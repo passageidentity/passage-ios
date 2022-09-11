@@ -49,7 +49,7 @@ internal class PassageSettings : PassageAuthSettings {
         if let apiUrl = config!["apiUrl"] {
             self.apiUrl = apiUrl
         } else {
-            self.apiUrl = "https://auth-uat.passage.dev"
+            self.apiUrl = "https://auth.passage.id"
         }
     }
     
