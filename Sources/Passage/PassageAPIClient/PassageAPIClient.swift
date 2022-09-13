@@ -321,7 +321,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let parameters = [
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
-            "user_id": startResponse.user.id,
+            "user_id": startResponse.handshake.challenge.publicKey.user.name,
         ] as [String :Any]
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
