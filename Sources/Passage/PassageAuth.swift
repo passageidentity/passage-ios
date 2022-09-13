@@ -799,11 +799,14 @@ public class PassageAuth {
         var authResult: AuthResult?
         do {
             let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
-            var identifier = startResponse.user.email
-            if (identifier == nil) {
-                identifier = startResponse.user.phone
-            }
-            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: startResponse, identifier: identifier! )
+//            guard let identifier = startResponse.handshake.challenge.publicKey.user.name else {
+//                throw PassageError.unknown
+//            }
+//            var identifier = startResponse.user.email
+//            if (identifier == nil) {
+//                identifier = startResponse.user.phone
+//            }
+            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
             authResult = try await PassageAPIClient.shared.addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest!)
         }
         catch (let error as PassageAPIError) {
