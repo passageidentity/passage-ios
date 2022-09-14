@@ -11,46 +11,30 @@ import AuthenticationServices
 import os
 
 @available(iOS 16.0, *)
-class PassageAutofillAuthorizationController : NSObject, PassageAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
+public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     
-    static let shared = PassageAutofillAuthorizationController()
+    public static let shared = PassageAutofillAuthorizationController()
     
     var authController : ASAuthorizationController?
-    var autofillDelegate : PassageAuthorizationControllerDelegate?
     var startResponse : WebauthnLoginStartResponse?
     var isPerformingModalRequest : Bool = false
     var authenticationAnchor: ASPresentationAnchor?
     
+    var onSuccess: ((AuthResult) -> Void)?
+    var onError: ((Error) -> Void)?
+    var onCancel: (() -> Void)?
     
     override private init () {
 
     }
     
-    
-    // MARK: PassageAuthorizationControllerDelegate methods
-    func success() {
-        let logger = Logger()
-        logger.log("Autofill Success")
-    }
-    
-    func error(error: Error) {
-        let logger = Logger()
-        logger.log("Autofill Error \(error)")
-    }
-    
-    func didCancelModalSheet() {
-        let logger = Logger()
-        logger.log("Did cancel modal sheet")
-    }
-    
-    
     // MARK: Methods
 
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         return authenticationAnchor!
     }
 
-    func cancel() {
+    public func cancel() {
         if self.authController != nil  {
             
             self.authController!.delegate = nil
@@ -61,8 +45,12 @@ class PassageAutofillAuthorizationController : NSObject, PassageAuthorizationCon
         }
     }
     
-    func begin(anchor: ASPresentationAnchor) async throws -> Void {
+    public func begin(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)? ) async throws -> Void {
      
+        self.onSuccess = onSuccess
+        self.onError = onError
+        self.onCancel = onCancel
+        
         self.authenticationAnchor = anchor
         
         self.startResponse = try await PassageAuth.autoFillStart()
@@ -83,46 +71,38 @@ class PassageAutofillAuthorizationController : NSObject, PassageAuthorizationCon
     
     // MARK: ASAuthorizationController
     
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        let logger = Logger()
-        
-        logger.log("Running PassagePasskeyAutofill controller didCompleteWithAuthorization")
-        
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {
         case let credentialAssertion as ASAuthorizationPlatformPublicKeyCredentialAssertion:
-            logger.log("A passkey was used to sign in.")
             Task {
                 guard self.startResponse != nil else {
                     throw PassageASAuthorizationError.invalidStartResponse
                 }
                 let loginResult = try await PassageAuth.autoFillFinish(startResponse: self.startResponse!, credentialAssertion: credentialAssertion)
                 if (loginResult.auth_token != nil) {
-                    print("****************")
-                    print("Login success")
-                    print(loginResult.auth_token ?? "Failed")
-                    print("****************")
                     self.isPerformingModalRequest = false
-                    self.autofillDelegate!.success()
+                    if let onSuccess = self.onSuccess {
+                        onSuccess(loginResult)
+                    }
                 } else {
-                    print("****************")
-                    print("Login Failed")
-                    print("error:")
-//                    print(loginResult.error)
-                    print("****************")
                     self.isPerformingModalRequest = false
-                    self.autofillDelegate!.error(error: PassageASAuthorizationError.loginFinish)
+                    if let onError = self.onError {
+                        onError(PassageASAuthorizationError.loginFinish)
+                    }
+
                 }
             }
         default:
-            logger.log("Received unknown authorization type")
             self.isPerformingModalRequest = false
-            self.autofillDelegate!.error(error: PassageASAuthorizationError.authorizationTypeUnknown)
+            if let onError = self.onError {
+                onError(PassageASAuthorizationError.authorizationTypeUnknown)
+            }
         }
         
         self.isPerformingModalRequest = false
     }
     
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         let logger = Logger()
         logger.log("authorizationController ERROR: \(error)")
         
@@ -136,7 +116,9 @@ class PassageAutofillAuthorizationController : NSObject, PassageAuthorizationCon
             logger.log("Request canceled.")
             
             if self.isPerformingModalRequest {
-                self.autofillDelegate!.didCancelModalSheet()
+                if let onCancel = self.onCancel {
+                    onCancel()
+                }
             }
         } else {
             logger.error("Error: \((error as NSError).userInfo)")

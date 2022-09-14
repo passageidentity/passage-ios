@@ -67,6 +67,32 @@ public class PassageAuth {
         return result
     }
     
+    /// Start the Passkey Autofill Service
+    ///
+    /// You should call this as early in your View lifecycle as possible. Make sure your input field has it's textContentType set to username.
+    ///
+    /// - Parameters:
+    ///   - anchor: Usually set to Window on your View.
+    ///   - onSuccess: function to run on successful Passkey login, this method should update the UI to a logged in state
+    ///   - onError: function to run if an error occures on Passkey login.
+    ///   - onCancel: function to run if the user cancels the Passkey login
+    /// - Returns: Void
+    @available(iOS 16.0, *)
+    public func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
+        self.clearTokens()
+
+        func onAutofillSuccess(authResult: AuthResult) -> Void {
+
+            self.setTokensFromAuthResult(authResult: authResult)
+            if let unwrappedOnSuccess = onSuccess {
+                unwrappedOnSuccess(authResult)
+            }
+
+        }
+        try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onAutofillSuccess, onError: onError, onCancel: onCancel)
+
+    }
+    
     /// Login a user with either a Passkey or send a magic link.
     ///
     /// If the user is authenticated and not sent a magic link, the tokens will be stored in the tokenStore
@@ -1040,28 +1066,37 @@ public class PassageAuth {
 
         var authResult: AuthResult!
 
-        PassageStore.shared.clearTokens()
-
         do {
             authResult = try await PassageAPIClient.shared.webauthnLoginFinish(startResponse: startResponse, credentialAssertion: credentialAssertion)
-
-            try PassageStore.shared.setTokens(authToken: authResult!.auth_token!, refreshToken: nil)
-        }
-        catch PassageAPIError.notFound {
-            Logger().log("Caught PassageError.loginUserNotFound")
         }
         catch {
-            Logger().log("Caught unknown error")
+            throw error
         }
 
         return authResult
 
     }
     
+    /// Start the Passkey Autofill Service
+    ///
+    /// You should call this as early in your View lifecycle as possible. Make sure your input field has it's textContentType set to username.
+    ///
+    /// - Parameters:
+    ///   - anchor: Usually set to Window on your View.
+    ///   - onSuccess: function to run on successful Passkey login, this method should update the UI to a logged in state
+    ///   - onError: function to run if an error occures on Passkey login.
+    ///   - onCancel: function to run if the user cancels the Passkey login
+    /// - Returns: Void
+    @available(iOS 16.0, *)
+    public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
+        try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
+    }
+    
     // MARK Test Functions - To Be Removed
     public static func test() -> String {
         return "Hello world from Passage!"
     }
+    
     
 
 }
