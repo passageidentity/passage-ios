@@ -49,4 +49,5 @@ The following articles will describe registering users, logging users in, and pa
 - <doc:Guide_PassageFramework>
 - <doc:Guide_Registration>
 - <doc:Guide_Login>
+- <doc:Guide_PasskeyAutofill>
 
