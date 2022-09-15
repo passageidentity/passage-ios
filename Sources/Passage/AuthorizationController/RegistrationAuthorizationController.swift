@@ -10,7 +10,7 @@ import Foundation
 import os
 import AuthenticationServices
 
-@available(iOS 16.0, *)
+@available(iOS 16.0, tvOS 16.0, *)
 class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerDelegate {
     
     // registration continuations

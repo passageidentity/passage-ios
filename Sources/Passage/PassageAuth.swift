@@ -77,7 +77,7 @@ public class PassageAuth {
     ///   - onError: function to run if an error occures on Passkey login.
     ///   - onCancel: function to run if the user cancels the Passkey login
     /// - Returns: Void
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         self.clearTokens()
 
@@ -150,7 +150,7 @@ public class PassageAuth {
     /// for a new account.
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public func loginWithPasskey() async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.loginWithPasskey()
@@ -259,7 +259,7 @@ public class PassageAuth {
     ///
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public func addDevice() async throws -> AuthResult? {
         
         guard let token = self.tokenStore.authToken else {
@@ -342,7 +342,7 @@ public class PassageAuth {
     /// - Parameter identifier: The users email or phone number
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     private func registerWithPasskey(identifier: String) async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.registerWithPasskey(identifier: identifier)
@@ -357,7 +357,7 @@ public class PassageAuth {
     /// - Parameter identifier: <#identifier description#>
     /// - Returns: <#description#>
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     private func loginWithIdentifier(identifier: String) async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.loginWithIdentifier(identifier: identifier)
@@ -543,7 +543,7 @@ public class PassageAuth {
     ///
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public static func loginWithPasskey() async throws -> AuthResult {
         
         var authResult : AuthResult?
@@ -820,7 +820,7 @@ public class PassageAuth {
     /// - Parameter token: The user's auth token
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public static func addDevice(token: String) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
@@ -932,7 +932,7 @@ public class PassageAuth {
     /// - Parameter identifier: The users email or phone number
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     private static func registerWithPasskey(identifier: String) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
@@ -962,7 +962,7 @@ public class PassageAuth {
     /// - Parameter identifier: <#identifier description#>
     /// - Returns: <#description#>
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     private static func loginWithIdentifier(identifier: String) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
@@ -1043,7 +1043,7 @@ public class PassageAuth {
     /// Currently a work in progress, so not public
     ///
     /// - Returns: <#description#>
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
 
         // should check error status if code == 404 throw userNotFound
@@ -1061,7 +1061,7 @@ public class PassageAuth {
     ///   - startResponse: The ``WebuathnLoginStartResponse`` from the autoFillStart call
     ///   - credentialAssertion: The credential assertion from the ASAuthorizationController
     /// - Returns: ``AuthResult``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal static func autoFillFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
 
         var authResult: AuthResult!
@@ -1087,7 +1087,7 @@ public class PassageAuth {
     ///   - onError: function to run if an error occures on Passkey login.
     ///   - onCancel: function to run if the user cancels the Passkey login
     /// - Returns: Void
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
     }

@@ -64,7 +64,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// Perform a webauthn login start request
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnLoginStart() async throws -> WebauthnLoginStartResponse {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
@@ -91,7 +91,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - credentialAssertion: ``ASAuthorizationPlatformPublicKeyCredentialAssertion``
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
         let url = try self.appUrl(path: "login/webauthn/finish/")
 
@@ -132,7 +132,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Parameter identifier: Email address or phone number
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnLoginWithIdentifierStart(identifier: String) async throws -> WebauthnLoginStartResponse {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
@@ -159,7 +159,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - credentialAssertion: ``ASAuthorizationPlatformPublicKeyCredentialAssertion``
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnLoginWithIdentifierFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
         let url = try self.appUrl(path: "login/webauthn/finish/")
         
@@ -202,7 +202,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Parameter identifier: The users identifier (email or phone number)
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "register/webauthn/start/")
         
@@ -225,7 +225,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - params: ``ASAuthorizationPlatformPublicKeyCredentialRegistration`` from the credential registration request
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult {
         let url = try self.appUrl(path: "register/webauthn/finish/")
         
@@ -268,7 +268,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Parameter token: The users access token
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal  func addDeviceStart(token: String) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "currentuser/devices/start/")
         
@@ -295,7 +295,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - params: The ASAuthorizationPlatformPublicKeyCredentialRegistration
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
+    @available(iOS 16.0, tvOS 16.0, *)
     internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         

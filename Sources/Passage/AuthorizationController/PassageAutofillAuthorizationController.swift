@@ -10,7 +10,7 @@ import Foundation
 import AuthenticationServices
 import os
 
-@available(iOS 16.0, *)
+@available(iOS 16.0, tvOS 16.0, *)
 public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     
     public static let shared = PassageAutofillAuthorizationController()
