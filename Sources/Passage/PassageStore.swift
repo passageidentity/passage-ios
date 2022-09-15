@@ -22,9 +22,9 @@ public protocol PassageTokenStore {
     
     /// A valid auth token
     
-    var authToken: String! { get set }
+    var authToken: String? { get set }
     /// a valid refresh token
-    var refreshToken: String! { get set }
+    var refreshToken: String? { get set }
     
     /// Set the auth token, refresh token or both from an ``AuthResult``
     /// - Parameter authResult: A ``AuthResult`` returned from a successful login or registration
@@ -50,7 +50,7 @@ public class PassageStore : PassageTokenStore {
     public static let shared = PassageStore()
     
     
-    public var authToken: String! {
+    public var authToken: String? {
         get {
             return KeychainWrapper.standard[.authTokenKey]
         }
@@ -59,7 +59,7 @@ public class PassageStore : PassageTokenStore {
         }
     }
     
-    public var refreshToken: String! {
+    public var refreshToken: String? {
         get {
             return KeychainWrapper.standard[.refreshTokenKey]
         }

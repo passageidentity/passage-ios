@@ -18,7 +18,7 @@ internal class PassageSettings : PassageAuthSettings {
     // MARK: - Properties
     internal var appId: String?
     internal var authOrigin: String?
-    internal var apiUrl: String?
+    internal var apiUrl: String? = "https://auth.passage.id"
     
     internal static let shared = PassageSettings()
     
@@ -38,18 +38,19 @@ internal class PassageSettings : PassageAuthSettings {
             }
         }
         
-        if let appId = config!["appId"] {
-            self.appId = appId
-        }
-        
-        if let authOrigin = config!["authOrigin"] {
-            self.authOrigin = authOrigin
-        }
-            
-        if let apiUrl = config!["apiUrl"] {
-            self.apiUrl = apiUrl
-        } else {
-            self.apiUrl = "https://auth.passage.id"
+        if let unwrappedConfig = config {
+            if let appId = unwrappedConfig["appId"] {
+                self.appId = appId
+            }
+            if let authOrigin = unwrappedConfig["authOrigin"] {
+                self.authOrigin = authOrigin
+            }
+            if let apiUrl = unwrappedConfig["apiUrl"] {
+                self.apiUrl = apiUrl
+            }
+            else {
+                self.apiUrl = "https://auth.passage.id"
+            }
         }
     }
     

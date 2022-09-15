@@ -208,7 +208,13 @@ public class PassageAuth {
     /// - Returns: ``PassageUserDetails`` the User object that represents an authenticated user
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func getCurrentUser() async throws -> PassageUserDetails? {
-        let currentUser = try await PassageAuth.getCurrentUser(token: self.tokenStore.authToken)
+        
+        guard let token = self.tokenStore.authToken else {
+            throw PassageError.unauthorized
+        }
+        
+        let currentUser = try await PassageAuth.getCurrentUser(token: token)
+        
         return currentUser
     }
     
