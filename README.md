@@ -38,7 +38,8 @@ The Passage-iOS SDK is supported for iOS version 14+. However, Passkeys are only
 
 # Installation
 
-Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods
+Add the passage-ios package to your app via SwiftPackage Manager
+<!--Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods-->
 ## Swift Package Manager
 
 [Swift Package Manager](https://swift.org/package-manager/)
@@ -56,22 +57,22 @@ Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods
 https://github.com/passageidentity/passage-ios
 ```
 
-## Cocoapods
-
-- Git clone this repo
-- In your app, update your Podfile:
-
-```
-platform :ios, '16.0' // Must be iOS 16.0 or later
-
-target 'My App' do
-  use_frameworks!
-
-  # Pods for MyApp
-  pod 'Passage', :path => '../passage-ios' // The relative path to this private passage-ios library
-
-end
-```
+<!--## Cocoapods-->
+<!---->
+<!--- Git clone this repo-->
+<!--- In your app, update your Podfile:-->
+<!---->
+<!--```-->
+<!--platform :ios, '16.0' // Must be iOS 16.0 or later-->
+<!---->
+<!--target 'My App' do-->
+<!--  use_frameworks!-->
+<!---->
+<!--  # Pods for MyApp-->
+<!--  pod 'Passage', :path => '../passage-ios' // The relative path to this private passage-ios library-->
+<!---->
+<!--end-->
+<!--```-->
 
 - Run `pod install`
   <br>
@@ -79,7 +80,7 @@ end
 
 # Setup Guide
 
-Dowload the [DocC zip](docs/Passage.doccarchive.zip) in the `docs` folder. Follow the `Getting Started` guide which consists the following steps:
+View the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer. Follow the `Getting Started` guide which consists the following steps:
 
 
 1. Setup your Passage application
@@ -95,11 +96,11 @@ Import the Passage package into any source file that will use the iOS SDK.
 import Passage
 ```
 
-Download the [DocC Archive](docs/Passage.doccarchive.zip) and navigate to the `Getting Started` guide for a detailed step by step guide.
+View the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer, and navigate to the `Getting Started` guide for a detailed step by step guide.
 
 
 # SDK Methods 
-The package provides both Type Methods and Instance Methods. These methods provide everything you will need to register, login, and manage users on your application. The SDK methods below provide a high level overview of available actions. For the full a full list of available methos and their signatures download the [DocC Archive](docs/Passage.doccarchive.zip) and navigate to `Classes`.
+The package provides both Type Methods and Instance Methods. These methods provide everything you will need to register, login, and manage users on your application. The SDK methods below provide a high level overview of available actions. For the full a full list of available methos and their signatures view the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer and navigate to `Classes`.
 
 ## PassageAuth
 
@@ -115,16 +116,22 @@ PassageAuth is the primary class you will work with. It provides the following:
 # Examples
 ## Registration
 
-See the `User Registration` guide in the [DocC Archive](docs/Passage.doccarchive.zip).
+See the `User Registration` guide in the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer.
 
 ## Login
 
-See the `Login` guide in the [DocC Archive](docs/Passage.doccarchive.zip).
+See the `Login` guide in the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer.
 
 # Resources
+
+## Online Documentation
+
+[Documentation Catalog Online](https://passageidentity.github.io/passage-ios/documentation/passage/)
 
 ## Documentation Catalog
 
 This package includes a documentation catalog that can be viewed in the Xcode developer documentation browser.
 
 To generate the documentation catalog, in Xcode click "Product" -> "Build Documentation", it should open the Documentation Viewer, if not select "Window" -> "Developer Documentation"
+
+Download the [DocC Archive](docs/Passage.doccarchive.zip)
