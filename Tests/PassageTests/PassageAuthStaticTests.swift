@@ -11,6 +11,7 @@ final class PassageAuthStaticTests: XCTestCase {
         PassageAPIClient.shared = MockPassageAPIClient()
         if #available(iOS 16.0, *) {
             LoginAuthorizationController.shared = MockLoginAuthorizationController()
+            RegistrationAuthorizationController.shared = MockRegistrationAuthorizationController()
         }
     }
     

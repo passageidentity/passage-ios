@@ -36,3 +36,30 @@ let testLoginFinishResponse = AuthResult(
     auth_token: "TEST_TOKEN",
     redirect_url: nil
 )
+
+let testRegisterStartResponse = WebauthnRegisterStartResponse(
+    user: PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true),
+    handshake: WebauthnRegisterStartResponseHandshake(
+        id: "TEST_ID",
+        challenge: WebauthnRegisterStartResponseHandshakeChallenge(
+            publicKey: WebauthnRegisterStartResponseHandshakeChallengePublicKey(
+                attestation: "TEST_ATTESTATION",
+                pubKeyCredParams: [],
+                rp: WebauthnRegisterStartResponseHandshakeChallengePublicKeyRelyingParty(
+                    name: "TEST_NAME",
+                    id: "TEST_ID"
+                ),
+                user: WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser(
+                    displayName: "TEST_DISPLAY_NAME",
+                    id: "TEST_ID",
+                    name: "TEST_NAME"
+                ),
+                challenge: "TEST_CHALLENGE",
+                authenticatorSelection: WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection(
+                    authenticatorAttachment: "TEST_AUTH_ATT"
+                ),
+                timeout: 6000
+            )
+        )
+    )
+)

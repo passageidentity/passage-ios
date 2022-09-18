@@ -11,7 +11,7 @@ import os
 import AuthenticationServices
 
 @available(iOS 16.0, *)
-class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerDelegate {
+class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerDelegate, RegistrationAuthorizationControllerProtocol {
     
     // registration continuations
     private typealias CredentialRegistrationCheckedThrowingContinuation = CheckedContinuation<ASAuthorizationPlatformPublicKeyCredentialRegistration, Error>
@@ -19,7 +19,7 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
 
     
     
-    static let shared = RegistrationAuthorizationController()
+    static var shared: RegistrationAuthorizationControllerProtocol = RegistrationAuthorizationController()
     
     public var domain: String
     

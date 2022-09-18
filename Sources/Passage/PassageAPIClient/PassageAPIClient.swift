@@ -230,7 +230,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult {
+    internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult {
+        guard let params else {
+            throw PassageError.unknown
+        }
         let url = try self.appUrl(path: "register/webauthn/finish/")
         
         let response = [

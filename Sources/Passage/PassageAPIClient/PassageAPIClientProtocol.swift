@@ -72,7 +72,7 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult
+    func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult
     
     
     /// Peform a webauthn add device start request

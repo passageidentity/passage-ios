@@ -946,7 +946,7 @@ public class PassageAuth {
             
             let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
             
-            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest!)
+            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch  {
