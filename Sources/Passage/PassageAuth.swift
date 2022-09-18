@@ -1097,13 +1097,6 @@ public class PassageAuth {
     public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
     }
-    
-    // MARK Test Functions - To Be Removed
-    public static func test() -> String {
-        return "Hello world from Passage!"
-    }
-    
-    
 
 }
 

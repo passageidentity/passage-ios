@@ -19,7 +19,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///
     /// Get the shared instance of the PassageAPIClient. The PassageAPIClient implements a singleton pattern
     /// and cannot be directly instantiated. Use the shared instance to make all network requests.
-    internal static let shared = PassageAPIClient()
+    internal static var shared: PassageAuthAPIClient = PassageAPIClient()
     
     /// The Passage AppId
     ///

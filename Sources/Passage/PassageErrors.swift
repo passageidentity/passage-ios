@@ -32,7 +32,7 @@ public enum PassageLoginError: Error {
 }
 
 /// Any unspecified PassageError
-public enum PassageError: Error {
+public enum PassageError: Error, Equatable {
     case unauthorized
     case unknown
     case userAlreadyExists
