@@ -9,6 +9,9 @@ final class PassageAuthStaticTests: XCTestCase {
         PassageSettings.shared.authOrigin = testAppInfo.auth_origin
         PassageSettings.shared.apiUrl = "TEST_API_URL"
         PassageAPIClient.shared = MockPassageAPIClient()
+        if #available(iOS 16.0, *) {
+            LoginAuthorizationController.shared = MockLoginAuthorizationController()
+        }
     }
     
     override func tearDown() {

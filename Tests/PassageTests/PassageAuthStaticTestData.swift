@@ -1,4 +1,4 @@
-import Foundation
+import AuthenticationServices
 @testable import Passage
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
@@ -17,4 +17,22 @@ let testAppInfo = AppInfo(
     require_identifier_verification: false,
     session_timeout_length: 6000,
     public_signup: true
+)
+
+let testLoginStartResponse = WebauthnLoginStartResponse(
+    handshake: WebauthnLoginStartResponseHandshake(
+        id: "TEST_ID",
+        challenge: WebauthnLoginStartResponseHandshakeChallenge(
+            publicKey: WebauthnLoginStartResponseHandshakeChallengePublicKey(
+                challenge: "TEST_CHALLENGE",
+                timeout: 6000,
+                rpId: "TEST_RPID"
+            )
+        )
+    )
+)
+
+let testLoginFinishResponse = AuthResult(
+    auth_token: "TEST_TOKEN",
+    redirect_url: nil
 )

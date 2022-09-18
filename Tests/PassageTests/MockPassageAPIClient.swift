@@ -11,12 +11,12 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func webauthnLoginStart() async throws -> Passage.WebauthnLoginStartResponse {
-        throw PassageError.unknown
+        return testLoginStartResponse
     }
     
     @available(iOS 15.0, *)
-    func webauthnLoginFinish(startResponse: Passage.WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> Passage.AuthResult {
-        throw PassageError.unknown
+    func webauthnLoginFinish(startResponse: Passage.WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> Passage.AuthResult {
+        return testLoginFinishResponse
     }
     
     func webauthnLoginWithIdentifierStart(identifier: String) async throws -> Passage.WebauthnLoginStartResponse {
@@ -29,6 +29,9 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func webauthnRegistrationStart(identifier: String) async throws -> Passage.WebauthnRegisterStartResponse {
+        guard identifier == "unregistered-test-user@passage.id" else {
+            throw PassageError.userAlreadyExists
+        }
         throw PassageError.unknown
     }
     
