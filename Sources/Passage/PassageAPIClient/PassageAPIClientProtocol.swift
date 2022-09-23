@@ -88,9 +88,9 @@ protocol PassageAuthAPIClient  {
     ///   - token: The users access token
     ///   - startResponse: The ``WebauthnRegisterStartResponse`` from the  addDeviceStart request
     ///   - params: The ASAuthorizationPlatformPublicKeyCredentialRegistration
-    /// - Returns: ``AuthResult``
+    /// - Returns: ``Void``
     @available(iOS 16.0, *)
-    func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse,  params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult
+    func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse,  params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void
     
     
     /// Send a new login magic link to the user's email or phone
