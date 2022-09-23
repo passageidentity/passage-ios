@@ -266,14 +266,13 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func addDevice() async throws -> AuthResult? {
+    public func addDevice() async throws -> Void {
         
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
         
-        let authResult = try await PassageAuth.addDevice(token: token)
-        return authResult
+        try await PassageAuth.addDevice(token: token)        
     }
 
     
@@ -827,24 +826,17 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func addDevice(token: String) async throws -> AuthResult {
-        var authResult: AuthResult?
+    public static func addDevice(token: String) async throws -> Void {
         do {
             let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
             let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
-            authResult = try await PassageAPIClient.shared.addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest!)
+            try await PassageAPIClient.shared.addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest!)
         }
         catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         }
         catch {
             throw error
-        }
-        
-        if let unwrappedAuthResult = authResult {
-            return unwrappedAuthResult
-        } else {
-            throw PassageError.unknown
         }
     }
     
