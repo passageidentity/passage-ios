@@ -300,10 +300,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - token: The users access token
     ///   - startResponse: The ``WebauthnRegisterStartResponse`` from the  addDeviceStart request
     ///   - params: The ASAuthorizationPlatformPublicKeyCredentialRegistration
-    /// - Returns: ``AuthResult``
+    /// - Returns: ``Void``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult {
+    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
@@ -339,9 +339,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         try assertValidResponse(response: resp, responseData: responseData, successStatusCode: 201)
 
-        let addDeviceResponse = try JSONDecoder().decode(WebauthnAddDeviceFinishResponse.self, from: responseData)
+//        let addDeviceResponse = try JSONDecoder().decode(WebauthnAddDeviceFinishResponse.self, from: responseData)
 
-        return addDeviceResponse.auth_result
+        
     }
     
     /// Send a new login magic link to the user's email or phone

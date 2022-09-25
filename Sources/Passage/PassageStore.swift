@@ -55,7 +55,11 @@ public class PassageStore : PassageTokenStore {
             return KeychainWrapper.standard[.authTokenKey]
         }
         set {
-            KeychainWrapper.standard[.authTokenKey] = newValue
+            if newValue == nil {
+                KeychainWrapper.standard.removeObject(forKey: "passageAuthToken")
+            } else {
+                KeychainWrapper.standard[.authTokenKey] = newValue
+            }
         }
     }
     
@@ -64,7 +68,13 @@ public class PassageStore : PassageTokenStore {
             return KeychainWrapper.standard[.refreshTokenKey]
         }
         set {
-            KeychainWrapper.standard[.refreshTokenKey] = newValue
+            if newValue == nil {
+                KeychainWrapper.standard.removeObject(forKey: "passageRefreshToken")
+            }
+            else {
+                KeychainWrapper.standard[.refreshTokenKey] = newValue
+            }
+            
         }
     }
     
