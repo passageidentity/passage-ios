@@ -9,6 +9,6 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '15.0'
     s.swift_version = '5.0'
     s.source_files = 'Sources/Passage/**/*'
-    s.exclude_files = '[Sources/Passage/Passage.docc/**/*', 'docs']
+    s.exclude_files = ['Sources/Passage/Passage.docc/**/*', 'docs']
     s.dependency 'SwiftKeychainWrapper'
 end
