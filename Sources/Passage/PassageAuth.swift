@@ -938,7 +938,7 @@ public class PassageAuth {
             
             let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
             
-            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest!)
+            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch  {
@@ -1089,13 +1089,6 @@ public class PassageAuth {
     public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
     }
-    
-    // MARK Test Functions - To Be Removed
-    public static func test() -> String {
-        return "Hello world from Passage!"
-    }
-    
-    
 
 }
 

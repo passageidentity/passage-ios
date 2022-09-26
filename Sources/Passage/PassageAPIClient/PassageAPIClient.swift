@@ -19,7 +19,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///
     /// Get the shared instance of the PassageAPIClient. The PassageAPIClient implements a singleton pattern
     /// and cannot be directly instantiated. Use the shared instance to make all network requests.
-    internal static let shared = PassageAPIClient()
+    internal static var shared: PassageAuthAPIClient = PassageAPIClient()
     
     /// The Passage AppId
     ///
@@ -92,7 +92,11 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
+    internal func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> AuthResult {
+        guard let credentialAssertion else {
+            throw PassageASAuthorizationError.credentialRegistration
+        }
+        
         let url = try self.appUrl(path: "login/webauthn/finish/")
 
         let response = [
@@ -226,7 +230,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> AuthResult {
+    internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult {
+        guard let params else {
+            throw PassageError.unknown
+        }
         let url = try self.appUrl(path: "register/webauthn/finish/")
         
         let response = [

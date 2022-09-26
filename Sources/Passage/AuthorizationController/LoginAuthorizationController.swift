@@ -11,14 +11,14 @@ import os
 import AuthenticationServices
 
 @available(iOS 16.0, *)
-class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate {
+class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate, LoginAuthorizationControllerProtocol {
 
     private typealias CredentialAssertionCheckedThrowingContinuation =
         CheckedContinuation<ASAuthorizationPlatformPublicKeyCredentialAssertion, Error>
     private var credentialAssertionThrowingContinuation: CredentialAssertionCheckedThrowingContinuation? = nil
 
     
-    static let shared = LoginAuthorizationController()
+    static var shared: LoginAuthorizationControllerProtocol = LoginAuthorizationController()
     
     public var domain: String
     
@@ -47,7 +47,7 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
         )
     }
     
-    func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion {
+    func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
         let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
         let challenge = response.handshake.challenge.publicKey.challenge
