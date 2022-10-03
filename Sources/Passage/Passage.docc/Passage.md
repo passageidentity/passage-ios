@@ -6,6 +6,8 @@ Use Passage to add exclusively Passwordless authentication to your iOS Applicati
 
 ![Passage Logo](Passage)
 
+**Note: passage-ios is currently in beta.**
+
 The Passage iOS Framework provides an easy to use SDK interface to implement a [Passkey](https://developer.apple.com/passkeys/) focused authentication expierence.
 
 Using [Passage](https://passage.id/) as your backend you can unlock complete user management using exclusively passwordless. 
