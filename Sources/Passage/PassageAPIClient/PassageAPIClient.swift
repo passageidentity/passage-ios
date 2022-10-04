@@ -650,6 +650,28 @@ internal class PassageAPIClient : PassageAuthAPIClient {
 
     }
     
+    /// Refresh a session using a refresh token
+    ///  - Parameter The user's refresh token
+    ///  - Returns ``AuthResult``
+    ///  - Throws ``PassageAPIError``
+    internal func refresh(refreshToken: String) async throws -> AuthResult {
+        let url = try self.appUrl(path: "tokens/")
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        
+        request.httpMethod = "POST"
+        
+        let data = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken], options: [])
+        
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+                
+        try assertValidResponse(response: response, responseData: responseData)
+        
+        let refreshResponse = try JSONDecoder().decode(RefreshResponse.self, from: responseData)
+        
+        return refreshResponse.auth_result
+    }
+    
     
     // MARK: Private funcs.
  

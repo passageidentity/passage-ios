@@ -291,6 +291,22 @@ public class PassageAuth {
         try await PassageAuth.revokeDevice(token: token, deviceId: deviceId)
     }
     
+    /// Refreshes the current user's session using the refresh token.
+    /// Refresh tokens must be enabled on the current application.
+    ///
+    /// Refresh Token from the instance tokenStore will be used.
+    ///
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func refresh() async throws -> AuthResult  {
+        guard let refreshToken = self.tokenStore.refreshToken else {
+            throw PassageError.unauthorized
+        }
+        let authResult = try await PassageAuth.refresh(refreshToken: refreshToken)
+        self.setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
     
     // MARK: Instance Private Methods
     
@@ -858,6 +874,28 @@ public class PassageAuth {
             throw error
         }
     }
+    
+    /// Refreshes the current user's session using the refresh token.
+    /// Refresh tokens must be enabled on the current application.
+    ///
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public static func refresh(refreshToken: String) async throws -> AuthResult {
+        var authResult: AuthResult?
+        do {
+            authResult = try await PassageAPIClient.shared.refresh(refreshToken: refreshToken)
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+        } catch {
+            throw error
+        }
+        if let unwrappedAuthResult = authResult {
+            return unwrappedAuthResult
+        } else {
+            throw PassageError.unknown
+        }
+    }
+    
     
     
     
