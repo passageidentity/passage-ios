@@ -84,7 +84,7 @@ public class PassageStore : PassageTokenStore {
     
     public func setTokens(authResult: AuthResult) {
         self.authToken = authResult.auth_token
-        self.refreshToken = nil
+        self.refreshToken = authResult.refresh_token
     }
     
     public func setTokens(authToken: String?, refreshToken: String?) {
