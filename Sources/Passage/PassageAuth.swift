@@ -415,8 +415,8 @@ public class PassageAuth {
             throw PassageError.invalidAppInfo
         }
        
-        let publicSignup = appInfo?.public_signup ?? false
-        let requiredIdentifierVerification = appInfo?.require_identifier_verification ?? false
+        let publicSignup = unwrappedAppInfo.public_signup
+        let requiredIdentifierVerification = unwrappedAppInfo.require_identifier_verification
 
         if (!publicSignup) {
             throw PassageRegisterError.publicRegistrationDisabled
