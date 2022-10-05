@@ -119,7 +119,6 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-        
 
         request.httpMethod = "POST"
 
@@ -664,10 +663,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let data = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken], options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-        
-        print(response)
                 
-        try assertValidResponse(response: response, responseData: responseData)
+        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 201)
         
         let refreshResponse = try JSONDecoder().decode(RefreshResponse.self, from: responseData)
         
