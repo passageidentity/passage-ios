@@ -180,6 +180,12 @@ protocol PassageAuthAPIClient  {
     ///  - Returns ``AuthResult``
     ///  - Throws ``PassageAPIError``
     func refresh(refreshToken: String) async throws -> AuthResult
+    
+    /// Sign out the current user's session
+    /// - Parameter The user's refresh token
+    /// - Returns: Void
+    /// - Throws: ``PassageAPIError``
+    func signOut(refreshToken: String) async throws
 }
 
 

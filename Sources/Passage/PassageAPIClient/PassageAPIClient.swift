@@ -672,6 +672,22 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         return refreshResponse.auth_result
     }
     
+    /// Sign out the current user's session
+    /// - Parameter The user's refresh token
+    /// - Returns: Void
+    /// - Throws: ``PassageAPIError``
+    internal func signOut(refreshToken: String) async throws {
+        let url = try self.appUrl(path: "tokens/?refresh_token=\(refreshToken.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        
+        request.httpMethod = "DELETE"
+        
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+        
+        try assertValidResponse(response: response, responseData: responseData)
+    }
+    
     
     // MARK: Private funcs.
  

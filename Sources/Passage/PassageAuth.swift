@@ -172,14 +172,16 @@ public class PassageAuth {
         return magicLink
     }
     
-    /// Sign out the current user
+    /// Sign out the current user. If the app is configured to use refresh tokens the user's current session will be signed out.
     ///
     /// Will clear the tokens from the tokenStore set on the instance.
     ///
-    /// More to come when we implement session management
-    ///
     /// - Returns: Void
     public func signOut() async throws -> Void {
+        let refreshToken = self.tokenStore.refreshToken
+        if let unwrappedRefreshToken = refreshToken {
+            try await PassageAuth.signOut(refreshToken: unwrappedRefreshToken)
+        }
         self.clearTokens()
     }
     
@@ -611,13 +613,19 @@ public class PassageAuth {
     }
         
     
-    /// Sign out the current user
+    /// Sign out the current user's session
     ///
-    /// Currently nothing to do, until we support session management
-    ///
+    /// - Parameter The user's refresh token
     /// - Returns: Void
-    public static func signOut() async throws -> Void {
-        // currently do nothing, but once we implement session management it will.
+    /// - Throws: ``PassageAPIError``
+    public static func signOut(refreshToken: String) async throws -> Void {
+        do {
+            try await PassageAPIClient.shared.signOut(refreshToken: refreshToken)
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+        } catch {
+            throw error
+        }
     }
     
     
