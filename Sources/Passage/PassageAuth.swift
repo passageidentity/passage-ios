@@ -11,7 +11,7 @@ import os
 
 public class PassageAuth {
     
-    // MARK: Instnace Properties
+    // MARK: Instance Properties
     
     /// A token store that implements ``PassageTokenStore``
     ///
@@ -309,6 +309,21 @@ public class PassageAuth {
         return authResult
     }
     
+    /// Checks validity of the auth token and refreshes the session, if required.
+    ///
+    /// - Returns: Current authToken
+    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    public func getAuthToken() async throws -> String {
+        guard let authToken = self.tokenStore.authToken else {
+            throw PassageSessionError.loginRequired
+        }
+        let refreshToken = self.tokenStore.refreshToken
+        let tokens = try await PassageAuth.getAuthToken(authToken: authToken, refreshToken: refreshToken)
+        self.tokenStore.authToken = tokens.authToken
+        self.tokenStore.refreshToken = tokens.refreshToken
+        return tokens.authToken
+    }
+    
     
     // MARK: Instance Private Methods
     
@@ -422,7 +437,6 @@ public class PassageAuth {
     /// - Returns:  (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
     /// - Throws: ``PassageError``, ``PassageAPIError``
     public static func register(identifier: String) async throws -> (authResult: AuthResult?, magicLink: MagicLink?) {
-       
         var authResult: AuthResult?
         var magicLink: MagicLink?
         var sendMagicLink = false
@@ -899,6 +913,37 @@ public class PassageAuth {
         }
         if let unwrappedAuthResult = authResult {
             return unwrappedAuthResult
+        } else {
+            throw PassageError.unknown
+        }
+    }
+    
+    /// Checks validity of the auth token and refreshes the session, if required.
+    ///
+    /// - Returns: Current authToken and an optional refresh token, if being used
+    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    public static func getAuthToken(authToken: String, refreshToken: String?) async throws -> (authToken: String, refreshToken: String?){
+        var isTokenExpired = PassageTokenUtils(token: authToken).isExpired
+        if(!isTokenExpired){
+            return (authToken, refreshToken)
+        }
+        guard let unwrappedRefreshToken = refreshToken else {
+            throw PassageSessionError.loginRequired
+        }
+        var authResult: AuthResult?
+        do {
+            authResult = try await PassageAuth.refresh(refreshToken: unwrappedRefreshToken)
+        } catch PassageAPIError.unauthorized {
+            throw PassageSessionError.loginRequired
+        } catch {
+            throw error
+        }
+        if let unwrappedAuthResult = authResult {
+            if let unwrappedAuthToken = unwrappedAuthResult.auth_token {
+                return (authToken: unwrappedAuthToken, refreshToken: unwrappedAuthResult.refresh_token)
+            } else {
+                throw PassageError.unknown
+            }
         } else {
             throw PassageError.unknown
         }

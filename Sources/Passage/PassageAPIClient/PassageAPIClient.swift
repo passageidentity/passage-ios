@@ -664,6 +664,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let data = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken], options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+        
+        print(response)
                 
         try assertValidResponse(response: response, responseData: responseData)
         
