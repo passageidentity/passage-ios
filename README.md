@@ -10,6 +10,8 @@
 
 # Overview
 
+**NOTE: passage-ios is currently in beta.**
+
 The [Passage](https://passage.id) iOS framework provides an easy to use SDK interface to implement a [Passkey](https://developer.apple.com/passkeys/) focused authentication expierence for native apps built in Swift. 
 
  Want to see the end result before the setup work? 
