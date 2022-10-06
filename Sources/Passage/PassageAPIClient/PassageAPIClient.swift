@@ -119,7 +119,6 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-        
 
         request.httpMethod = "POST"
 
@@ -648,6 +647,44 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         return getUserResponse.user
 
+    }
+    
+    /// Refresh a session using a refresh token
+    ///  - Parameter The user's refresh token
+    ///  - Returns ``AuthResult``
+    ///  - Throws ``PassageAPIError``
+    internal func refresh(refreshToken: String) async throws -> AuthResult {
+        let url = try self.appUrl(path: "tokens/")
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        
+        request.httpMethod = "POST"
+        
+        let data = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken], options: [])
+        
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+                
+        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 201)
+        
+        let refreshResponse = try JSONDecoder().decode(RefreshResponse.self, from: responseData)
+        
+        return refreshResponse.auth_result
+    }
+    
+    /// Sign out the current user's session
+    /// - Parameter The user's refresh token
+    /// - Returns: Void
+    /// - Throws: ``PassageAPIError``
+    internal func signOut(refreshToken: String) async throws {
+        let url = try self.appUrl(path: "tokens/?refresh_token=\(refreshToken.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        
+        request.httpMethod = "DELETE"
+        
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+        
+        try assertValidResponse(response: response, responseData: responseData)
     }
     
     

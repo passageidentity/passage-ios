@@ -12,6 +12,9 @@ public struct AuthResult : Codable {
     /// The users auth_token
     public var auth_token: String?
     
+    /// The users refresh_token
+    public var refresh_token: String?
+    
     /// The redirect url after successful authentication
     public var redirect_url: String?
 }

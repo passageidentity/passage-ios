@@ -174,6 +174,18 @@ protocol PassageAuthAPIClient  {
     /// - Parameter The identifier (email or phone) of the user to get
     /// - Returns: ``PassageUser``
     func getUser(identifier: String) async throws -> PassageUser
+    
+    /// Refresh a session using a refresh token
+    ///  - Parameter The user's refresh token
+    ///  - Returns ``AuthResult``
+    ///  - Throws ``PassageAPIError``
+    func refresh(refreshToken: String) async throws -> AuthResult
+    
+    /// Sign out the current user's session
+    /// - Parameter The user's refresh token
+    /// - Returns: Void
+    /// - Throws: ``PassageAPIError``
+    func signOut(refreshToken: String) async throws
 }
 
 

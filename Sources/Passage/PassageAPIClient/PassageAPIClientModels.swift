@@ -155,4 +155,8 @@ internal struct GetUserResponse : Codable {
     public var user: PassageUser
 }
 
+internal struct RefreshResponse : Codable {
+    public var auth_result: AuthResult
+}
+
 

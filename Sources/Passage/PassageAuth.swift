@@ -11,7 +11,7 @@ import os
 
 public class PassageAuth {
     
-    // MARK: Instnace Properties
+    // MARK: Instance Properties
     
     /// A token store that implements ``PassageTokenStore``
     ///
@@ -172,14 +172,16 @@ public class PassageAuth {
         return magicLink
     }
     
-    /// Sign out the current user
+    /// Sign out the current user. If the app is configured to use refresh tokens the user's current session will be signed out.
     ///
     /// Will clear the tokens from the tokenStore set on the instance.
     ///
-    /// More to come when we implement session management
-    ///
     /// - Returns: Void
     public func signOut() async throws -> Void {
+        let refreshToken = self.tokenStore.refreshToken
+        if let unwrappedRefreshToken = refreshToken {
+            try await PassageAuth.signOut(refreshToken: unwrappedRefreshToken)
+        }
         self.clearTokens()
     }
     
@@ -289,6 +291,37 @@ public class PassageAuth {
             throw PassageError.unauthorized
         }
         try await PassageAuth.revokeDevice(token: token, deviceId: deviceId)
+    }
+    
+    /// Refreshes the current user's session using the refresh token.
+    /// Refresh tokens must be enabled on the current application.
+    ///
+    /// Refresh Token from the instance tokenStore will be used.
+    ///
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func refresh() async throws -> AuthResult  {
+        guard let refreshToken = self.tokenStore.refreshToken else {
+            throw PassageError.unauthorized
+        }
+        let authResult = try await PassageAuth.refresh(refreshToken: refreshToken)
+        self.setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
+    /// Checks validity of the auth token and refreshes the session, if required.
+    ///
+    /// - Returns: Current authToken
+    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    public func getAuthToken() async throws -> String {
+        guard let authToken = self.tokenStore.authToken else {
+            throw PassageSessionError.loginRequired
+        }
+        let refreshToken = self.tokenStore.refreshToken
+        let tokens = try await PassageAuth.getAuthToken(authToken: authToken, refreshToken: refreshToken)
+        self.tokenStore.authToken = tokens.authToken
+        self.tokenStore.refreshToken = tokens.refreshToken
+        return tokens.authToken
     }
     
     
@@ -404,7 +437,6 @@ public class PassageAuth {
     /// - Returns:  (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
     /// - Throws: ``PassageError``, ``PassageAPIError``
     public static func register(identifier: String) async throws -> (authResult: AuthResult?, magicLink: MagicLink?) {
-       
         var authResult: AuthResult?
         var magicLink: MagicLink?
         var sendMagicLink = false
@@ -415,8 +447,8 @@ public class PassageAuth {
             throw PassageError.invalidAppInfo
         }
        
-        let publicSignup = appInfo?.public_signup ?? false
-        let requiredIdentifierVerification = appInfo?.require_identifier_verification ?? false
+        let publicSignup = unwrappedAppInfo.public_signup
+        let requiredIdentifierVerification = unwrappedAppInfo.require_identifier_verification
 
         if (!publicSignup) {
             throw PassageRegisterError.publicRegistrationDisabled
@@ -595,13 +627,19 @@ public class PassageAuth {
     }
         
     
-    /// Sign out the current user
+    /// Sign out the current user's session
     ///
-    /// Currently nothing to do, until we support session management
-    ///
+    /// - Parameter The user's refresh token
     /// - Returns: Void
-    public static func signOut() async throws -> Void {
-        // currently do nothing, but once we implement session management it will.
+    /// - Throws: ``PassageAPIError``
+    public static func signOut(refreshToken: String) async throws -> Void {
+        do {
+            try await PassageAPIClient.shared.signOut(refreshToken: refreshToken)
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+        } catch {
+            throw error
+        }
     }
     
     
@@ -858,6 +896,59 @@ public class PassageAuth {
             throw error
         }
     }
+    
+    /// Refreshes the current user's session using the refresh token.
+    /// Refresh tokens must be enabled on the current application.
+    ///
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public static func refresh(refreshToken: String) async throws -> AuthResult {
+        var authResult: AuthResult?
+        do {
+            authResult = try await PassageAPIClient.shared.refresh(refreshToken: refreshToken)
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+        } catch {
+            throw error
+        }
+        if let unwrappedAuthResult = authResult {
+            return unwrappedAuthResult
+        } else {
+            throw PassageError.unknown
+        }
+    }
+    
+    /// Checks validity of the auth token and refreshes the session, if required.
+    ///
+    /// - Returns: Current authToken and an optional refresh token, if being used
+    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    public static func getAuthToken(authToken: String, refreshToken: String?) async throws -> (authToken: String, refreshToken: String?){
+        var isTokenExpired = PassageTokenUtils(token: authToken).isExpired
+        if(!isTokenExpired){
+            return (authToken, refreshToken)
+        }
+        guard let unwrappedRefreshToken = refreshToken else {
+            throw PassageSessionError.loginRequired
+        }
+        var authResult: AuthResult?
+        do {
+            authResult = try await PassageAuth.refresh(refreshToken: unwrappedRefreshToken)
+        } catch PassageAPIError.unauthorized {
+            throw PassageSessionError.loginRequired
+        } catch {
+            throw error
+        }
+        if let unwrappedAuthResult = authResult {
+            if let unwrappedAuthToken = unwrappedAuthResult.auth_token {
+                return (authToken: unwrappedAuthToken, refreshToken: unwrappedAuthResult.refresh_token)
+            } else {
+                throw PassageError.unknown
+            }
+        } else {
+            throw PassageError.unknown
+        }
+    }
+    
     
     
     

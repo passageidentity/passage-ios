@@ -49,3 +49,8 @@ public enum PassageDeviceError : Error {
 public enum PassageSettingsError: Error {
     case errorReadingPlist
 }
+
+/// Passage Session Errors
+public enum PassageSessionError: Error {
+    case loginRequired
+}
