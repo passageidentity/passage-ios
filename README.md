@@ -40,8 +40,7 @@ The Passage-iOS SDK is supported for iOS version 14+. However, Passkeys are only
 
 # Installation
 
-Add the passage-ios package to your app via SwiftPackage Manager
-<!--Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods-->
+Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods
 ## Swift Package Manager
 
 [Swift Package Manager](https://swift.org/package-manager/)
@@ -59,22 +58,17 @@ Add the passage-ios package to your app via SwiftPackage Manager
 https://github.com/passageidentity/passage-ios
 ```
 
-<!--## Cocoapods-->
-<!---->
-<!--- Git clone this repo-->
-<!--- In your app, update your Podfile:-->
-<!---->
-<!--```-->
-<!--platform :ios, '16.0' // Must be iOS 16.0 or later-->
-<!---->
-<!--target 'My App' do-->
-<!--  use_frameworks!-->
-<!---->
-<!--  # Pods for MyApp-->
-<!--  pod 'Passage', :path => '../passage-ios' // The relative path to this private passage-ios library-->
-<!---->
-<!--end-->
-<!--```-->
+# CocoaPods
+
+Add the following line to your Podfile:
+
+```
+pod 'Passage', '~> 0.1'
+```
+Then, run pod install.
+
+For further reference on Cocoapods, check their [official documentation](https://guides.cocoapods.org/using/getting-started.html).
+
 
 - Run `pod install`
   <br>
