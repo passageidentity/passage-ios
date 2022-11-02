@@ -106,5 +106,12 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         return PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true)
     }
     
+    func refresh(refreshToken: String) async throws -> AuthResult {
+        return AuthResult(auth_token: "TEST_TOKEN", refresh_token: "TEST_REFRESH_TOKEN", redirect_url: "")
+    }
+    
+    func signOut(refreshToken: String) async throws {
+        // do nothing
+    }
     
 }
