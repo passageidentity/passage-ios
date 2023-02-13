@@ -27,5 +27,9 @@ jobs:
       - name: Force Xcode 13
         run: sudo xcode-select -switch /Applications/Xcode_13.4.app
 
+      - uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: "5.7"
+
       - name: Test iOS 15.5
         run: xcodebuild test -scheme Passage -sdk iphonesimulator15.5 -destination "OS=15.5,name=iPhone 13 Pro"
