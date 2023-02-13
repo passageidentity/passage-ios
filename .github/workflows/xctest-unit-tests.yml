@@ -18,4 +18,4 @@ jobs:
         run: xcodebuild test -scheme Passage -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro"
 
       - name: Test iOS 15.5
-        run: xcodebuild test -scheme Passage -sdk iphonesimulator16.2 -destination "OS=15.5,name=iPhone 13 Pro"
+        run: xcodebuild test -scheme Passage -sdk iphonesimulator15.5 -destination "OS=15.5,name=iPhone 13 Pro"
