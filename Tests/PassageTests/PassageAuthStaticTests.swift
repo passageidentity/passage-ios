@@ -26,7 +26,7 @@ final class PassageAuthStaticTests: XCTestCase {
         } catch {
             thrownError = error
         }
-        XCTAssertEqual(thrownError as? PassageError, .userAlreadyExists)
+        XCTAssertEqual(thrownError as? PassageError, .userDoesNotExist)
     }
     
     func testPassageAuth_whenRegisterExistingUser_throwsAlreadyExistsError() async {
