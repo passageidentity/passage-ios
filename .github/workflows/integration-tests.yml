@@ -15,5 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: List Schemes
+        run: xcodebuild -list
+
       - name: Test iOS 16.2
         run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro"
