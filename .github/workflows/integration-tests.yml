@@ -9,7 +9,7 @@ on:
       - main
 jobs:
   unit-test-iOS-16:
-    name: Build and Unit Test iOS 16
+    name: Build and Integration Tests iOS 16
     runs-on: macos-latest
     steps:
       - name: Checkout
