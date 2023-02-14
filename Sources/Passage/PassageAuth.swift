@@ -336,13 +336,14 @@ public class PassageAuth {
     ///
     /// - Parameters:
     ///   - newEmail: string - valid email address
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private func changeEmail(newEmail: String) async throws -> MagicLink? {
+    private func changeEmail(newEmail: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
-        let magicLink = try await PassageAuth.changeEmail(token: token, newEmail: newEmail)
+        let magicLink = try await PassageAuth.changeEmail(token: token, newEmail: newEmail, language: language)
         return magicLink
     }
     
@@ -354,13 +355,14 @@ public class PassageAuth {
     ///
     /// - Parameters:
     ///   - newPhone: string - valid E164 formatted phone number.
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private  func changePhone(newPhone: String) async throws -> MagicLink? {
+    private  func changePhone(newPhone: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
-        let magicLink = try await PassageAuth.changePhone(token: token, newPhone: newPhone)
+        let magicLink = try await PassageAuth.changePhone(token: token, newPhone: newPhone, language: language)
         return magicLink
     }
     
@@ -607,12 +609,13 @@ public class PassageAuth {
     ///
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func loginWithMagicLink(identifier: String) async throws -> MagicLink {
+    public static func loginWithMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         var magicLink: MagicLink?
         do {
-            magicLink = try await PassageAuth.newLoginMagicLink(identifier: identifier)
+            magicLink = try await PassageAuth.newLoginMagicLink(identifier: identifier, language: language)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
@@ -705,12 +708,13 @@ public class PassageAuth {
     ///
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func newRegisterMagicLink(identifier: String) async throws -> MagicLink {
+    public static func newRegisterMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         var magicLink: MagicLink?
         do {
-            magicLink = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil)
+            magicLink = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: language)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
@@ -727,12 +731,13 @@ public class PassageAuth {
     /// Creates and send a magic link to login the user. The user will receive an email or text to complete the login.
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func newLoginMagicLink(identifier: String) async throws -> MagicLink {
+    public static func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         var magicLink: MagicLink?
         do {
-            magicLink = try await PassageAPIClient.shared.sendLoginMagicLink(identifier: identifier, path: nil)
+            magicLink = try await PassageAPIClient.shared.sendLoginMagicLink(identifier: identifier, path: nil, language: language)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
@@ -923,7 +928,7 @@ public class PassageAuth {
     /// - Returns: Current authToken and an optional refresh token, if being used
     /// - Throws: ``PassageAPIError``, ``PassageSessionError``
     public static func getAuthToken(authToken: String, refreshToken: String?) async throws -> (authToken: String, refreshToken: String?){
-        var isTokenExpired = PassageTokenUtils(token: authToken).isExpired
+        let isTokenExpired = PassageTokenUtils(token: authToken).isExpired
         if(!isTokenExpired){
             return (authToken, refreshToken)
         }
@@ -963,12 +968,13 @@ public class PassageAuth {
     /// - Parameters:
     ///   - token: The user's auth token
     ///   - newEmail: string - valid email address
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private static func changeEmail(token: String, newEmail: String) async throws -> MagicLink {
+    private static func changeEmail(token: String, newEmail: String, language: String? = nil) async throws -> MagicLink {
         var magicLink: MagicLink?
         do {
-            magicLink = try await PassageAPIClient.shared.changeEmail(token: token, newEmail: newEmail, magicLinkPath: nil, redirectUrl: nil)
+            magicLink = try await PassageAPIClient.shared.changeEmail(token: token, newEmail: newEmail, magicLinkPath: nil, redirectUrl: nil, language: language)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
@@ -988,12 +994,13 @@ public class PassageAuth {
     /// - Parameters:
     ///   - token: The user's auth token
     ///   - newPhone: string - valid E164 formatted phone number.
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private static func changePhone(token: String, newPhone: String) async throws -> MagicLink {
+    private static func changePhone(token: String, newPhone: String, language: String? = nil) async throws -> MagicLink {
         var magicLink: MagicLink?
         do {
-            magicLink = try await PassageAPIClient.shared.changePhone(token: token, newPhone: newPhone, magicLinkPath: nil, redirectUrl: nil)
+            magicLink = try await PassageAPIClient.shared.changePhone(token: token, newPhone: newPhone, magicLinkPath: nil, redirectUrl: nil, language: language)
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
