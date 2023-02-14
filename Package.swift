@@ -26,6 +26,9 @@ let package = Package(
         .testTarget(
             name: "PassageTests",
             dependencies: ["Passage"]),
+        .testTarget(
+            name: "Integration",
+            dependencies: ["Passage"]),
     ],
     swiftLanguageVersions: [.v5]
 )
