@@ -1,5 +1,6 @@
 name: unit test passage-ios
 on:
+  workflow_dispatch:
   push:
     branches:
       - main

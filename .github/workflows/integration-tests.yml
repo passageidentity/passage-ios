@@ -1,0 +1,22 @@
+name: integration tests passage-ios
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  integration-test-iOS-16:
+    name: Build and Integration Tests iOS 16
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: List Schemes
+        run: xcodebuild -list
+
+      - name: Test iOS 16.2
+        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro"
