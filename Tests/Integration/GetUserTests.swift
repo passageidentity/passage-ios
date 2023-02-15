@@ -27,7 +27,6 @@ final class GetUserTests: XCTestCase {
             XCTAssertEqual(response, registeredUser)
             
         } catch {
-            debugPrint("getUser Exception:",error)
             XCTAssertTrue(false)
         }
     }
