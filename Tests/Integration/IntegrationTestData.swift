@@ -8,6 +8,8 @@
 import AuthenticationServices
 @testable import Passage
 
+let apiUrl = "https://auth-uat.passage.dev"
+
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
 

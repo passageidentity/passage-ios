@@ -12,7 +12,7 @@ final class GetUserTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = "https://auth-uat.passage.dev"
+        PassageSettings.shared.apiUrl = apiUrl
         PassageSettings.shared.appId = appInfoValid.id
     }
     
