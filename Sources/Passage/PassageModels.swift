@@ -21,7 +21,7 @@ public struct AuthResult : Codable {
 
 
 /// Details of a Passage User
-public struct PassageUser : Codable {
+public struct PassageUser : Codable, Equatable {
 
     /// The user's id in the Passage System
     public var id: String

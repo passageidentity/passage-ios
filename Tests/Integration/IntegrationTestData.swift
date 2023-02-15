@@ -9,7 +9,19 @@ import AuthenticationServices
 @testable import Passage
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
+let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
 
+let registeredUser = PassageUser(
+    id: "dvr55TCBl3eNI5IuGPoYVIrl",
+    status: "active",
+    email:"blayne.bayer+integrationtest@passge.id",
+    email_verified: false,
+    phone: "",
+    phone_verified: false,
+    webauthn: false,
+    user_metadata: nil,
+    webauthn_types: []
+)
 
 let appInfoValid = AppInfo(
     id: "6svMVa1OQTePB7y2rhGRflJ8",
