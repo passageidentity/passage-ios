@@ -90,7 +90,7 @@ public struct WebauthnDevice : Codable {
 }
 
 /// Struct describing a Passage Application
-public struct AppInfo : Codable {
+public struct AppInfo : Codable, Equatable {
     
     /// The id of the Passage Application
     public var id: String
