@@ -347,19 +347,21 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Parameters:
     ///   - identifier: The users email or phone number
     ///   - path: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``
-    internal func sendLoginMagicLink(identifier: String, path: String?) async throws -> MagicLink {
+    internal func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
         let url = try self.appUrl(path: "login/magic-link/")
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
         
-        var data: Data
+        var jsonObject = ["identifier": identifier]
         if ( path != nil) {
-            data = try JSONSerialization.data(withJSONObject: ["identifier": identifier, path: path], options: [])
+            jsonObject["path"] = path
         }
-        else {
-            data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
+        if ( language != nil) {
+            jsonObject["language"] = language
         }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         request.httpMethod = "POST"
         
@@ -376,19 +378,21 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Parameters:
     ///   - identifier: The users email or phone number
     ///   - path: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    internal func sendRegisterMagicLink(identifier: String, path: String?) async throws -> MagicLink {
+    internal func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
         let url = try self.appUrl(path: "register/magic-link/")
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
         
-        var data: Data
+        var jsonObject = ["identifier": identifier]
         if ( path != nil) {
-            data = try JSONSerialization.data(withJSONObject: ["identifier": identifier, path: path], options: [])
+            jsonObject["path"] = path
         }
-        else {
-            data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
+        if ( language != nil) {
+            jsonObject["language"] = language
         }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         request.httpMethod = "POST"
         
@@ -501,9 +505,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - newEmail: New email address
     ///   - magicLinkPath: optional path to append to the redirect url
     ///   - redirectUrl: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``
-    internal func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?) async throws -> MagicLink {
+    internal func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink {
         let url = try self.appUrl(path: "currentuser/email/")
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
@@ -513,19 +518,17 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         request.httpMethod = "PATCH"
         
-        var data: Data
-        if ( magicLinkPath != nil && redirectUrl != nil) {
-            data = try JSONSerialization.data(withJSONObject: ["new_email": newEmail, "magic_link_path": magicLinkPath, "redirect_url": redirectUrl], options: [])
+        var jsonObject = ["new_email": newEmail]
+        if (redirectUrl != nil) {
+            jsonObject["redirect_url"] = redirectUrl
         }
-        else if ( magicLinkPath != nil) {
-            data = try JSONSerialization.data(withJSONObject: ["new_email": newEmail, "magic_link_path": magicLinkPath], options: [])
+        if (magicLinkPath != nil) {
+            jsonObject["magic_link_path"] = magicLinkPath
         }
-        else if ( redirectUrl != nil ) {
-            data = try JSONSerialization.data(withJSONObject: ["new_email": newEmail,  "redirect_url": redirectUrl], options: [])
+        if(language != nil) {
+            jsonObject["language"] = language
         }
-        else {
-            data = try JSONSerialization.data(withJSONObject: ["new_email": newEmail], options: [])
-        }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -543,9 +546,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - newPhone: The user's new phone number
     ///   - magicLinkPath: optional path to append to the redirect url
     ///   - redirectUrl: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``
-    internal func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?) async throws -> MagicLink {
+    internal func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink {
         
       let url = try self.appUrl(path: "currentuser/phone/")
       var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
@@ -554,20 +558,19 @@ internal class PassageAPIClient : PassageAuthAPIClient {
       request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
       
       request.httpMethod = "PATCH"
-      
-      var data: Data
-      if ( magicLinkPath != nil && redirectUrl != nil) {
-          data = try JSONSerialization.data(withJSONObject: ["new_phone": newPhone, "magic_link_path": magicLinkPath, "redirect_url": redirectUrl], options: [])
+        
+      var jsonObject = ["new_phone": newPhone]
+        
+      if (redirectUrl != nil) {
+          jsonObject["redirect_url"] = redirectUrl
       }
-      else if ( magicLinkPath != nil) {
-          data = try JSONSerialization.data(withJSONObject: ["new_phone": newPhone, "magic_link_path": magicLinkPath], options: [])
+      if (magicLinkPath != nil) {
+          jsonObject["magic_link_path"] = magicLinkPath
       }
-      else if ( redirectUrl != nil ) {
-          data = try JSONSerialization.data(withJSONObject: ["new_phone": newPhone,  "redirect_url": redirectUrl], options: [])
+      if(language != nil) {
+          jsonObject["language"] = language
       }
-      else {
-          data = try JSONSerialization.data(withJSONObject: ["new_phone": newPhone,], options: [])
-      }
+      let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
       
       let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
       

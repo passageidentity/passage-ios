@@ -53,14 +53,14 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func sendLoginMagicLink(identifier: String, path: String?) async throws -> Passage.MagicLink {
+    func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
         guard identifier == "registered-test-user@passage.id" else {
             throw PassageError.unknown
         }
         return Passage.MagicLink(id: "TEST_MAGIC_LINK")
     }
     
-    func sendRegisterMagicLink(identifier: String, path: String?) async throws -> Passage.MagicLink {
+    func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
         guard identifier == "unregistered-test-user@passage.id" else {
             throw PassageError.userAlreadyExists
         }
@@ -83,11 +83,11 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?) async throws -> Passage.MagicLink {
+    func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> Passage.MagicLink {
         throw PassageError.unknown
     }
     
-    func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?) async throws -> Passage.MagicLink {
+    func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> Passage.MagicLink {
         throw PassageError.unknown
     }
     

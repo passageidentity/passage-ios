@@ -97,16 +97,18 @@ protocol PassageAuthAPIClient  {
     /// - Parameters:
     ///   - identifier: The users email or phone number
     ///   - path: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    func sendLoginMagicLink(identifier: String, path: String?) async throws -> MagicLink
+    func sendLoginMagicLink(identifier: String, path: String?, language: String?) async throws -> MagicLink
     
     
     /// Send a new registration magic link to the users email or phone
     /// - Parameters:
     ///   - identifier: The users email or phone number
     ///   - path: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    func sendRegisterMagicLink(identifier: String, path: String?) async throws -> MagicLink
+    func sendRegisterMagicLink(identifier: String, path: String?, language: String?) async throws -> MagicLink
     
     
     /// Check the status of a magic link
@@ -139,8 +141,9 @@ protocol PassageAuthAPIClient  {
     ///   - newEmail: New email address
     ///   - magicLinkPath: optional path to append to the redirect url
     ///   - redirectUrl: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?) async throws -> MagicLink
+    func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink
 
     
     /// Change the current user's phone, will send a magic link to confirm
@@ -149,8 +152,9 @@ protocol PassageAuthAPIClient  {
     ///   - newPhone: The user's new phone number
     ///   - magicLinkPath: optional path to append to the redirect url
     ///   - redirectUrl: optional path to append to the redirect url
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?) async throws -> MagicLink
+    func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink
     
     
     /// Update the user's device, only supports the friendly name currently
