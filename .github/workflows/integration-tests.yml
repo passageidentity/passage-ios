@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - main
+
+env:
+  PASSAGE_AUTH_TOKEN: ${{ secrets.PASSAGE_AUTH_TOKEN }}
+
 jobs:
   integration-test-iOS-16:
     name: Build and Integration Tests iOS 16
@@ -19,4 +23,4 @@ jobs:
         run: xcodebuild -list
 
       - name: Test iOS 16.2
-        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro"
+        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}"

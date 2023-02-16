@@ -45,7 +45,7 @@ final class AppInfoTests: XCTestCase {
                     case .notFound(let response):
                         XCTAssertTrue(true)
                 default:
-                    XCTAssertFalse(false)
+                    XCTAssertFalse(true)
                 }
             }
         }
