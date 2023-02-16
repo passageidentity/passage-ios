@@ -23,4 +23,4 @@ jobs:
         run: xcodebuild -list
 
       - name: Test iOS 16.2
-        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro" PASSAGE_AUTH_TOKEN="${{ env.SENTRY_AUTH_TOKEN }}"
+        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}"
