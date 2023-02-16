@@ -21,30 +21,50 @@ final class CurrentUserTests: XCTestCase {
     }
 
     
-    func testCurrentUSer() {
+    func testCurrentUser() async {
+        
         // make sure we have an authToken.
         XCTAssertNotEqual(authToken, "")
+        
+        do {
+            PassageAPIClient.shared.appId = appInfoValid.id
+            let response = try await PassageAPIClient.shared.currentUser(token: authToken)
+            XCTAssertEqual(response.id, currentUser.id)
+            XCTAssertEqual(response.created_at, currentUser.created_at)
+            XCTAssertEqual(response.updated_at, currentUser.updated_at)
+            XCTAssertEqual(response.status, currentUser.status)
+            XCTAssertEqual(response.email, currentUser.email)
+            XCTAssertEqual(response.email_verified, currentUser.email_verified)
+            XCTAssertEqual(response.phone, currentUser.phone)
+            XCTAssertEqual(response.phone_verified, currentUser.phone_verified)
+            XCTAssertEqual(response.webauthn, currentUser.webauthn)
+        } catch {
+            debugPrint("testCurrentUser: error:",error)
+            // fail the test if we catch an error
+            XCTAssertTrue(false)
+        }
+        
     }
-//    func testUserFound() async {
-//        do {
-//            PassageAPIClient.shared.appId = appInfoValid.id
-//            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email ?? "")
-//            XCTAssertEqual(response, registeredUser)
-//            
-//        } catch {
-//            XCTAssertTrue(false)
-//        }
-//    }
-//    
-//    func testUserNotFound() async {
-//        do {
-//            PassageAPIClient.shared.appId = appInfoValid.id
-//            let response = try await PassageAPIClient.shared.getUser(identifier: unregisteredUserEmail)
-//            XCTAssertFalse(true)
-//        }
-//        catch  {
-//            XCTAssertTrue(true)
-//        }
-//        
-//    }
+
+    func testCurrentUserNotAuthorized() async {
+        do {
+            PassageAPIClient.shared.appId = appInfoValid.id
+            let response = try await PassageAPIClient.shared.currentUser(token: "")
+            // fail if we didn't get an error
+            XCTAssertTrue(false)
+        }
+        catch {
+            XCTAssertTrue(error is PassageAPIError)
+            
+            if let thrownError = error as? PassageAPIError {
+                switch thrownError {
+                    case .unauthorized(let response):
+                        XCTAssertTrue(true)
+                default:
+                    XCTAssertFalse(true)
+                }
+            }
+        }
+    }
+
 }
