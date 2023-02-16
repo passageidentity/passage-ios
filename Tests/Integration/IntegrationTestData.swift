@@ -22,7 +22,7 @@ let registeredUser = PassageUser(
     email_verified: true,
     phone: "",
     phone_verified: false,
-    webauthn: false,
+    webauthn: true,
     user_metadata: nil,
     webauthn_types: []
 )
@@ -36,7 +36,7 @@ let currentUser = PassageUserDetails(
     email_verified: true,
     phone: "",
     phone_verified: false,
-    webauthn: false,
+    webauthn: true,
     last_login_at: "2023-02-16T19:55:38.907657Z",
     login_count: 2,
     webauthn_devices: [],
