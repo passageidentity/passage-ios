@@ -21,7 +21,7 @@ public struct AuthResult : Codable {
 
 
 /// Details of a Passage User
-public struct PassageUser : Codable {
+public struct PassageUser : Codable, Equatable {
 
     /// The user's id in the Passage System
     public var id: String
@@ -90,7 +90,7 @@ public struct WebauthnDevice : Codable {
 }
 
 /// Struct describing a Passage Application
-public struct AppInfo : Codable {
+public struct AppInfo : Codable, Equatable {
     
     /// The id of the Passage Application
     public var id: String
