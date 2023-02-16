@@ -27,6 +27,23 @@ let registeredUser = PassageUser(
     webauthn_types: []
 )
 
+let currentUser = PassageUserDetails(
+    created_at: "2023-02-16T15:55:28.890571Z",
+    updated_at: "2023-02-16T19:55:38.909048Z",
+    status: "active",
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    email: "blayne.bayer@passage.id",
+    email_verified: true,
+    phone: "",
+    phone_verified: false,
+    webauthn: false,
+    last_login_at: "2023-02-16T19:55:38.907657Z",
+    login_count: 2,
+    webauthn_devices: [],
+    webauthn_types: []
+)
+
+
 let appInfoValid = AppInfo(
     id: "czLTOVFIytGqrhRVoHV9o8Wo",
     ephemeral: false,
@@ -35,7 +52,7 @@ let appInfoValid = AppInfo(
     login_url: "/",
     allowed_identifier: "email",
     required_identifier: "email",
-    auth_origin: "http://localhost:8080",
+    auth_origin: "http://localhost:4173",
     require_email_verification: false,
     require_identifier_verification: false,
     session_timeout_length: 0,
