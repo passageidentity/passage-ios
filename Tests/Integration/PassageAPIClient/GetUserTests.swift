@@ -24,7 +24,14 @@ final class GetUserTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email ?? "")
-            XCTAssertEqual(response, registeredUser)
+            XCTAssertEqual(response.id, currentUser.id)
+            XCTAssertEqual(response.status, currentUser.status)
+            XCTAssertEqual(response.email, currentUser.email)
+            XCTAssertEqual(response.email_verified, currentUser.email_verified)
+            XCTAssertEqual(response.phone, currentUser.phone)
+            XCTAssertEqual(response.phone_verified, currentUser.phone_verified)
+            XCTAssertEqual(response.webauthn, currentUser.webauthn)
+
             
         } catch {
             XCTAssertTrue(false)

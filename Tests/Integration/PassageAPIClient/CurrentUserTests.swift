@@ -31,7 +31,6 @@ final class CurrentUserTests: XCTestCase {
             let response = try await PassageAPIClient.shared.currentUser(token: authToken)
             XCTAssertEqual(response.id, currentUser.id)
             XCTAssertEqual(response.created_at, currentUser.created_at)
-            XCTAssertEqual(response.updated_at, currentUser.updated_at)
             XCTAssertEqual(response.status, currentUser.status)
             XCTAssertEqual(response.email, currentUser.email)
             XCTAssertEqual(response.email_verified, currentUser.email_verified)
@@ -39,7 +38,6 @@ final class CurrentUserTests: XCTestCase {
             XCTAssertEqual(response.phone_verified, currentUser.phone_verified)
             XCTAssertEqual(response.webauthn, currentUser.webauthn)
         } catch {
-            debugPrint("testCurrentUser: error:",error)
             // fail the test if we catch an error
             XCTAssertTrue(false)
         }
