@@ -10,14 +10,16 @@ import AuthenticationServices
 
 let apiUrl = "https://auth-uat.passage.dev"
 
+let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
+
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
 
 let registeredUser = PassageUser(
-    id: "dvr55TCBl3eNI5IuGPoYVIrl",
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
     status: "active",
-    email:"blayne.bayer+integrationtest@passge.id",
-    email_verified: false,
+    email:"blayne.bayer@passage.id",
+    email_verified: true,
     phone: "",
     phone_verified: false,
     webauthn: false,
@@ -26,9 +28,9 @@ let registeredUser = PassageUser(
 )
 
 let appInfoValid = AppInfo(
-    id: "6svMVa1OQTePB7y2rhGRflJ8",
+    id: "czLTOVFIytGqrhRVoHV9o8Wo",
     ephemeral: false,
-    name: "authorizer",
+    name: "passage-ios uat",
     redirect_url: "/dashboard",
     login_url: "/",
     allowed_identifier: "email",
