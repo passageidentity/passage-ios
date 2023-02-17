@@ -21,25 +21,6 @@ jobs:
       - name: Create Documentation
         run: xcodebuild docbuild -scheme Passage -destination generic/platform=iOS  OTHER_DOCC_FLAGS="--transform-for-static-hosting --output-path docs --hosting-base-path passage-ios"
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Generated and Updated Documentation
-
-  build-documentation-archive:
-    name: Build Documentation Archive
-    needs: build-documentation
-    runs-on: macos-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Generate Docs
-        run: xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iOS
-
       - name: Create doc archive
         run: |
           pushd tmpdocs/Build/Products/Debug-iphoneos
@@ -49,4 +30,4 @@ jobs:
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: Generated and Updated Document Archive
+          commit_message: Generated and Updated Documentation
