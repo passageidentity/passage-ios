@@ -306,6 +306,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        
+        request.setValue("pasasge-ios", forHTTPHeaderField: "Passage-Version")
 
         let tokenString = "Bearer \(token)"
         request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
@@ -742,6 +744,15 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     
     internal func logData(data: Data) {
         print("The data: \(String(bytes: data, encoding: .utf8)!)")
+    }
+    
+    internal func buildRequest(url: URL, method: String) -> URLRequest {
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        request.setValue("passage-ios", forHTTPHeaderField: "Passage-Version")
+        request.httpMethod = method
+        
+        return request
     }
     
 }
