@@ -27,6 +27,7 @@ jobs:
 
   build-documentation-archive:
     name: Build Documentation Archive
+    needs: build-documentation
     runs-on: macos-latest
 
     permissions:
@@ -36,7 +37,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Generate Docs
+        run: xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iOS
+
       - name: Create doc archive
         run: |
-          export HOMED = PWD
-          echo $HOMED
+          pushd tmpdocs/Build/Products/Debug-iphoneos
+          zip -r $OLDPWD/docs/Passage.doccarchive.zip Passage.doccarchive
+          popd
+          rm -rf tmpdocs
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Generated and Updated Document Archive
