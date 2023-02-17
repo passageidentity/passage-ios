@@ -21,12 +21,22 @@ jobs:
       - name: Create Documentation
         run: xcodebuild docbuild -scheme Passage -destination generic/platform=iOS  OTHER_DOCC_FLAGS="--transform-for-static-hosting --output-path docs --hosting-base-path passage-ios"
 
-      - name: Create doc archive
-        run: |
-          xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iO
-          export HOMED = PWD
-          echo $HOMED
-
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Generated and Updated Documentation
+
+  build-documentation-archive:
+    name: Build Documentation Archive
+    runs-on: macos-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create doc archive
+        run: |
+          export HOMED = PWD
+          echo $HOMED
