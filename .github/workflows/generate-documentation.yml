@@ -21,6 +21,9 @@ jobs:
       - name: Create Documentation
         run: xcodebuild docbuild -scheme Passage -destination generic/platform=iOS  OTHER_DOCC_FLAGS="--transform-for-static-hosting --output-path docs --hosting-base-path passage-ios"
 
+      - name: Generate doccarchive
+        run: xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iOS
+
       - name: Create doc archive
         run: |
           pushd tmpdocs/Build/Products/Debug-iphoneos
