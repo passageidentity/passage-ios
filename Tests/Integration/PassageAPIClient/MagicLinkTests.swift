@@ -26,7 +26,6 @@ final class MagicLinkTests: XCTestCase {
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator" + "+" + String(date) + "@passage.id"
             let response = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
-            print(response)
             do {
                 _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
                 XCTAssertTrue(false) // the status should error as it is unactivated
@@ -49,10 +48,30 @@ final class MagicLinkTests: XCTestCase {
             } catch {
                 XCTAssertTrue(true)
             }
-            
         } catch {
             print(error)
             XCTAssertTrue(false)
+        }
+    }
+    
+    func testActivateMagicLink() async {
+        do{
+            PassageAPIClient.shared.appId = appInfoValid.id
+            let date = Date().timeIntervalSince1970
+            let identifier = "authentigator" + "+" + String(date) + "@ncor7c1m.mailosaur.net"
+            let response = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
+            try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
+            let magicLink = try await MailosaurAPIClient().getMostRecentMagicLink()
+            let token = try await PassageAPIClient.shared.activateMagicLink(magicLink: magicLink)
+            XCTAssertNotNil(token)
+            do {
+                _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
+                XCTAssertTrue(true)
+            } catch {
+                XCTAssertTrue(false)
+            }
+        } catch {
+            print(error)
         }
     }
 }

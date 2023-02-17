@@ -11,6 +11,7 @@ import AuthenticationServices
 let apiUrl = "https://auth-uat.passage.dev"
 
 let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
+let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
