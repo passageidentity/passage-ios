@@ -20,16 +20,16 @@ final class AppInfoTests: XCTestCase {
         super.tearDown()
     }
     
-//    func testAppInfoFound() async {
-//        do {
-//            PassageAPIClient.shared.appId = appInfoValid.id
-//            let response = try await PassageAPIClient.shared.appInfo()
-//            XCTAssertEqual(response, appInfoValid)
-//            
-//        } catch {
-//            XCTAssertTrue(false)
-//        }
-//    }
+    func testAppInfoFound() async {
+        do {
+            PassageAPIClient.shared.appId = appInfoValid.id
+            let response = try await PassageAPIClient.shared.appInfo()
+            XCTAssertEqual(response, appInfoValid)
+            
+        } catch {
+            XCTAssertTrue(false)
+        }
+    }
 
     func testAppInfoNotFound() async {
         do {
