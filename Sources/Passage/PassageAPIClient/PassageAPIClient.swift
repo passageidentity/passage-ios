@@ -10,15 +10,11 @@ import Foundation
 import AuthenticationServices
 import os
 
-
-
 /// Passage API Client
 ///
 /// Implements all the network requests to the Passage API's 
 internal class PassageAPIClient : PassageAuthAPIClient {
 
-    let version = "0.2.0"
-    
     /// Singleton instance of the PassageAPIClient
     ///
     /// Get the shared instance of the PassageAPIClient. The PassageAPIClient implements a singleton pattern
@@ -698,7 +694,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         
         // Set the version header
-        request.setValue("passage-ios v\(version)", forHTTPHeaderField: "Passage-Version")
+        request.setValue("passage-ios v\(PassageSettings.shared.version)", forHTTPHeaderField: "Passage-Version")
         
         request.httpMethod = method
                 
