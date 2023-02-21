@@ -10,11 +10,15 @@ import Foundation
 import AuthenticationServices
 import os
 
+
+
 /// Passage API Client
 ///
 /// Implements all the network requests to the Passage API's 
 internal class PassageAPIClient : PassageAuthAPIClient {
 
+    let version = "0.2.0"
+    
     /// Singleton instance of the PassageAPIClient
     ///
     /// Get the shared instance of the PassageAPIClient. The PassageAPIClient implements a singleton pattern
@@ -48,9 +52,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func appInfo() async throws -> AppInfo {
         let url = try self.appUrl(path: "")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        request.httpMethod = "GET"
+        let request = buildRequest(url: url, method: "GET")
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
         
@@ -69,9 +71,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-
-        request.httpMethod = "POST"
+        let request = buildRequest(url: url, method: "POST")
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
 
@@ -116,11 +116,12 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
         ] as [String : Any]
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        
+        let request = buildRequest(url: url, method: "POST")
+
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
 
-        request.httpMethod = "POST"
 
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -140,12 +141,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        let request = buildRequest(url: url, method: "POST")
 
         let data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
-        
-        request.httpMethod = "POST"
-        
+               
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
         try assertValidResponse(response: response, responseData: responseData)
@@ -184,11 +183,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
         ] as [String : Any]
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        
+        let request = buildRequest(url: url, method: "POST")
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-
-        request.httpMethod = "POST"
 
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -209,10 +207,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "register/webauthn/start/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        let request = buildRequest(url: url, method: "POST")
 
         let data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
-        request.httpMethod = "POST"
+        
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         
         try assertValidResponse(response: response, responseData: responseData, successStatusCode: 200)
@@ -255,11 +253,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             "cred_type": "passkey"
         ] as [String :Any]
      
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
+        let request = buildRequest(url: url, method: "POST")
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-
-        request.httpMethod = "POST"
 
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -278,13 +274,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal  func addDeviceStart(token: String) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "currentuser/devices/start/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "POST"
-        
+        let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
+                
         let (responseData, response) = try await URLSession.shared.data(for: request)
         
         try assertValidResponse(response: response, responseData: responseData)
@@ -305,13 +296,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        request.setValue("pasasge-ios", forHTTPHeaderField: "Passage-Version")
-
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
+        let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
         
         let response = [
             "attestationObject": params.rawAttestationObject?.toBase64Url(),
@@ -334,14 +319,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
         
-        request.httpMethod = "POST"
         
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
         try assertValidResponse(response: resp, responseData: responseData, successStatusCode: 201)
-
-//        let addDeviceResponse = try JSONDecoder().decode(WebauthnAddDeviceFinishResponse.self, from: responseData)
-
         
     }
     
@@ -354,7 +335,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Throws: ``PassageAPIError``
     internal func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
         let url = try self.appUrl(path: "login/magic-link/")
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        let request = buildRequest(url: url, method: "POST")
         
         var jsonObject = ["identifier": identifier]
         if ( path != nil) {
@@ -364,9 +345,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             jsonObject["language"] = language
         }
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-        
-        request.httpMethod = "POST"
-        
+                
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
         try assertValidResponse(response: response, responseData: responseData)
@@ -385,7 +364,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
         let url = try self.appUrl(path: "register/magic-link/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        let request = buildRequest(url: url, method: "POST")
         
         var jsonObject = ["identifier": identifier]
         if ( path != nil) {
@@ -395,9 +374,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             jsonObject["language"] = language
         }
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-        
-        request.httpMethod = "POST"
-        
+                
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
         try assertValidResponse(response: response,responseData: responseData, successStatusCode: 201)
@@ -414,11 +391,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func magicLinkStatus(id: String) async throws -> AuthResult {
         let url = try self.appUrl(path: "magic-link/status/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
+        let request = buildRequest(url: url, method: "POST")
+                
         let data = try JSONSerialization.data(withJSONObject: ["id": id], options: [])
-        
-        request.httpMethod = "POST"
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
                 
@@ -437,11 +412,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func activateMagicLink(magicLink: String) async throws -> AuthResult {
         let url = try self.appUrl(path: "magic-link/activate/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
+        let request = buildRequest(url: url, method: "PATCH")
         
         let data = try JSONSerialization.data(withJSONObject: ["magic_link": magicLink], options: [])
-        
-        request.httpMethod = "PATCH"
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
                 
@@ -458,13 +431,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Throws: ``PassageAPIError``
     internal func currentUser(token: String) async throws -> PassageUserDetails {
         let url = try self.appUrl(path: "currentuser/")
-        
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "GET"
+
+        let request = buildAuthenticatedRequest(url: url, method: "GET", token: token)
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
 
@@ -483,12 +451,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func listDevices(token: String) async throws -> [DeviceInfo] {
         let url = try self.appUrl(path: "currentuser/devices/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "GET"
+        let request = buildAuthenticatedRequest(url: url, method: "GET", token: token)
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
 
@@ -512,13 +475,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Throws: ``PassageAPIError``
     internal func changeEmail(token: String, newEmail: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink {
         let url = try self.appUrl(path: "currentuser/email/")
-        
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "PATCH"
+
+        let request = buildAuthenticatedRequest(url: url, method: "PATCH", token: token)
         
         var jsonObject = ["new_email": newEmail]
         if (redirectUrl != nil) {
@@ -554,12 +512,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink {
         
       let url = try self.appUrl(path: "currentuser/phone/")
-      var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-      
-      let tokenString = "Bearer \(token)"
-      request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-      
-      request.httpMethod = "PATCH"
+    
+      let request = buildAuthenticatedRequest(url: url, method: "PATCH", token: token)
         
       var jsonObject = ["new_phone": newPhone]
         
@@ -593,13 +547,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func updateDevice(token: String, deviceId: String, friendlyName: String) async throws -> DeviceInfo {
         let url = try self.appUrl(path: "currentuser/devices/\(deviceId)/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "PATCH"
-        
+        let request = buildAuthenticatedRequest(url: url, method: "PATCH", token: token)
+                
         let data: Data = try JSONSerialization.data(withJSONObject: ["friendly_name": friendlyName], options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
@@ -619,13 +568,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Throws: ``PassageAPIError``
     internal func revokeDevice(token: String, deviceId: String) async throws {
         let url = try self.appUrl(path: "currentuser/devices/\(deviceId)/")
-                
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
         
-        let tokenString = "Bearer \(token)"
-        request.addValue("\(tokenString)", forHTTPHeaderField: "Authorization")
-        
-        request.httpMethod = "DELETE"
+        let request = buildAuthenticatedRequest(url: url, method: "DELETE", token: token)
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
         
@@ -640,9 +584,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func getUser(identifier: String) async throws -> PassageUser {
         let url = try self.appUrl(path: "users/?identifier=\(identifier.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        request.httpMethod = "GET"
+        let request = buildRequest(url: url, method: "GET")
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
         
@@ -661,9 +603,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func refresh(refreshToken: String) async throws -> AuthResult {
         let url = try self.appUrl(path: "tokens/")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        request.httpMethod = "POST"
+        let request = buildRequest(url: url, method: "POST")
         
         let data = try JSONSerialization.data(withJSONObject: ["refresh_token": refreshToken], options: [])
         
@@ -683,9 +623,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     internal func signOut(refreshToken: String) async throws {
         let url = try self.appUrl(path: "tokens/?refresh_token=\(refreshToken.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
-        
-        request.httpMethod = "DELETE"
+        let request = buildRequest(url: url, method: "DELETE")
         
         let (responseData, response) = try await URLSession.shared.data(for: request)
         
@@ -746,12 +684,24 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         print("The data: \(String(bytes: data, encoding: .utf8)!)")
     }
     
+    internal func buildAuthenticatedRequest(url: URL, method: String, token: String) -> URLRequest {
+        
+        var request = buildRequest(url: url, method: method)
+        
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return request
+    }
+    
     internal func buildRequest(url: URL, method: String) -> URLRequest {
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-        request.setValue("passage-ios", forHTTPHeaderField: "Passage-Version")
-        request.httpMethod = method
         
+        // Set the version header
+        request.setValue("passage-ios v\(version)", forHTTPHeaderField: "Passage-Version")
+        
+        request.httpMethod = method
+                
         return request
     }
     
