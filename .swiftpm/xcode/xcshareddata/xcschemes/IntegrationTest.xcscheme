@@ -71,6 +71,11 @@
             value = "$(PASSAGE_AUTH_TOKEN)"
             isEnabled = "YES">
          </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "MAILOSAUR_API_KEY"
+            value = "$(MAILOSAUR_API_KEY)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
       </EnvironmentVariables>
       <Testables>
          <TestableReference
