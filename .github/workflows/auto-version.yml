@@ -23,43 +23,24 @@ jobs:
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
         with:
           fallback: 0.0.0
-      - name: Echo Previous Tag
-        run: |
-          echo "${{ steps.previoustag.outputs.tag }}"
       - name: Get Next Version
         id: nexttag
         uses: "WyriHaximus/github-action-next-semvers@v1"
         with:
           version: ${{ steps.previoustag.outputs.tag }}
-      - name: Echo Next Versions
-        run: |
-          echo "${{ steps.nexttag.outputs.major}}"
-          echo "${{ steps.nexttag.outputs.minor}}"
-          echo "${{ steps.nexttag.outputs.patch}}"
-          echo "${{ steps.nexttag.outputs.v_major}}"
-          echo "${{ steps.nexttag.outputs.v_minor}}"
-          echo "${{ steps.nexttag.outputs.v_patch}}"
-          echo "Branch: ${{ env.BRANCH }}"
-          echo "{\"version\": \"${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}\"}"
-      - name: Determine new version
+      - name: Configure Branch and new Version
         id: newversion
         run: |
           echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
           echo "version=${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}" >> $GITHUB_OUTPUT
-      - name: echo newversion
-        run: |
-          echo "branch: ${{ steps.newversion.outputs.branch}}"
-          echo "version: ${{ steps.newversion.outputs.version}}"
       - name: Update version
         id: update-settings-version
         uses: jsdaniell/create-json@v1.2.2
         with:
           name: "settings.json"
           dir: "./Sources/Passage/Resources/"
-          json: "{\n\"version\": \"${{ steps.newversion.outputs.version }}\"\n}"
-      - name: Commit & Push changes
-        uses: actions-js/push@master
+          json: "{\n\t\"version\": \"${{ steps.newversion.outputs.version }}\"\n}"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: "Updated version"
-          branch: "${{ steps.newversion.outputs.branch }}"
+          commit_message: "Generated and Updated Version to ${{ steps.newversion.outputs.version }}"

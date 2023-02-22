@@ -1,0 +1,33 @@
+name: Auto Bump Version
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        required: true
+        type: choice
+        description: What type of release
+        options:
+          - major
+          - minor
+          - patch
+# env:
+#   BRANCH: ${GITHUB_REF_NAME}
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: MajorBump
+        if: ${{ github.event.inputs.release-type }} == 'major'
+        run: |
+          echo "Major Bump"
+
+      - name: MinorBump
+        if: ${{ github.event.inputs.release-type }} == 'minor'
+        run: |
+          echo "Minor Bump"
+
+      - name: PatchBump
+        if: ${{ github.event.inputs.release-type }} == 'patch'
+        run: |
+          echo "Patch Bump"
