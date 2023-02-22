@@ -41,5 +41,5 @@ jobs:
               "bump":"major",
               "tag": true,
               "reset":["minor","build"]
-            }]'
+            }]
           github-token: ${{ secrets.GITHUB_TOKEN }}
