@@ -11,7 +11,7 @@
     {
       "trigger": "pull-request",
       "destBranch": "main",
-      "suffix": "-${GITHUB_SHA}",
+      "suffix": "-${process.env.GITHUB_SHA}",
       "tag": false
     },
     {
