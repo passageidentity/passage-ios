@@ -6,7 +6,7 @@
     {
       "trigger": "commit",
       "branch": "PSG-1550-testing",
-      "suffix": "-${GITHUB_SHA}"
+      "suffix": "-${process.env.GITHUB_SHA}"
     },
     {
       "trigger": "pull-request",
