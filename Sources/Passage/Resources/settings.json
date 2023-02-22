@@ -1,3 +1,3 @@
 {
-    "version": "0.2.0-${process.env.BUMP_SUFFIX}-${process.env.GITHUB_SHA}-${GITHUB_SHA}"
+  "version": "0.2.0"
 }
