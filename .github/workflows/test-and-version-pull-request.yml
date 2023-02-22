@@ -1,4 +1,4 @@
-name: PR Handler for passage-ios
+name: Test and Version Pull Request
 on:
   workflow_dispatch:
   pull_request:
