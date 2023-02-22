@@ -8,7 +8,7 @@ on:
   #     - main
 
 env:
-  BRANCH: "${GITHUB_REF_NAME}"
+  BRANCH: ${GITHUB_REF_NAME}
 
 jobs:
   bump:
