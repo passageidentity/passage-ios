@@ -8,7 +8,7 @@ on:
   #     - main
 
 env:
-  BUMP_SUFFIX: "FOO-${GITHUB_SHA}-BAR"
+  BUMP_SUFFIX: "FOO-${GITHUB_SHA}-BARBAR"
 
 jobs:
   bump:
@@ -36,7 +36,7 @@ jobs:
                     "trigger": "commit",
                     "branch": "PSG-1550-testing",
                     "suffix": "-${{env.BUMP_SUFFIX}}",
-                    "reset": ["build"]
+                    "reset": ["build","suffix"]
                   }
             ]
           github-token: ${{ secrets.GITHUB_TOKEN }}
