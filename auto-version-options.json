@@ -6,12 +6,12 @@
     {
       "trigger": "commit",
       "branch": "PSG-1550-testing",
-      "suffix": "-${process.env.GITHUB_SHA}"
+      "suffix": "-${process.env.BUMP_SUFFIX}"
     },
     {
       "trigger": "pull-request",
       "destBranch": "main",
-      "suffix": "-${process.env.GITHUB_SHA}",
+      "suffix": "-${process.env.BUMP_SUFFIX}",
       "tag": false
     },
     {
