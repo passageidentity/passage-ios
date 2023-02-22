@@ -35,7 +35,7 @@ jobs:
                   {
                     "trigger": "commit",
                     "branch": "PSG-1550-testing",
-                    "suffix": "-${{env.BUMP_SUFFIX}}",
+                    "suffix": "-${{env.GITHUB_SHA}}",
                     "reset": ["build"]
                   }
             ]
