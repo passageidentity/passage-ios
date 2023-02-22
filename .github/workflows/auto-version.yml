@@ -44,8 +44,8 @@ jobs:
       - name: Determine new version
         id: newversion
         run: |
-          echo "::set-output branch=${GITHUB_REF_NAME}"
-          echo "::set-output version=${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}"
+          echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          echo "version=${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}" >> $GITHUB_OUTPUT
       - name: echo newversion
         run: |
           echo "branch: ${{ steps.newversion.outputs.branch}}"
