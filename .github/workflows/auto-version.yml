@@ -39,3 +39,15 @@ jobs:
           echo "${{ steps.nexttag.outputs.v_major}}"
           echo "${{ steps.nexttag.outputs.v_minor}}"
           echo "${{ steps.nexttag.outputs.v_patch}}"
+      - name: Update version
+        id: update-settings-version
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "settings.json"
+          dir: "./Sources/Passage/Resources/"
+          json: '{"version": "${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}"}'
+      - name: Commit & Push changes
+        uses: actions-js/push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          message: "Updated version"
