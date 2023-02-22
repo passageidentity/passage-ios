@@ -30,12 +30,10 @@ jobs:
               "trigger":"commit",
               "branch": "PSG-1550-testing",
               "suffix": "-${GITHUB_SHA}",
-              # "bump":"build"
             },{
               "trigger": "pull-request",
               "destBranch": "main",
               "suffix": "-${GITHUB_SHA}",
-              # "bump": "build",
               "tag": false
             }, {
               "trigger":"commit",
