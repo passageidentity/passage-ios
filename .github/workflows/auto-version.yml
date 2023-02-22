@@ -30,7 +30,7 @@ jobs:
         with:
           name: "settings.json"
           dir: "./Sources/Passage/Resources/"
-          json: "{\n\t\"version\": \"${{ steps.newversion.outputs.version }}\"\n}"
+          json: "{\n    \"version\": \"${{ steps.newversion.outputs.version }}\"\n}"
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
