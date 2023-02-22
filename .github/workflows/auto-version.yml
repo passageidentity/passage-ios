@@ -31,7 +31,7 @@ jobs:
                   {
                     "trigger": "commit",
                     "branch": "PSG-1550-testing",
-                    "suffix": "-${{BUMP_SUFFIX}}"
+                    "suffix": "-${{env.BUMP_SUFFIX}}"
                   }
             ]
           github-token: ${{ secrets.GITHUB_TOKEN }}
