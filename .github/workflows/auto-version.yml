@@ -8,7 +8,7 @@ on:
   #     - main
 
 env:
-  BUMP_SUFFIX: "${GITHUB_SHA}-foo-bar"
+  BUMP_SUFFIX: ${GITHUB_SHA}
 
 jobs:
   bump:
