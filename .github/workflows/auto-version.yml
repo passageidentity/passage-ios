@@ -22,5 +22,16 @@ jobs:
       - name: Bump Version
         uses: michmich112/version-bumper@master
         with:
-          options-file: "./auto-version-options.json"
+          scheme: org_semantic
+          version-file: "./Sources/Passage/Resources/settings.json"
+          files: >
+            ["./Sources/Passage/Resources/settings.json"]
+          rules: >
+            [
+                  {
+                    "trigger": "commit",
+                    "branch": "PSG-1550-testing",
+                    "suffix": "-${GITHUB_SHA}"
+                  }
+            ]
           github-token: ${{ secrets.GITHUB_TOKEN }}
