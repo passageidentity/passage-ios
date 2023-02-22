@@ -22,6 +22,7 @@ jobs:
       - name: Print SHA
         run: |
           echo "SHA: ${GITHUB_SHA}"
+          echo "BUMP_SUFFIX: ${{env.BUMP_SUFFIX}}"
       - name: Bump Version
         uses: michmich112/version-bumper@master
         with:
