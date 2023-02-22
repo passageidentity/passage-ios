@@ -13,12 +13,17 @@ protocol PassageAuthSettings {
     var apiUrl: String? { get set }
 }
 
+public struct Settings : Codable {
+    public var version: String
+}
+
 internal class PassageSettings : PassageAuthSettings {
     
     // MARK: - Properties
     internal var appId: String?
     internal var authOrigin: String?
     internal var apiUrl: String? = "https://auth.passage.id"
+    internal var version: String
     
     internal static let shared = PassageSettings()
     
@@ -52,6 +57,18 @@ internal class PassageSettings : PassageAuthSettings {
                 self.apiUrl = "https://auth.passage.id"
             }
         }
+        
+        do {
+            let settingsUrl = Bundle.module.url(forResource: "settings", withExtension: "json")
+            let settingsData = try Data(contentsOf: settingsUrl!)
+            let decoder = JSONDecoder()
+            let settings = try decoder.decode(Settings.self, from: settingsData)
+            self.version = settings.version
+        } catch {
+            version = "unknown"
+        }
     }
+    
+    
     
 }

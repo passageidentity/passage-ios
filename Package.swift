@@ -22,7 +22,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "Passage",
-            dependencies: ["SwiftKeychainWrapper"]),
+            dependencies: ["SwiftKeychainWrapper"], resources: [.copy("Resources/settings.json")]),
         .testTarget(
             name: "PassageTests",
             dependencies: ["Passage"]),
