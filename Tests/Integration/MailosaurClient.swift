@@ -82,7 +82,6 @@ internal class MailosaurAPIClient {
             guard let magicLink = components!.queryItems?.filter({$0.name == "psg_magic_link"}).first?.value else {
                 return ""
             }
-            print(magicLink)
             return magicLink
         } catch {
             print(error)
