@@ -35,6 +35,8 @@ jobs:
                   {
                     "trigger": "commit",
                     "branch": "PSG-1550-testing",
+                    "suffix": "",
+                    "reset": ["build"],
                     "bump": "build"
                   }
             ]
