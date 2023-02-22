@@ -16,27 +16,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
         with:
-          node-version: "12"
-      - name: Print SHA
+          fetch-depth: 0
+      - name: Get Previous Tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 0.0.0
+      - name: Echo Previous Tag
         run: |
-          echo "SHA: ${GITHUB_SHA}"
-          echo "BUMP_SUFFIX: ${{env.BUMP_SUFFIX}}"
-      - name: Bump Version
-        uses: michmich112/version-bumper@master
+          echo "${{ steps.previoustag.outputs.tag }}"
+      - name: Get Next Version
+        id: nexttag
+        uses: "WyriHaximus/github-action-next-semvers@v1"
         with:
-          scheme: org_semantic
-          version-file: "./Sources/Passage/Resources/settings.json"
-          files: >
-            ["./Sources/Passage/Resources/settings.json"]
-          rules: >
-            [
-                  {
-                    "trigger": "commit",
-                    "branch": "PSG-1550-testing",
-                    "suffix": "-${{env.BUMP_SUFFIX}}",
-                    "reset": ["build","suffix"]
-                  }
-            ]
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.previoustag.outputs.tag }}
+      - name: Echo Next Versions
+        run: |
+          echo "${{ steps.nexttag.outputs.major}}"
+          echo "${{ steps.nexttag.outputs.minor}}"
+          echo "${{ steps.nexttag.outputs.patch}}"
+          echo "${{ steps.nexttag.outputs.v_major}}"
+          echo "${{ steps.nexttag.outputs.v_minor}}"
+          echo "${{ steps.nexttag.outputs.v_patch}}"
