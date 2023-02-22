@@ -1,0 +1,25 @@
+{
+  "scheme": "org_semantic",
+  "version-file": "./Sources/Passage/Resources/settings.json",
+  "files": ["./Sources/Passage/Resources/settings.json"],
+  "rules": [
+    {
+      "trigger": "commit",
+      "branch": "PSG-1550-testing",
+      "suffix": "-${GITHUB_SHA}"
+    },
+    {
+      "trigger": "pull-request",
+      "destBranch": "main",
+      "suffix": "-${GITHUB_SHA}",
+      "tag": false
+    },
+    {
+      "trigger": "commit",
+      "branch": "release",
+      "bump": "major",
+      "tag": true,
+      "reset": ["minor", "build"]
+    }
+  ]
+}
