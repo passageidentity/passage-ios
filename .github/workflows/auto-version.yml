@@ -1,23 +1,47 @@
 name: Auto Bump Version
+
 on:
   push:
     branches:
       - PSG-1550-testing
-  # pull_request:
-  #   branches:
-  #     - main
 
 jobs:
   bump:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout action is required
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: "12"
-      - name: Bump Version
+      - name: Bump Versions
         uses: michmich112/version-bumper@master
         with:
-          options-file: "./auto-version-options.json"
+          scheme: org_semantic
+          username: Blayne
+          email: blayne.bayer@passage.id
+          version-file: "./Sources/Passage/Resources/settings.json"
+          files: >
+            [
+              "./Sources/Passage/Resources/settings.json"
+            ]
+          rules: >
+            [{
+              "trigger":"commit",
+              "branch": "PSG-1550-testing",
+              "suffix": "-${GITHUB_SHA}",
+              "tag": false
+            },{
+              "trigger": "pull-request",
+              "destBranch": "main",
+              "suffix": "-${GITHUB_SHA}",
+              "tag": false
+            }, {
+              "trigger":"commit",
+              "branch":"release",
+              "bump":"major",
+              "tag": true,
+              "reset":["minor","build"]
+            }]'
           github-token: ${{ secrets.GITHUB_TOKEN }}
