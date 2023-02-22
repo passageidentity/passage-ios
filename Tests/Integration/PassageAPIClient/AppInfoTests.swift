@@ -24,7 +24,6 @@ final class AppInfoTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared.appInfo()
-            XCTAssertTrue(false)
             XCTAssertEqual(response, appInfoValid)
             
         } catch {
