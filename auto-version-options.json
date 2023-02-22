@@ -1,6 +1,6 @@
 {
   "scheme": "org_semantic",
-  "version-file": "./Sources/Passage/Resources/settings.json",
+  "versionFile": "./Sources/Passage/Resources/settings.json",
   "files": ["./Sources/Passage/Resources/settings.json"],
   "rules": [
     {
