@@ -41,16 +41,25 @@ jobs:
           echo "${{ steps.nexttag.outputs.v_patch}}"
           echo "Branch: ${{ env.BRANCH }}"
           echo "{\"version\": \"${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}\"}"
+      - name: Determine new version
+        id: newversion
+        run: |
+          echo "::set-output branch=${GITHUB_REF_NAME}"
+          echo "::set-output version=${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}"
+      - name: echo newversion
+        run: |
+          echo "branch: ${{ steps.newversion.outputs.branch}}"
+          echo "version: ${{ steps.newversion.outputs.version}}"
       - name: Update version
         id: update-settings-version
         uses: jsdaniell/create-json@v1.2.2
         with:
           name: "settings.json"
           dir: "./Sources/Passage/Resources/"
-          json: '{"version": "${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}"}'
+          json: '{"version": "${{ steps.newversion.outputs.version }}"}'
       - name: Commit & Push changes
         uses: actions-js/push@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: "Updated version"
-          branch: $GITHUB_REF_NAME
+          branch: "${{ steps.newversion.outputs.branch }}"
