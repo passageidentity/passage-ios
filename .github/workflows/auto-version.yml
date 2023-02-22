@@ -19,6 +19,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: "12"
+      - name: Print SHA
+        run: |
+          echo "SHA: ${GITHUB_SHA}"
       - name: Bump Version
         uses: michmich112/version-bumper@master
         with:
