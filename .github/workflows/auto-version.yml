@@ -8,7 +8,7 @@ on:
   #     - main
 
 env:
-  BUMP_SUFFIX: ${GITHUB_SHA}
+  BUMP_SUFFIX: "testing"
 
 jobs:
   bump:
