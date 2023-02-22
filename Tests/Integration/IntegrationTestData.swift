@@ -75,6 +75,21 @@ let appInfoInvalid = AppInfo(
     public_signup: true
 )
 
+let appInfoRefreshToken = AppInfo(
+    id: "uFZlFit7nglPuzcYRVesCUBZ",
+    ephemeral: false,
+    name: "passage-ios uat refresh tokens",
+    redirect_url: "/dashboard",
+    login_url: "/",
+    allowed_identifier: "both",
+    required_identifier: "both",
+    auth_origin: "http://localhost:4173",
+    require_email_verification: false,
+    require_identifier_verification: false,
+    session_timeout_length: 5,
+    public_signup: true
+)
+
 
 
 
