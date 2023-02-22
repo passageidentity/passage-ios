@@ -7,8 +7,8 @@ on:
   #   branches:
   #     - main
 
-env:
-  BRANCH: ${GITHUB_REF_NAME}
+# env:
+#   BRANCH: ${GITHUB_REF_NAME}
 
 jobs:
   bump:
@@ -50,6 +50,8 @@ jobs:
           json: '{"version": "${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}"}'
       - name: Commit & Push changes
         uses: actions-js/push@master
+        env:
+          BRANCH: "${GITHUB_REF_NAME}"
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           message: "Updated version"
