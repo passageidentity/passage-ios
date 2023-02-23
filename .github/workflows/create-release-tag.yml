@@ -1,4 +1,4 @@
-name: Release passage-ios
+name: Create passage-ios release tag
 on:
   workflow_dispatch:
     inputs:
@@ -77,6 +77,11 @@ jobs:
         with:
           commit_message: "Generated and Updated Version to ${{ steps.newversion.outputs.version }}"
 
+      - uses: actions-ecosystem/action-push-tag@v1
+        with:
+          tag: "v${{ steps.newversion.outputs.version }}"
+          message: "Push tag for new major release v${{ steps.newversion.outputs.version }}"
+
   bump-minor:
     needs: build-documentation
     if: ${{ github.event.inputs.release-type }} == 'minor'
@@ -111,6 +116,11 @@ jobs:
         with:
           commit_message: "Generated and Updated Version to ${{ steps.newversion.outputs.version }}"
 
+      - uses: actions-ecosystem/action-push-tag@v1
+        with:
+          tag: "v${{ steps.newversion.outputs.version }}"
+          message: "Push tag for new minor release v${{ steps.newversion.outputs.version }}"
+
   bump-patch:
     needs: build-documentation
     if: ${{ github.event.inputs.release-type }} == 'patch'
@@ -144,3 +154,8 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Generated and Updated Version to ${{ steps.newversion.outputs.version }}"
+
+      - uses: actions-ecosystem/action-push-tag@v1
+        with:
+          tag: "v${{ steps.newversion.outputs.version }}"
+          message: "Push tag for new patch release v${{ steps.newversion.outputs.version }}"
