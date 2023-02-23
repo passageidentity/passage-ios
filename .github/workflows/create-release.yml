@@ -173,16 +173,6 @@ jobs:
       - name: Create Documentation
         run: xcodebuild docbuild -scheme Passage -destination generic/platform=iOS  OTHER_DOCC_FLAGS="--transform-for-static-hosting --output-path docs --hosting-base-path passage-ios"
 
-      - name: Generate doccarchive
-        run: xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iOS
-
-      - name: Create doc archive
-        run: |
-          pushd tmpdocs/Build/Products/Debug-iphoneos
-          zip -r $OLDPWD/docs/Passage.doccarchive.zip Passage.doccarchive
-          popd
-          rm -rf tmpdocs
-
       - uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
@@ -201,6 +191,62 @@ jobs:
           commit_message: "Generated and Updated Documentation for ${{ needs.determine-next-versions.outputs.next-patch }}"
           branch: ${{needs.determine-next-versions.outputs.branch-patch}}
 
+  build-doc-archive:
+    name: Build Documentation
+    runs-on: macos-latest
+    needs: [determine-next-versions, create-release-branch, bump-version]
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+
+    steps:
+      - name: Check out code - major release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'major' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-major}}
+
+      - name: Check out code - minor release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'minor' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-minor}}
+
+      - name: Check out code - patch release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'patch' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-patch}}
+
+      - name: Generate doccarchive
+        run: xcodebuild docbuild -scheme Passage -derivedDataPath ./tmpdocs -destination generic/platform=iOS
+
+      - name: Create doc archive
+        run: |
+          pushd tmpdocs/Build/Products/Debug-iphoneos
+          zip -r $OLDPWD/docs/Passage.doccarchive.zip Passage.doccarchive
+          popd
+          rm -rf tmpdocs
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ github.event.inputs.release-type == 'major' }}
+        with:
+          commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-major }}"
+          branch: ${{needs.determine-next-versions.outputs.branch-major}}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ github.event.inputs.release-type == 'minor' }}
+        with:
+          commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-minor }}"
+          branch: ${{needs.determine-next-versions.outputs.branch-minor}}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        if: ${{ github.event.inputs.release-type == 'patch' }}
+        with:
+          commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-patch }}"
+          branch: ${{needs.determine-next-versions.outputs.branch-patch}}
+
   tag-and-create-release:
     name: Tag Release
     runs-on: ubuntu-latest
@@ -210,6 +256,7 @@ jobs:
         create-release-branch,
         bump-version,
         build-documentation,
+        build-doc-archive,
       ]
 
     steps:
@@ -285,6 +332,7 @@ jobs:
         create-release-branch,
         bump-version,
         build-documentation,
+        build-doc-archive,
         tag-and-create-release,
       ]
 
