@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name             = 'Passage'
-    s.version          = '0.2.0'
+    s.version          = ENV['LIB_VERSION'] || '0.2.0' #fallback to major version
     s.summary          = 'Use Passage Authentication in your iOS application'
     s.homepage         = 'https://github.com/passageidentity/passage-ios'
     s.license          = { :type => 'MIT', :file => 'LICENSE.md' }

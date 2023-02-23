@@ -124,19 +124,22 @@ jobs:
           dir: "./Sources/Passage/Resources/"
           json: "{\n\t\"version\": \"${{ needs.determine-next-versions.outputs.next-patch }}\"\n}"
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit major version change
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
           commit_message: "Generated and Updated Major Version to ${{ needs.determine-next-versions.outputs.next-major }}"
           branch: ${{needs.determine-next-versions.outputs.branch-major}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit minor version change
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'minor' }}
         with:
           commit_message: "Generated and Updated Minor Version to ${{ needs.determine-next-versions.outputs.next-minor }}"
           branch: ${{needs.determine-next-versions.outputs.branch-minor}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit patch version change
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'patch' }}
         with:
           commit_message: "Generated and Updated Patch Version to ${{ needs.determine-next-versions.outputs.next-patch }}"
@@ -173,26 +176,29 @@ jobs:
       - name: Create Documentation
         run: xcodebuild docbuild -scheme Passage -destination generic/platform=iOS  OTHER_DOCC_FLAGS="--transform-for-static-hosting --output-path docs --hosting-base-path passage-ios"
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit major documentation updates
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
           commit_message: "Generated and Updated Documentation for ${{ needs.determine-next-versions.outputs.next-major }}"
           branch: ${{needs.determine-next-versions.outputs.branch-major}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit minor documentation updates
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'minor' }}
         with:
           commit_message: "Generated and Updated Documentation for ${{ needs.determine-next-versions.outputs.next-minor }}"
           branch: ${{needs.determine-next-versions.outputs.branch-minor}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit patch documentation updates
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'patch' }}
         with:
           commit_message: "Generated and Updated Documentation for ${{ needs.determine-next-versions.outputs.next-patch }}"
           branch: ${{needs.determine-next-versions.outputs.branch-patch}}
 
   build-doc-archive:
-    name: Build Documentation
+    name: Build Documentation Archive
     runs-on: macos-latest
     needs:
       [
@@ -235,19 +241,22 @@ jobs:
           popd
           rm -rf tmpdocs
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit major doc archive update
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
           commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-major }}"
           branch: ${{needs.determine-next-versions.outputs.branch-major}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit minor doc archive update
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'minor' }}
         with:
           commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-minor }}"
           branch: ${{needs.determine-next-versions.outputs.branch-minor}}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit patch doc archive update
+        uses: stefanzweifel/git-auto-commit-action@v4
         if: ${{ github.event.inputs.release-type == 'patch' }}
         with:
           commit_message: "Generated and Updated Documentation Archive for ${{ needs.determine-next-versions.outputs.next-patch }}"
@@ -320,7 +329,7 @@ jobs:
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-major }}"
           generateReleaseNotes: true
-          draft: true
+          draft: false
 
       - name: Create Minor Release
         uses: ncipollo/release-action@v1
@@ -328,7 +337,7 @@ jobs:
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-minor }}"
           generateReleaseNotes: true
-          draft: true
+          draft: false
 
       - name: Create Patch Release
         uses: ncipollo/release-action@v1
@@ -336,7 +345,75 @@ jobs:
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-patch }}"
           generateReleaseNotes: true
-          draft: true
+          draft: false
+
+  publish-cocoapod:
+    name: Publish Cocoapod
+    runs-on: macos-latest
+    needs:
+      [
+        determine-next-versions,
+        create-release-branch,
+        bump-version,
+        build-documentation,
+        build-doc-archive,
+        tag-and-create-release,
+      ]
+
+    steps:
+      - name: Check out code - major release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'major' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-major}}
+
+      - name: Check out code - minor release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'minor' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-minor}}
+
+      - name: Check out code - patch release
+        uses: actions/checkout@v3
+        if: ${{ github.event.inputs.release-type == 'patch' }}
+        with:
+          ref: ${{needs.determine-next-versions.outputs.branch-patch}}
+
+      - name: Install Cocoapods
+        run: gem install cocoapods
+
+      - name: Deploy Major to Cocoapds
+        if: ${{ github.event.inputs.release-type == 'major' }}
+        run: |
+          set -eo pipefail
+          export LIB_VERSION=${{ needs.determine-next-versions.outputs.next-major }}
+          echo "version: ${LIB_VERSION}"
+          pod lib lint --allow-warnings
+          pod trunk push --alow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+
+      - name: Deploy Minor to Cocoapds
+        if: ${{ github.event.inputs.release-type == 'minor' }}
+        run: |
+          set -eo pipefail
+          export LIB_VERSION=${{ needs.determine-next-versions.outputs.next-minor }}
+          echo "version: ${LIB_VERSION}"
+          pod lib lint --allow-warnings
+          pod trunk push --alow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+
+      - name: Deploy Patch to Cocoapds
+        if: ${{ github.event.inputs.release-type == 'patch' }}
+        run: |
+          set -eo pipefail
+          export LIB_VERSION=${{ needs.determine-next-versions.outputs.next-patch }}
+          echo "version: ${LIB_VERSION}"
+          pod lib lint --allow-warnings
+          pod trunk push --alow-warnings
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
 
   create-pull-request:
     name: Create Pull Request
@@ -349,6 +426,7 @@ jobs:
         build-documentation,
         build-doc-archive,
         tag-and-create-release,
+        publish-cocoapod,
       ]
 
     steps:
