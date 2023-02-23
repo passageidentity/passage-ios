@@ -1,7 +1,7 @@
-name: integration tests passage-ios
+name: Test Pull Request
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -10,6 +10,16 @@ env:
   MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
 
 jobs:
+  unit-test-iOS-16:
+    name: Build and Unit Test iOS 16
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Test iOS 16.2
+        run: xcodebuild test -scheme Passage -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro"
+
   integration-test-iOS-16:
     name: Build and Integration Tests iOS 16
     runs-on: macos-latest

@@ -1,0 +1,39 @@
+name: Bump version on push to main
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    needs: [unit-test-iOS-16, integration-test-iOS-16]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get Previous Tag
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 0.0.0
+
+      - name: Configure Branch and new Version
+        id: newversion
+        run: |
+          echo "version=${{ steps.previoustag.outputs.tag }}-${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Update version
+        id: update-settings-version
+        uses: jsdaniell/create-json@v1.2.2
+        with:
+          name: "settings.json"
+          dir: "./Sources/Passage/Resources/"
+          json: "{\n    \"version\": \"${{ steps.newversion.outputs.version }}\"\n}"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Generated and Updated Version to ${{ steps.newversion.outputs.version }}"
