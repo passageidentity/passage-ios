@@ -20,9 +20,9 @@ jobs:
       next-major: ${{ steps.nexttag.outputs.major }}
       next-minor: ${{ steps.nexttag.outputs.minor }}
       next-patch: ${{ steps.nexttag.outputs.patch }}
-      branch-major: ${{ steps.branchnames.outputs.major }}
-      branch-minor: ${{ steps.branchnames.outputs.minor }}
-      branch-patch: ${{ steps.branchnames.outputs.patch }}
+      branch-major: ${{ steps.branchnames.outputs.major-branch }}
+      branch-minor: ${{ steps.branchnames.outputs.minor-branch }}
+      branch-patch: ${{ steps.branchnames.outputs.patch-branch }}
 
     steps:
       - name: check out code
