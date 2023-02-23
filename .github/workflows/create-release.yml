@@ -49,7 +49,7 @@ jobs:
           echo "minor-branch=release-minor-v${{ steps.nexttag.outputs.minor }}" >> $GITHUB_OUTPUT
           echo "patch-branch=release-patch-v${{ steps.nexttag.outputs.patch }}" >> $GITHUB_OUTPUT
 
-  create-relelase-branch:
+  create-release-branch:
     name: Create Release Branch
     runs-on: ubuntu-latest
     needs: determine-next-versions
