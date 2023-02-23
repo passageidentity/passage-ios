@@ -11,4 +11,5 @@ Pod::Spec.new do |s|
     s.source_files = 'Sources/Passage/**/*'
     s.exclude_files = ['Sources/Passage/Passage.docc/**/*', 'docs']
     s.dependency 'SwiftKeychainWrapper'
+    s.resources = "Sources/Passage/Resources/settings.json"
 end
