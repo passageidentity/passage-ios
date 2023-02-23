@@ -284,26 +284,35 @@ jobs:
         with:
           ref: ${{needs.determine-next-versions.outputs.branch-patch}}
 
-      - name: Tag Major Release
-        uses: thejeff77/action-push-tag@v1.0.0
+      - name: Tag Major
         if: ${{ github.event.inputs.release-type == 'major' }}
-        with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-major }}"
-          message: "Push tag for new major release v${{ needs.determine-next-versions.outputs.next-major }}"
+        run: |
+          tag='v${{ needs.determine-next-versions.outputs.next-major }}'
+          message='Push tag for new major release v${{ needs.determine-next-versions.outputs.next-major }}'
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a "${tag}" -m "${message}"
+          git push origin "${tag}"
 
-      - name: Tag Minor Release
-        uses: thejeff77/action-push-tag@v1.0.0
+      - name: Tag Minor
         if: ${{ github.event.inputs.release-type == 'minor' }}
-        with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-minor }}"
-          message: "Push tag for new major release v${{ needs.determine-next-versions.outputs.next-minor }}"
+        run: |
+          tag='v${{ needs.determine-next-versions.outputs.next-minor }}'
+          message='Push tag for new minor release v${{ needs.determine-next-versions.outputs.next-minor }}'
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a "${tag}" -m "${message}"
+          git push origin "${tag}"
 
-      - name: Tag Patch Release
-        uses: thejeff77/action-push-tag@v1.0.0
+      - name: Tag Patch
         if: ${{ github.event.inputs.release-type == 'patch' }}
-        with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-patch }}"
-          message: "Push tag for new major release v${{ needs.determine-next-versions.outputs.next-patch }}"
+        run: |
+          tag='v${{ needs.determine-next-versions.outputs.next-patch }}'
+          message='Push tag for new patch release v${{ needs.determine-next-versions.outputs.next-patch }}'
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a "${tag}" -m "${message}"
+          git push origin "${tag}"
 
       - name: Create Major Release
         uses: ncipollo/release-action@v1
