@@ -232,21 +232,21 @@ jobs:
           ref: ${{needs.determine-next-versions.outputs.branch-patch}}
 
       - name: Tag Major Release
-        uses: actions-ecosystem/action-push-tag@v1
+        uses: thejeff77/action-push-tag@v1.0.0
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-major }}"
           message: "Push tag for new major release v${{ needs.determine-next-versions.outputs.next-major }}"
 
       - name: Tag Minor Release
-        uses: actions-ecosystem/action-push-tag@v1
+        uses: thejeff77/action-push-tag@v1.0.0
         if: ${{ github.event.inputs.release-type == 'minor' }}
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-minor }}"
           message: "Push tag for new major release v${{ needs.determine-next-versions.outputs.next-minor }}"
 
       - name: Tag Patch Release
-        uses: actions-ecosystem/action-push-tag@v1
+        uses: thejeff77/action-push-tag@v1.0.0
         if: ${{ github.event.inputs.release-type == 'patch' }}
         with:
           tag: "v${{ needs.determine-next-versions.outputs.next-patch }}"
