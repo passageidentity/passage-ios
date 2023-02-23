@@ -1,9 +1,6 @@
 name: Bump version on push to main
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   bump:
