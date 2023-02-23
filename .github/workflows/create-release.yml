@@ -194,7 +194,13 @@ jobs:
   build-doc-archive:
     name: Build Documentation
     runs-on: macos-latest
-    needs: [determine-next-versions, create-release-branch, bump-version]
+    needs:
+      [
+        determine-next-versions,
+        create-release-branch,
+        bump-version,
+        build-documentation,
+      ]
 
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
