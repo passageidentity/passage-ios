@@ -8,7 +8,6 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
-    needs: [unit-test-iOS-16, integration-test-iOS-16]
 
     steps:
       - uses: actions/checkout@v2
