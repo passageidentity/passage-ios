@@ -327,7 +327,7 @@ jobs:
         uses: ncipollo/release-action@v1
         if: ${{ github.event.inputs.release-type == 'major' }}
         with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-major }}"
+          tag: "${{ needs.determine-next-versions.outputs.next-major }}"
           generateReleaseNotes: true
           draft: false
 
@@ -335,7 +335,7 @@ jobs:
         uses: ncipollo/release-action@v1
         if: ${{ github.event.inputs.release-type == 'minor' }}
         with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-minor }}"
+          tag: "${{ needs.determine-next-versions.outputs.next-minor }}"
           generateReleaseNotes: true
           draft: false
 
@@ -343,7 +343,7 @@ jobs:
         uses: ncipollo/release-action@v1
         if: ${{ github.event.inputs.release-type == 'patch' }}
         with:
-          tag: "v${{ needs.determine-next-versions.outputs.next-patch }}"
+          tag: "${{ needs.determine-next-versions.outputs.next-patch }}"
           generateReleaseNotes: true
           draft: false
 
