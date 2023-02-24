@@ -58,6 +58,7 @@ internal class PassageSettings : PassageAuthSettings {
             }
         }
         
+        #if SWIFT_PACKAGE
         do {
             let settingsUrl = Bundle.module.url(forResource: "settings", withExtension: "json")
             let settingsData = try Data(contentsOf: settingsUrl!)
@@ -67,6 +68,9 @@ internal class PassageSettings : PassageAuthSettings {
         } catch {
             version = "unknown"
         }
+        #else
+        self.version = "1.0.0"
+        #endif
     }
     
     
