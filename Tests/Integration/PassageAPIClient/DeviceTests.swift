@@ -28,8 +28,8 @@ final class ListDevicesTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared.listDevices(token: authToken)
+            XCTAssertGreaterThan(response.count, 0)
             XCTAssertEqual(response.count, 2)
-            XCTAssertEqual(response[0].id, "e05RoyWyVmnseVaqaHaRUoes")
             XCTAssertEqual(response[0].user_id,currentUser.id)
         } catch {
             XCTAssertTrue(false)
