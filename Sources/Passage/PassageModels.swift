@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by blayne bayer on 8/31/22.
-//
-
 import Foundation
 
 /// The authentication result containing the users tokens and redirect url
@@ -148,6 +141,15 @@ public struct AppInfo : Codable, Equatable {
 public struct MagicLink : Codable {
     /// id of the magic link
     public var id: String
+}
+
+/// Describes a one time passcode
+public struct OneTimePasscode : Codable {
+    /// id of the one time passcode
+    public let id: String
+    enum CodingKeys: String, CodingKey {
+        case id = "otp_id"
+    }
 }
 
 /// Information about a registered device
