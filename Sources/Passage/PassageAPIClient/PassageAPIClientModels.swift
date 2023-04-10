@@ -1,18 +1,9 @@
-//
-//  PassageAPIClientModels.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/23/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 /// A respsonse struct for the app info request, contains a root object of type ``AppInfo``
 internal struct AppInfoResponse : Codable {
     
     /// Root element of the response of type ``AppInfo``
     public var app: AppInfo
 }
-
 
 /// Details of the Public Key
 internal struct WebauthnLoginStartResponseHandshakeChallengePublicKey : Codable {
@@ -129,11 +120,13 @@ internal struct ActivateMagicLinkResponse : Codable {
     public var auth_result: AuthResult
 }
 
+internal struct ActivateOneTimePasscodeResponse : Codable {
+    public var auth_result: AuthResult
+}
 
 internal struct CurrentUserResponse : Codable {
     public var user: PassageUserDetails
 }
-
 
 internal struct ListDevicesResponse : Codable {
     public var devices: [DeviceInfo]
@@ -158,5 +151,3 @@ internal struct GetUserResponse : Codable {
 internal struct RefreshResponse : Codable {
     public var auth_result: AuthResult
 }
-
-

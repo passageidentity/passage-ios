@@ -75,6 +75,24 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
+    func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
+        guard identifier == "registered-test-user@passage.id" else {
+            throw PassageError.unknown
+        }
+        return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
+    }
+    
+    func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
+        guard identifier == "unregistered-test-user@passage.id" else {
+            throw PassageError.userAlreadyExists
+        }
+        return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
+    }
+    
+    func activateOneTimePasscode(otp: String, otpId: String) async throws -> Passage.AuthResult {
+        throw PassageError.unknown
+    }
+    
     func currentUser(token: String) async throws -> Passage.PassageUserDetails {
         throw PassageError.unknown
     }

@@ -1,11 +1,3 @@
-//
-//  self.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/9/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 import AuthenticationServices
 import os
 
@@ -628,7 +620,6 @@ public class PassageAuth {
             throw PassageError.unknown
         }
     }
-        
     
     /// Sign out the current user's session
     ///
@@ -795,6 +786,65 @@ public class PassageAuth {
             throw PassageError.unknown
         }
     }
+    
+    /// Creates and sends a one time passcode to the user. The user will receive an email or text to complete the registration.
+    ///
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public static func newRegisterOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        do {
+            let oneTimePasscode = try await PassageAPIClient.shared.sendRegisterOneTimePasscode(identifier: identifier, language: language)
+            return oneTimePasscode
+        } catch {
+            if let error = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: error)
+            }
+            throw error
+        }
+    }
+    
+    /// Creates and sends a one time passcode to login the user. The user will receive an email or text to complete the login.
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public static func newLoginOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        do {
+            let oneTimePasscode = try await PassageAPIClient.shared.sendLoginOneTimePasscode(identifier: identifier, language: language)
+            return oneTimePasscode
+        } catch {
+            if let error = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: error)
+            }
+            throw error
+        }
+    }
+    
+    /// Completes a one time passcode login workflow by activating the one time passcode.
+    ///
+    /// Used to activate either a login or registration one time passcode.
+    ///
+    /// - Parameters:
+    ///   - otp: The user's one time passcode
+    ///   - otpId: The one time passcode id
+    /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public static func oneTimePasscodeActivate(otp: String, otpId: String) async throws -> AuthResult {
+        do {
+            let authResult = try await PassageAPIClient.shared.activateOneTimePasscode(otp: otp, otpId: otpId)
+            return authResult
+        } catch {
+            if let error = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: error)
+            }
+            throw error
+        }
+    }
+    
            
     /// This method fetches the user by the specified token.
     /// - Parameter token: an auth token from the AuthResult object

@@ -1,12 +1,3 @@
-//
-//  PassageAPIClient.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/23/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
-import Foundation
 import AuthenticationServices
 import os
 
@@ -357,6 +348,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - path: optional path to append to the redirect url
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
+    /// - Throws: ``PassageAPIError``
     internal func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
         let url = try self.appUrl(path: "register/magic-link/")
         
@@ -400,7 +392,6 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         return magicLinkStatusResponse.auth_result
     }
     
-    
     /// Active a magic link
     /// - Parameter magicLink: The magic link to activate
     /// - Returns: ``AuthResult``
@@ -419,6 +410,83 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let activateMagicLinkResponse = try JSONDecoder().decode(ActivateMagicLinkResponse.self, from: responseData)
         
         return activateMagicLinkResponse.auth_result
+    }
+    
+    /// Send a new login one time passcode to the user's email or phone
+    /// - Parameters:
+    ///   - identifier: The user's email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``
+    func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
+        let url = try appUrl(path: "login/otp/")
+        let request = buildRequest(url: url, method: "POST")
+        
+        var jsonObject = ["identifier": identifier]
+        
+        if ( language != nil) {
+            jsonObject["language"] = language
+        }
+        
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+                
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+
+        try assertValidResponse(response: response, responseData: responseData)
+        
+        let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
+        
+        return oneTimePasscode
+    }
+    
+    /// Send a new registration one time passcode to the users email or phone
+    /// - Parameters:
+    ///   - identifier: The user's email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``
+    func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
+        let url = try appUrl(path: "register/otp/")
+        
+        let request = buildRequest(url: url, method: "POST")
+        
+        var jsonObject = ["identifier": identifier]
+
+        if ( language != nil) {
+            jsonObject["language"] = language
+        }
+        
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+                
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+
+        try assertValidResponse(response: response,responseData: responseData, successStatusCode: 201)
+        
+        let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
+        
+        return oneTimePasscode
+    }
+    
+    /// Active a one time passcode
+    /// - Parameters:
+    ///   - otp: The user's one time passcode
+    ///   - otpId: The one time passcode id
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``
+    func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult {
+        let url = try appUrl(path: "otp/activate/")
+        
+        let request = buildRequest(url: url, method: "POST")
+        
+        let data = try JSONSerialization.data(withJSONObject: ["otp": otp, "otp_id": otpId], options: [])
+        
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+                
+        try assertValidResponse(response: response, responseData: responseData)
+        
+        let activateOneTimePasscodeResponse = try JSONDecoder().decode(ActivateOneTimePasscodeResponse.self, from: responseData)
+        
+        return activateOneTimePasscodeResponse.auth_result
     }
     
     /// Get the detail for the current user
