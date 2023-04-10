@@ -1,16 +1,7 @@
-//
-//  PassageErrors.swift
-//  Shiny
-//
-//  Created by Ricky C Padilla on 8/8/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 import Foundation
 
-
 /// Errors thrown from the ASAuthorization Controller
-public enum PassageASAuthorizationError : Error {
+public enum PassageASAuthorizationError: Error {
     case authorizationTypeUnknown
     case canceled
     case credentialRegistration
@@ -38,10 +29,11 @@ public enum PassageError: Error, Equatable {
     case userAlreadyExists
     case userDoesNotExist
     case invalidAppInfo
+    case invalidAuthFallbackMethod
 }
 
 /// Passage Device Errors
-public enum PassageDeviceError : Error {
+public enum PassageDeviceError: Error {
     case notFound
 }
 

@@ -139,17 +139,20 @@ public struct AppInfo: Codable, Equatable {
     
 }
 
+public protocol AuthFallbackResult: Codable {
+    var id: String { get set }
+}
 
 /// Describes a magic link
-public struct MagicLink : Codable {
+public struct MagicLink: AuthFallbackResult {
     /// id of the magic link
     public var id: String
 }
 
 /// Describes a one time passcode
-public struct OneTimePasscode: Codable {
+public struct OneTimePasscode: AuthFallbackResult {
     /// id of the one time passcode
-    public let id: String
+    public var id: String
     enum CodingKeys: String, CodingKey {
         case id = "otp_id"
     }
