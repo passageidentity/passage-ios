@@ -83,57 +83,60 @@ public struct WebauthnDevice : Codable {
 }
 
 /// Struct describing a Passage Application
-public struct AppInfo : Codable, Equatable {
-    
-    /// The id of the Passage Application
-    public var id: String
-    
-    
-    /// If this is an ephemeral app
-    public var ephemeral: Bool
-    
-    
-    /// The name of the Passage Application
-    public var name: String
-    
-    
-    /// The Pasage Application redirect url
-    public var redirect_url: String
-    
-    
-    /// The Login URL of the Passage Application
-    public var login_url: String
-    
-    
+public struct AppInfo: Codable, Equatable {
     /// Allowed identifier (email or phone)
-    public var allowed_identifier: String
-    
-    /// The identifier type that is required
-    public var required_identifier: String
-    
-    
+    public let allowedIdentifier: String
+    /// String representation of which fallback method is set in the Passage Application when Passkeys are not available
+    internal let authFallbackMethodString: String
     /// The Passage Applications auth origin
-    public var auth_origin: String
-    
-    
-    /// Whether the Passage Application requires email verificiation
-    public var require_email_verification: Bool
-    
-    
-    /// Whether the Passage Application required identifier verification when registering
-    public var require_identifier_verification: Bool
-    
-    
-    /// How long is the auth token valid
-    public var session_timeout_length: Int
-
-    //    var user_metadata_schema: [String: String]
-
-    //    var layouts: [String: String]
-    
-    
+    public let authOrigin: String
+    /// If this is an ephemeral app
+    public let ephemeral: Bool
+    /// The id of the Passage Application
+    public let id: String
+    /// The Login URL of the Passage Application
+    public let loginURL: String
+    /// The name of the Passage Application
+    public let name: String
     /// Allow public signup
-    public var public_signup: Bool
+    public let publicSignup: Bool
+    /// The Pasage Application redirect url
+    public let redirectURL: String
+    /// The identifier type that is required
+    public let requiredIdentifier: String
+    /// Whether the Passage Application requires email verificiation
+    public let requireEmailVerification: Bool
+    /// Whether the Passage Application required identifier verification when registering
+    public let requireIdentifierVerification: Bool
+    /// How long is the auth token valid
+    public let sessionTimeoutLength: Int
+
+    enum CodingKeys: String, CodingKey {
+        case allowedIdentifier = "allowed_identifier"
+        case authFallbackMethodString = "auth_fallback_method"
+        case authOrigin = "auth_origin"
+        case ephemeral
+        case id
+        case loginURL = "login_url"
+        case name
+        case publicSignup = "public_signup"
+        case redirectURL = "redirect_url"
+        case requiredIdentifier = "required_identifier"
+        case requireEmailVerification = "require_email_verification"
+        case requireIdentifierVerification = "require_identifier_verification"
+        case sessionTimeoutLength = "session_timeout_length"
+    }
+    
+    public enum AuthFallbackMethod: String {
+        case magicLink = "magic_link"
+        case oneTimePasscode = "otp"
+    }
+    
+    /// Which fallback method is set in the Passage Application when Passkeys are not available
+    public var authFallbackMethod: AuthFallbackMethod? {
+        return AuthFallbackMethod(rawValue: authFallbackMethodString)
+    }
+    
 }
 
 
@@ -144,7 +147,7 @@ public struct MagicLink : Codable {
 }
 
 /// Describes a one time passcode
-public struct OneTimePasscode : Codable {
+public struct OneTimePasscode: Codable {
     /// id of the one time passcode
     public let id: String
     enum CodingKeys: String, CodingKey {
