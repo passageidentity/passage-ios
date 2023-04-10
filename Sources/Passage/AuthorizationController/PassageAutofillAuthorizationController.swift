@@ -45,12 +45,13 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         }
     }
     
-    public func begin(onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)? ) async throws -> Void {
+    public func begin(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)? ) async throws -> Void {
      
         self.onSuccess = onSuccess
         self.onError = onError
         self.onCancel = onCancel
         
+        self.authenticationAnchor = anchor
         self.startResponse = try await PassageAuth.autoFillStart()
         
         let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: PassageSettings.shared.authOrigin!)

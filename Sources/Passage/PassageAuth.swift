@@ -78,7 +78,7 @@ public class PassageAuth {
     ///   - onCancel: function to run if the user cancels the Passkey login
     /// - Returns: Void
     @available(iOS 16.0, *)
-    public func beginAutoFill(onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
+    public func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         self.clearTokens()
 
         func onAutofillSuccess(authResult: AuthResult) -> Void {
@@ -89,7 +89,7 @@ public class PassageAuth {
             }
 
         }
-        try await PassageAutofillAuthorizationController.shared.begin(onSuccess: onAutofillSuccess, onError: onError, onCancel: onCancel)
+        try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onAutofillSuccess, onError: onError, onCancel: onCancel)
 
     }
     
@@ -1184,8 +1184,8 @@ public class PassageAuth {
     ///   - onCancel: function to run if the user cancels the Passkey login
     /// - Returns: Void
     @available(iOS 16.0, *)
-    public static func beginAutoFill(onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
-        try await PassageAutofillAuthorizationController.shared.begin(onSuccess: onSuccess, onError: onError, onCancel: onCancel)
+    public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
+        try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
     }
 
 }
