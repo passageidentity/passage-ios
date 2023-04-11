@@ -474,7 +474,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult {
-        let url = try appUrl(path: "otp/activate/")
+        let url = try appUrl(path: "otp/activate")
         
         let request = buildRequest(url: url, method: "POST")
         
