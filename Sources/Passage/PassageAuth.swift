@@ -441,9 +441,9 @@ public class PassageAuth {
             var authFallbackResult: AuthFallbackResult? = nil
             switch fallbackMethod {
             case .magicLink:
-                authFallbackResult = try? await PassageAuth.newRegisterMagicLink(identifier: identifier)
+                authFallbackResult = try await PassageAuth.newRegisterMagicLink(identifier: identifier)
             case .oneTimePasscode:
-                authFallbackResult = try? await PassageAuth.newRegisterOneTimePasscode(identifier: identifier)
+                authFallbackResult = try await PassageAuth.newRegisterOneTimePasscode(identifier: identifier)
             case .none:
                 throw PassageError.authFallbacksNotSupported
             }
@@ -493,9 +493,9 @@ public class PassageAuth {
         var authFallbackResult: AuthFallbackResult? = nil
         switch fallbackMethod {
         case .magicLink:
-            authFallbackResult = try? await newLoginMagicLink(identifier: identifier)
+            authFallbackResult = try await newLoginMagicLink(identifier: identifier)
         case .oneTimePasscode:
-            authFallbackResult = try? await newLoginOneTimePasscode(identifier: identifier)
+            authFallbackResult = try await newLoginOneTimePasscode(identifier: identifier)
         case .none:
             throw PassageError.authFallbacksNotSupported
         }

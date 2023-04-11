@@ -432,7 +432,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
                 
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
-        try assertValidResponse(response: response, responseData: responseData)
+        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 201)
         
         let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
         
