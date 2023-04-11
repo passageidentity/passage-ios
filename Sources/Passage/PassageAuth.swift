@@ -51,10 +51,10 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     public func register(identifier: String) async throws -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
-        self.clearTokens()
+        clearTokens()
         let result = try await PassageAuth.register(identifier: identifier)
         if let authResult = result.authResult {
-            self.setTokensFromAuthResult(authResult: authResult)
+            setTokensFromAuthResult(authResult: authResult)
         }
         return result
     }
@@ -85,12 +85,12 @@ public class PassageAuth {
 
     }
     
-    /// Login a user with either a Passkey or send a magic link.
+    /// Login a user with either a Passkey or use a fallback method.
     ///
-    /// If the user is authenticated and not sent a magic link, the tokens will be stored in the tokenStore
+    /// If the user is authenticated and not sent a magic link or one time passcode, the tokens will be stored in the tokenStore
     /// on the instance.
     ///
-    /// NOTE: Passkey login is only available for iOS 16+, earlier versions of iOS will send a magic link.
+    /// NOTE: Passkey login is only available for iOS 16+, earlier versions of iOS will send magic link or one time passcode.
     ///
     /// iOS 16+
     /// On iOS 16+ this method will prompt a user to login to your app using a Passkey. This function handles the
@@ -99,28 +99,24 @@ public class PassageAuth {
     /// If the user does not have a Passkey or they cancel the Passkey prompt and an identifer is passed in
     /// a magic link will be sent.
     ///
-    /// If no identifier is passed in, then this method will not attempt to send a magic link and simply return with nil for
-    /// both the authResult and magicLink props of the result.
-    ///
     /// iOS 14 and 15
     ///
-    /// This method will send a magic link to the user (either email or text depending on identifier).  If no identifier is
-    /// is passed in, this method will throw PassageLoginError.identifierRequired
+    /// This method will send a magic link or one time passcode to the user (either email or text depending on identifier).
     ///
-    /// Returns a tuple (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
+    /// Returns a tuple (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     ///
-    /// If an authResult is returned the user was logged in.  If a magicLink is returned the user was sent a magic link, and if neither
-    /// are returned, then the user was not logged in and a magic link was not set.
+    /// If an authResult is returned the user was logged in.  If an authFallbackResult is returned the user was sent a magic link or a one time passcode,
+    /// and if neither are returned, then the user was not logged in and no fallback method was used.
     ///
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
-    /// - Returns:  (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
-    /// - Throws: ``PasageLoginError``, ``PassageAPIError``
-    public func login(identifier: String) async throws -> (authResult: AuthResult?, magicLink: MagicLink?) {
-        self.clearTokens()
+    /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
+    /// - Throws: ``PasageLoginError``, ``PassageAPIError``, ``PassageError``
+    public func login(identifier: String) async throws -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
+        clearTokens()
         let result = try await PassageAuth.login(identifier: identifier)
         if let authResult = result.authResult {
-            self.setTokensFromAuthResult(authResult: authResult)
+            setTokensFromAuthResult(authResult: authResult)
         }
         return result
     }
@@ -448,6 +444,8 @@ public class PassageAuth {
                 authFallbackResult = try? await PassageAuth.newRegisterMagicLink(identifier: identifier)
             case .oneTimePasscode:
                 authFallbackResult = try? await PassageAuth.newRegisterOneTimePasscode(identifier: identifier)
+            case .none:
+                throw PassageError.authFallbacksNotSupported
             }
             return (nil, authFallbackResult)
         }
@@ -455,9 +453,9 @@ public class PassageAuth {
         return (authResult, nil)
     }
     
-    /// Login a user with either a Passkey or send a magic link.
+    /// Login a user with either a Passkey or use a fallback method.
     ///
-    /// NOTE: Passkey login is only available for iOS 16+, earlier versions of iOS will send a magic link.
+    /// NOTE: Passkey login is only available for iOS 16+, earlier versions of iOS will send magic link or one time passcode.
     ///
     /// iOS 16+
     /// On iOS 16+ this method will prompt a user to login to your app using a Passkey. This function handles the
@@ -466,73 +464,42 @@ public class PassageAuth {
     /// If the user does not have a Passkey or they cancel the Passkey prompt and an identifer is passed in
     /// a magic link will be sent.
     ///
-    /// If no identifier is passed in, then this method will not attempt to send a magic link and simply return with nil for
-    /// both the authResult and magicLink props of the result.
-    ///
     /// iOS 14 and 15
     ///
-    /// This method will send a magic link to the user (either email or text depending on identifier).  If no identifier is
-    /// is passed in, this method will throw PassageLoginError.identifierRequired
+    /// This method will send a magic link or one time passcode to the user (either email or text depending on identifier).
     ///
-    /// Returns a tuple (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
+    /// Returns a tuple (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     ///
-    /// If an authResult is returned the user was logged in.  If a magicLink is returned the user was sent a magic link, and if neither
-    /// are returned, then the user was not logged in and a magic link was not set.
+    /// If an authResult is returned the user was logged in.  If an authFallbackResult is returned the user was sent a magic link or a one time passcode,
+    /// and if neither are returned, then the user was not logged in and no fallback method was used.
     ///
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
-    /// - Returns:  (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
+    /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     /// - Throws: ``PasageLoginError``, ``PassageAPIError``, ``PassageError``
-    public static func login(identifier: String) async throws -> (authResult: AuthResult?, magicLink: MagicLink?) {
-        
-        var authResult: AuthResult?
-        var magicLink: MagicLink?
-            
-        let identifierExists = try await PassageAuth.identifierExists(identifier: identifier)
-
-        guard identifierExists else {
+    public static func login(identifier: String) async throws  -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
+        guard (try? await PassageAuth.identifierExists(identifier: identifier)) == true else {
             throw PassageError.userDoesNotExist
         }
-        
-        // Try passkey login
-
-        if #available(iOS 16.0, *) {
-            do {
-                authResult = try await PassageAuth.loginWithPasskey()
-            }
-            catch (let error as PassageASAuthorizationError)  {
-                switch error {
-                case .canceled:
-                    authResult = nil
-                    break
-                default:
-                    throw error
-                }
-            } catch (let error as PassageAPIError) {
-                try PassageAuth.handlePassageAPIError(error: error)
-            } catch {
-                throw error
-            }
+        if #available(iOS 16.0, *), let authResult = try? await PassageAuth.loginWithPasskey() {
+            return (authResult, nil)
         }
-        
-        if (authResult == nil ) {
-            do {
-                magicLink = try await self.loginWithMagicLink(identifier: identifier)
-            } catch (let error as PassageAPIError) {
-                try PassageAuth.handlePassageAPIError(error: error)
-            } catch {
-                throw error
-            }
+        guard let appInfo = try? await PassageAuth.appInfo() else {
+            throw PassageError.invalidAppInfo
         }
-        
-
-        if (authResult == nil && magicLink == nil) {
-            throw PassageError.unknown
+        guard let fallbackMethod = appInfo.authFallbackMethod else {
+            throw PassageError.invalidAuthFallbackMethod
         }
-        
-        return (authResult: authResult, magicLink: magicLink)
-        
-
+        var authFallbackResult: AuthFallbackResult? = nil
+        switch fallbackMethod {
+        case .magicLink:
+            authFallbackResult = try? await newLoginMagicLink(identifier: identifier)
+        case .oneTimePasscode:
+            authFallbackResult = try? await newLoginOneTimePasscode(identifier: identifier)
+        case .none:
+            throw PassageError.authFallbacksNotSupported
+        }
+        return (nil, authFallbackResult)
     }
     
     

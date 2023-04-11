@@ -111,7 +111,7 @@ public struct AppInfo: Codable, Equatable {
     /// How long is the auth token valid
     public let sessionTimeoutLength: Int
 
-    enum CodingKeys: String, CodingKey {
+    internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
         case authFallbackMethodString = "auth_fallback_method"
         case authOrigin = "auth_origin"
@@ -130,6 +130,7 @@ public struct AppInfo: Codable, Equatable {
     public enum AuthFallbackMethod: String {
         case magicLink = "magic_link"
         case oneTimePasscode = "otp"
+        case none = "none"
     }
     
     /// Which fallback method is set in the Passage Application when Passkeys are not available

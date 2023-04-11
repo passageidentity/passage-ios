@@ -30,6 +30,7 @@ public enum PassageError: Error, Equatable {
     case userDoesNotExist
     case invalidAppInfo
     case invalidAuthFallbackMethod
+    case authFallbacksNotSupported
 }
 
 /// Passage Device Errors

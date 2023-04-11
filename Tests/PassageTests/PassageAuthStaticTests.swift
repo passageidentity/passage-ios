@@ -44,7 +44,7 @@ final class PassageAuthStaticTests: XCTestCase {
         if #available(iOS 16.0, *) {
             XCTAssertTrue(result?.authResult is AuthResult)
         } else {
-            XCTAssertTrue(result?.magicLink is MagicLink)
+            XCTAssertTrue(result?.authFallbackResult is AuthFallbackResult)
         }
     }
     
