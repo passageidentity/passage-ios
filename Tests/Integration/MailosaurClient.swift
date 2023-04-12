@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Kevin Flanagan on 2/16/23.
-//
-
 import Foundation
 import os
 
@@ -47,6 +40,7 @@ internal struct GetMessageResponse: Codable {
 internal struct MessageHTML: Codable {
     public var body: String
     public var links: [MessageLink]
+    public var codes: [MessageCode]
 }
 
 internal struct MessageLink: Codable {
@@ -54,12 +48,15 @@ internal struct MessageLink: Codable {
     public var text: String
 }
 
+internal struct MessageCode: Codable {
+    public var value: String
+}
+
 internal class MailosaurAPIClient {
     // note: this is public information
-    private var serverId = "ncor7c1m"
+    internal static let serverId = "ncor7c1m"
     
     private var apiURL = "https://mailosaur.com/api/messages"
-    
     
     private func appUrl(_ path: String) throws -> URL {
         guard let url = URL(string: apiURL + path) else {
@@ -68,7 +65,7 @@ internal class MailosaurAPIClient {
         return url
     }
     
-    private func authHeader() -> String {
+    private var authHeader: String {
         let apiKey = "api:\(mailosaurAPIKey)".data(using: .utf8)?.base64EncodedString()
         return "Basic: \(apiKey!)"
     }
@@ -76,6 +73,7 @@ internal class MailosaurAPIClient {
     func getMostRecentMagicLink() async throws -> String {
         do{
             let messages = try await listMessages()
+            guard !messages.isEmpty else { return "" }
             let message = try await getMessage(id: messages[0].id)
             let incomingURL = message.html.links[0].href
             let components = NSURLComponents(url: URL(string: incomingURL)!, resolvingAgainstBaseURL: true)
@@ -89,11 +87,24 @@ internal class MailosaurAPIClient {
         }
     }
     
+    func getMostRecentOneTimePasscode() async throws -> String {
+        do{
+            let messages = try await listMessages()
+            guard !messages.isEmpty else { return "" }
+            let message = try await getMessage(id: messages[0].id)
+            let oneTimePasscode = message.html.codes.isEmpty ? "" : message.html.codes[0].value
+            return oneTimePasscode
+        } catch {
+            print(error)
+            return ""
+        }
+    }
+    
     func getMessage(id: String) async throws -> GetMessageResponse {
-        let url = try self.appUrl("/" + id)
+        let url = try appUrl("/" + id)
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
 
-        request.addValue(self.authHeader(), forHTTPHeaderField: "Authorization")
+        request.addValue(authHeader, forHTTPHeaderField: "Authorization")
         
         request.httpMethod = "GET"
         
@@ -104,10 +115,10 @@ internal class MailosaurAPIClient {
     
     func listMessages() async throws -> [ListMessage] {
         do {
-            let url = try self.appUrl("?server=" + serverId)
+            let url = try appUrl("?server=" + MailosaurAPIClient.serverId)
             var request = URLRequest(url: url, cachePolicy: .reloadIgnoringCacheData)
 
-            request.addValue(self.authHeader(), forHTTPHeaderField: "Authorization")
+            request.addValue(authHeader, forHTTPHeaderField: "Authorization")
             
             request.httpMethod = "GET"
             

@@ -108,3 +108,31 @@ let appInfoTest = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000
 )
+
+let otpAppInfoValid = AppInfo(
+    allowedIdentifier: "both",
+    authFallbackMethodString: "otp",
+    authOrigin: "http://localhost:4173",
+    ephemeral: false,
+    id: "pTBeTnbvm1z3U6hznMTD33Es",
+    loginURL: "/",
+    name: "UAT OTP App",
+    publicSignup: true,
+    redirectURL: "/dashboard",
+    requiredIdentifier: "both",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 6000
+)
+
+let otpRegisteredUser = PassageUser(
+    id: "oiySQzEcqEpzxX3yu5cKKRKe",
+    status: "active",
+    email:"authentigator+1681334202.318723@passage.id",
+    email_verified: true,
+    phone: "",
+    phone_verified: false,
+    webauthn: false,
+    user_metadata: nil,
+    webauthn_types: []
+)

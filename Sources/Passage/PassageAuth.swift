@@ -449,7 +449,7 @@ public class PassageAuth {
             }
             return (nil, authFallbackResult)
         }
-        let authResult = try? await PassageAuth.registerWithPasskey(identifier: identifier)
+        let authResult = try await PassageAuth.registerWithPasskey(identifier: identifier)
         return (authResult, nil)
     }
     

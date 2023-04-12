@@ -24,7 +24,7 @@ final class MagicLinkTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let date = Date().timeIntervalSince1970
-            let identifier = "authentigator" + "+" + String(date) + "@passage.id"
+            let identifier = "authentigator+\(date)@passage.id"
             let response = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
             do {
                 _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
@@ -55,10 +55,10 @@ final class MagicLinkTests: XCTestCase {
     }
     
     func testActivateMagicLink() async {
-        do{
+        do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let date = Date().timeIntervalSince1970
-            let identifier = "authentigator" + "+" + String(date) + "@ncor7c1m.mailosaur.net"
+            let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             let response = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
             try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
             let magicLink = try await MailosaurAPIClient().getMostRecentMagicLink()
@@ -72,6 +72,7 @@ final class MagicLinkTests: XCTestCase {
             }
         } catch {
             print(error)
+            XCTAssertTrue(false)
         }
     }
 }

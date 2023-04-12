@@ -25,7 +25,7 @@ final class SessionTests: XCTestCase {
             // Sign in and get tokens
             PassageAPIClient.shared.appId = appInfoRefreshToken.id
             let date = Date().timeIntervalSince1970
-            let identifier = "authentigator" + "+" + String(date) + "@ncor7c1m.mailosaur.net"
+            let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             _ = try await PassageAPIClient.shared.sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
             try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
             let magicLink = try await MailosaurAPIClient().getMostRecentMagicLink()
@@ -40,7 +40,7 @@ final class SessionTests: XCTestCase {
             
             // Sign out the session
             try await PassageAPIClient.shared.signOut(refreshToken: newTokens.refresh_token!)
-            try await Task.sleep(nanoseconds: UInt64(Double(appInfoRefreshToken.session_timeout_length) * Double(NSEC_PER_SEC)))
+            try await Task.sleep(nanoseconds: UInt64(Double(appInfoRefreshToken.sessionTimeoutLength) * Double(NSEC_PER_SEC)))
             do {
                 _ = try await PassageAPIClient.shared.currentUser(token: newTokens.auth_token!)
                 XCTAssertTrue(false) // the above function should throw an unauthenticated exception
