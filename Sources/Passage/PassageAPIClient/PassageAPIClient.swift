@@ -419,7 +419,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``OneTimePasscode``
     /// - Throws: ``PassageAPIError``
     func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
-        let url = try appUrl(path: "login/otp/")
+        let url = try appUrl(path: "login/otp")
         let request = buildRequest(url: url, method: "POST")
         
         var jsonObject = ["identifier": identifier]
@@ -432,7 +432,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
                 
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
-        try assertValidResponse(response: response, responseData: responseData)
+        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 201)
         
         let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
         
@@ -446,7 +446,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``OneTimePasscode``
     /// - Throws: ``PassageAPIError``
     func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
-        let url = try appUrl(path: "register/otp/")
+        let url = try appUrl(path: "register/otp")
         
         let request = buildRequest(url: url, method: "POST")
         
@@ -474,7 +474,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult {
-        let url = try appUrl(path: "otp/activate/")
+        let url = try appUrl(path: "otp/activate")
         
         let request = buildRequest(url: url, method: "POST")
         
