@@ -1,5 +1,5 @@
 
-Copyright (c) 2022 Passage Identity, Inc. <hello@passage.id> (https://passage.id)
+Copyright (c) 2023 Passage Identity, Inc. <hello@passage.id> (https://passage.id)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -32,7 +32,7 @@ Compatile with [Xcode](https://developer.apple.com/xcode/) version 14+.
 
 The Passage-iOS SDK is supported for iOS version 14+. However, Passkeys are only supported on iOS v16+.
 
-| iOS Version 	| Passkey Login 	 | Magic Link Login 	|
+| iOS Version 	| Passkey Login 	 | Passcode & Magic Link Login 	|
 |-------------	|      :----:      |        :----: 	    |
 | v16.x       	|       ✅       	|           ✅        |
 | v15.x     	|        ❌       	|           ✅      	 |
@@ -63,7 +63,7 @@ https://github.com/passageidentity/passage-ios
 Add the following line to your Podfile:
 
 ```
-pod 'Passage', '~> 0.1'
+pod 'Passage', '~> 1.1'
 ```
 Then, run pod install.
 
@@ -71,8 +71,7 @@ For further reference on Cocoapods, check their [official documentation](https:/
 
 
 - Run `pod install`
-  <br>
-  NOTE: This is NOT yet working in Xcode 14 beta on M1 Macs.
+
 
 # Setup Guide
 
