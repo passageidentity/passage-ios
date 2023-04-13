@@ -16,7 +16,7 @@ final class GetUserTests: XCTestCase {
     func testUserFound() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email)
+            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email ?? "")
             XCTAssertEqual(response.id, currentUser.id)
             XCTAssertEqual(response.status, currentUser.status)
             XCTAssertEqual(response.email, currentUser.email)

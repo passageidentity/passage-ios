@@ -36,7 +36,7 @@ final class MagicLinkTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared
-                .sendLoginMagicLink(identifier: registeredUser.email, path: nil, language: nil)
+                .sendLoginMagicLink(identifier: registeredUser.email ?? "", path: nil, language: nil)
             do {
                 _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
                 XCTAssertTrue(false) // the status should error as it is unactivated

@@ -31,7 +31,7 @@ final class OneTimePasscodeTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = otpAppInfoValid.id
             let _ = try await PassageAPIClient.shared
-                .sendLoginOneTimePasscode(identifier: otpRegisteredUser.email, language: nil)
+                .sendLoginOneTimePasscode(identifier: otpRegisteredUser.email ?? "", language: nil)
             XCTAssertTrue(true)
         } catch {
             XCTAssertTrue(false)
