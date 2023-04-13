@@ -27,7 +27,7 @@ final class AppInfoTests: XCTestCase {
     func testAppInfoNotFound() async {
         do {
             PassageAPIClient.shared.appId = appInfoInvalid.id
-            let response = try await PassageAPIClient.shared.appInfo();
+            let _ = try await PassageAPIClient.shared.appInfo();
             XCTAssertFalse(true)
         }
         catch  {

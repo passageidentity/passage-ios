@@ -74,31 +74,22 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         switch authorization.credential {
         case let credentialAssertion as ASAuthorizationPlatformPublicKeyCredentialAssertion:
             Task {
-                guard self.startResponse != nil else {
+                guard startResponse != nil else {
                     throw PassageASAuthorizationError.invalidStartResponse
                 }
-                let loginResult = try await PassageAuth.autoFillFinish(startResponse: self.startResponse!, credentialAssertion: credentialAssertion)
-                if (loginResult.authToken != nil) {
-                    self.isPerformingModalRequest = false
-                    if let onSuccess = self.onSuccess {
-                        onSuccess(loginResult)
-                    }
-                } else {
-                    self.isPerformingModalRequest = false
-                    if let onError = self.onError {
-                        onError(PassageASAuthorizationError.loginFinish)
-                    }
-
+                let loginResult = try await PassageAuth.autoFillFinish(startResponse: startResponse!, credentialAssertion: credentialAssertion)
+                isPerformingModalRequest = false
+                if let onSuccess {
+                    onSuccess(loginResult)
                 }
             }
         default:
-            self.isPerformingModalRequest = false
-            if let onError = self.onError {
+            isPerformingModalRequest = false
+            if let onError = onError {
                 onError(PassageASAuthorizationError.authorizationTypeUnknown)
             }
         }
-        
-        self.isPerformingModalRequest = false
+        isPerformingModalRequest = false
     }
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {

@@ -32,7 +32,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     
     @available(iOS 16.0, *)
     func webauthnRegistrationStart(identifier: String) async throws -> Passage.WebauthnRegisterStartResponse {
-        guard identifier == "unregistered-test-user@passage.id" else {
+        guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
         return testRegisterStartResponse
@@ -54,14 +54,14 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
-        guard identifier == "registered-test-user@passage.id" else {
+        guard identifier == registeredUserEmail else {
             throw PassageError.unknown
         }
         return Passage.MagicLink(id: "TEST_MAGIC_LINK")
     }
     
     func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
-        guard identifier == "unregistered-test-user@passage.id" else {
+        guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
         return Passage.MagicLink(id: "TEST_MAGIC_LINK")
@@ -76,14 +76,14 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
-        guard identifier == "registered-test-user@passage.id" else {
+        guard identifier == registeredUserEmail else {
             throw PassageError.unknown
         }
         return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
     }
     
     func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
-        guard identifier == "unregistered-test-user@passage.id" else {
+        guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
         return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
@@ -118,7 +118,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func getUser(identifier: String) async throws -> Passage.PassageUserInfo {
-        guard identifier == "registered-test-user@passage.id" else {
+        guard identifier == registeredUserEmail else {
             throw PassageError.userDoesNotExist
         }
         return PassageUserInfo(

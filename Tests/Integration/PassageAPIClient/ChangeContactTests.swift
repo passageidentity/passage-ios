@@ -29,7 +29,7 @@ final class ChangeContactTests: XCTestCase {
     func testChangeEmailUnAuthed() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared
+            let _ = try await PassageAPIClient.shared
                 .changeEmail(token: "", newEmail: "blayne.bayer+2@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
             XCTAssertTrue(false)
         } catch {
@@ -63,7 +63,7 @@ final class ChangeContactTests: XCTestCase {
         XCTAssertNotEqual(authToken, "")
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared
+            let _ = try await PassageAPIClient.shared
                 .changePhone(token: authToken, newPhone: "5125874725", magicLinkPath: nil, redirectUrl: nil, language: nil)
             XCTAssertTrue(false)
         } catch {
@@ -83,7 +83,7 @@ final class ChangeContactTests: XCTestCase {
     func testChangePhoneUnAuthed() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared
+            let _ = try await PassageAPIClient.shared
                 .changePhone(token: "", newPhone: "555-555-5555", magicLinkPath: nil, redirectUrl: nil, language: nil)
             XCTAssertTrue(false)
         } catch {
