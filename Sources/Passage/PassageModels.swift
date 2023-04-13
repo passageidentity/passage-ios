@@ -1,84 +1,73 @@
 import Foundation
 
 /// The authentication result containing the users tokens and redirect url
-public struct AuthResult : Codable {
-    /// The users auth_token
-    public var auth_token: String?
-    
-    /// The users refresh_token
-    public var refresh_token: String?
-    
+public struct AuthResult: Codable {
+    /// The user's auth token
+    public let authToken: String
     /// The redirect url after successful authentication
-    public var redirect_url: String?
+    public let redirectURL: String
+    /// The user's refresh token
+    public let refreshToken: String?
+    /// The expiration of the user's refresh token
+    public let refreshTokenExpiration: Int?
+    
+    internal enum CodingKeys: String, CodingKey {
+        case authToken = "auth_token"
+        case redirectURL = "redirect_url"
+        case refreshToken = "refresh_token"
+        case refreshTokenExpiration = "refresh_token_expiration"
+    }
 }
 
-
-/// Details of a Passage User
-public struct PassageUser : Codable, Equatable {
-
-    /// The user's id in the Passage System
-    public var id: String
-    
-    /// User status,
-    public var status: String?
-
-    /// The user's email address
-    public var email: String?
-
-    /// Whether the users email has been verifier or not
-    public var email_verified: Bool
-    
-    /// Users phone number
-    public var phone: String?
-    
-    /// Whether the user's phone number has been verified
-    public var phone_verified: Bool
-    
-    /// Does the user support webauthn
-    public var webauthn: Bool
-    
-    /// Uer meta data schema
-    public var user_metadata: String?
-    
-    /// Types of webauth - platform or passkey
-    public var webauthn_types: [String]?
-    
-}
-
-/// Details about a Passage user
-public struct PassageUserDetails : Codable {
+/// Information about a Passage user
+public struct PassageUserInfo: Codable {
     /// when the user was created
-    public var created_at: String
-    /// when the user was last update
-    public var updated_at: String
-    /// status of the user
-    public var status: String
-    /// the user's unique id
-    public var id: String
+    public let createdAt: String?
     /// user's email address
-    public var email: String
+    public let email: String?
     /// has the user's email been verified
-    public var email_verified: Bool
-    /// user's phone number
-    public var phone: String
-    /// has the user's phone number been verified
-    public var phone_verified: Bool
-    /// does the user support webauthn
-    public var webauthn: Bool
+    public let emailVerified: Bool
+    /// the user's unique id
+    public let id: String
     /// last time the user logged in
-    public var last_login_at: String
+    public let lastLoginAt: String?
     /// number of times the user has logged in
-    public var login_count: Int
-    //    var user_metadata: [String: String]
+    public let loginCount: Int?
+    /// user's phone number
+    public let phone: String?
+    /// has the user's phone number been verified
+    public let phoneVerified: Bool
+    /// status of the user
+    public let status: String
+    /// when the user was last update
+    public let updatedAt: String?
+    /// does the user support webauthn
+    public let webauthn: Bool?
     /// Devices the user has used webauthn on
-    public var webauthn_devices: [WebauthnDevice]
+    public let webauthnDevices: [WebauthnDevice]?
     /// types of webauthn the user has used - passkey or platform
-    public var webauthn_types: [String]
+    public let webauthnTypes: [String]?
+    
+    internal enum CodingKeys: String, CodingKey {
+        case createdAt = "created_at"
+        case email
+        case emailVerified = "email_verified"
+        case id
+        case lastLoginAt = "last_login_at"
+        case loginCount = "login_count"
+        case phone
+        case phoneVerified = "phone_verified"
+        case status
+        case updatedAt = "updated_at"
+        case webauthn
+        case webauthnDevices = "webauthn_devices"
+        case webauthnTypes = "webauthn_types"
+    }
 }
 
 
 /// Devices used with webauthn
-public struct WebauthnDevice : Codable {
+public struct WebauthnDevice: Codable {
     public var id: String
 }
 
@@ -160,21 +149,32 @@ public struct OneTimePasscode: AuthFallbackResult {
 }
 
 /// Information about a registered device
-public struct DeviceInfo : Codable {
-    /// The device id
-    public var id: String
-    /// The id of the credential this device is registered with
-    public var cred_id: String
-    /// The user id associated with the device
-    public var user_id: String
-    /// A friendly name to describe the device
-    public var friendly_name: String
-    /// Number of times the device has been used
-    public var usage_count: Int
-    /// When the device was last updated.
-    public var updated_at: String
+public struct DeviceInfo: Codable {
     /// When the device was initially registered
-    public var created_at: String
+    public let createdAt: String
+    /// The id of the credential this device is registered with
+    public let credId: String
+    /// A friendly name to describe the device
+    public let friendlyName: String
+    /// The device id
+    public let id: String
     /// Last time the device was used.
-    public var last_login_at: String
+    public let lastLoginAt: String
+    /// When the device was last updated.
+    public let updatedAt: String?
+    /// Number of times the device has been used
+    public let usageCount: Int?
+    /// The user id associated with the device
+    public let userId: String
+    
+    internal enum CodingKeys: String, CodingKey {
+        case createdAt = "created_at"
+        case credId = "cred_id"
+        case friendlyName = "friendly_name"
+        case id
+        case lastLoginAt = "last_login_at"
+        case updatedAt = "updated_at"
+        case usageCount = "usage_count"
+        case userId = "user_id"
+    }
 }

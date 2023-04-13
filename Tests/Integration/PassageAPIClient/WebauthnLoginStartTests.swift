@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by blayne bayer on 2/15/23.
-//
-
 import XCTest
 @testable import Passage
 

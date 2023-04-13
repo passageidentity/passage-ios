@@ -195,9 +195,9 @@ public class PassageAuth {
     ///
     /// Will use the authToken from the tokenStore on the instance.
     ///
-    /// - Returns: ``PassageUserDetails`` the User object that represents an authenticated user
+    /// - Returns: ``PassageUserInfo`` the User object that represents an authenticated user
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public func getCurrentUser() async throws -> PassageUserDetails? {
+    public func getCurrentUser() async throws -> PassageUserInfo? {
         
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
@@ -607,18 +607,18 @@ public class PassageAuth {
     /// their status, user ID, and whether or not they have previously signed in with WebAuthn.
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
-    /// - Returns: ``PassageUser`` the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
+    /// - Returns: ``PassageUserInfo`` the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func getUser(identifier: String) async throws -> PassageUser? {
-        var user: PassageUser?
+    public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
-            user = try await PassageAPIClient.shared.getUser(identifier: identifier)
+            let user = try await PassageAPIClient.shared.getUser(identifier: identifier)
+            return user
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
+            throw error
         } catch {
             throw error
         }
-        return user
     }
     
     /// Checks if the identifier provided exists for the application.
@@ -627,10 +627,10 @@ public class PassageAuth {
     /// identifier types (e.g., it will throw an error if a phone number is supplied to an app that only supports emails as an identifier).
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
-    /// - Returns: ``PassageUser`` This contains the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
+    /// - Returns: ``PassageUserInfo`` This contains the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
     public static func identifierExists(identifier: String) async throws -> Bool {
         
-        var user: PassageUser?
+        var user: PassageUserInfo?
         do {
             user = try await PassageAuth.getUser(identifier: identifier)
         } catch {
@@ -793,10 +793,10 @@ public class PassageAuth {
            
     /// This method fetches the user by the specified token.
     /// - Parameter token: an auth token from the AuthResult object
-    /// - Returns: ``PassageUserDetails`` the User object that represents an authenticated user
+    /// - Returns: ``PassageUserInfo`` the User object that represents an authenticated user
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func getCurrentUser(token: String) async throws -> PassageUserDetails? {
-        var user: PassageUserDetails?
+    public static func getCurrentUser(token: String) async throws -> PassageUserInfo? {
+        var user: PassageUserInfo?
         do {
             user = try await PassageAPIClient.shared.currentUser(token: token)
         } catch (let error as PassageAPIError) {
@@ -939,11 +939,7 @@ public class PassageAuth {
             throw error
         }
         if let unwrappedAuthResult = authResult {
-            if let unwrappedAuthToken = unwrappedAuthResult.auth_token {
-                return (authToken: unwrappedAuthToken, refreshToken: unwrappedAuthResult.refresh_token)
-            } else {
-                throw PassageError.unknown
-            }
+            return (authToken: unwrappedAuthResult.authToken, refreshToken: unwrappedAuthResult.refreshToken)
         } else {
             throw PassageError.unknown
         }

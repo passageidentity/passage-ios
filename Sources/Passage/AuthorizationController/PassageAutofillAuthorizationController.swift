@@ -78,7 +78,7 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
                     throw PassageASAuthorizationError.invalidStartResponse
                 }
                 let loginResult = try await PassageAuth.autoFillFinish(startResponse: self.startResponse!, credentialAssertion: credentialAssertion)
-                if (loginResult.auth_token != nil) {
+                if (loginResult.authToken != nil) {
                     self.isPerformingModalRequest = false
                     if let onSuccess = self.onSuccess {
                         onSuccess(loginResult)

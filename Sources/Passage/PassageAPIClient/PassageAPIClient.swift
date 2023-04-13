@@ -116,7 +116,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
     }
     
     /// Peform a webauthn login start request for the specified identifier
@@ -181,7 +181,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
         
     }
 
@@ -250,7 +250,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
 
         let authResponse = try JSONDecoder().decode(WebauthnRegisterFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
     }
     
     /// Peform a webauthn add device start request
@@ -339,7 +339,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
         
-        return sendMagicLinkResponse.magic_link
+        return sendMagicLinkResponse.magicLink
     }
     
     /// Send a new registration magic link to the users email or phone
@@ -369,7 +369,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
         
-        return sendMagicLinkResponse.magic_link
+        return sendMagicLinkResponse.magicLink
     }
     
     /// Check the status of a magic link
@@ -389,7 +389,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let magicLinkStatusResponse = try JSONDecoder().decode(MagicLinkStatusResponse.self, from: responseData)
         
-        return magicLinkStatusResponse.auth_result
+        return magicLinkStatusResponse.authResult
     }
     
     /// Active a magic link
@@ -409,7 +409,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let activateMagicLinkResponse = try JSONDecoder().decode(ActivateMagicLinkResponse.self, from: responseData)
         
-        return activateMagicLinkResponse.auth_result
+        return activateMagicLinkResponse.authResult
     }
     
     /// Send a new login one time passcode to the user's email or phone
@@ -486,14 +486,14 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let activateOneTimePasscodeResponse = try JSONDecoder().decode(ActivateOneTimePasscodeResponse.self, from: responseData)
         
-        return activateOneTimePasscodeResponse.auth_result
+        return activateOneTimePasscodeResponse.authResult
     }
     
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
-    /// - Returns: ``PassageUserDetails``
+    /// - Returns: ``PassageUserInfo``
     /// - Throws: ``PassageAPIError``
-    internal func currentUser(token: String) async throws -> PassageUserDetails {
+    internal func currentUser(token: String) async throws -> PassageUserInfo {
         let url = try self.appUrl(path: "currentuser/")
 
         let request = buildAuthenticatedRequest(url: url, method: "GET", token: token)
@@ -560,7 +560,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let changeEmailResponse = try JSONDecoder().decode(ChangeEmailResponse.self, from: responseData)
         
-        return changeEmailResponse.magic_link
+        return changeEmailResponse.magicLink
 
     }
     
@@ -598,7 +598,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
       
       let changePhoneResponse = try JSONDecoder().decode(ChangePhoneResponse.self, from: responseData)
           
-        return changePhoneResponse.magic_link
+        return changePhoneResponse.magicLink
     }
     
     /// Update the user's device, only supports the friendly name currently
@@ -643,9 +643,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     
     /// Load a user
     /// - Parameter The identifier (email or phone) of the user to get
-    /// - Returns: ``PassageUser``
+    /// - Returns: ``PassageUserInfo``
     /// - Throws: ``PassageAPIError``
-    internal func getUser(identifier: String) async throws -> PassageUser {
+    internal func getUser(identifier: String) async throws -> PassageUserInfo {
         let url = try self.appUrl(path: "users/?identifier=\(identifier.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
         
         let request = buildRequest(url: url, method: "GET")
@@ -677,7 +677,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let refreshResponse = try JSONDecoder().decode(RefreshResponse.self, from: responseData)
         
-        return refreshResponse.auth_result
+        return refreshResponse.authResult
     }
     
     /// Sign out the current user's session
