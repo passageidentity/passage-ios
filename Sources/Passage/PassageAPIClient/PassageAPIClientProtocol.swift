@@ -140,8 +140,8 @@ protocol PassageAuthAPIClient  {
     
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
-    /// - Returns: ``PassageUserDetails``
-    func currentUser(token: String) async throws -> PassageUserDetails
+    /// - Returns: ``PassageUserInfo``
+    func currentUser(token: String) async throws -> PassageUserInfo
     
     
     /// Make a request to get the current user's devices
@@ -191,8 +191,8 @@ protocol PassageAuthAPIClient  {
     
     /// Load a user
     /// - Parameter The identifier (email or phone) of the user to get
-    /// - Returns: ``PassageUser``
-    func getUser(identifier: String) async throws -> PassageUser
+    /// - Returns: ``PassageUserInfo``
+    func getUser(identifier: String) async throws -> PassageUserInfo
     
     /// Refresh a session using a refresh token
     ///  - Parameter The user's refresh token

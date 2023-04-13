@@ -19,7 +19,8 @@ final class OneTimePasscodeTests: XCTestCase {
             PassageAPIClient.shared.appId = otpAppInfoValid.id
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
-            let _ = try await PassageAPIClient.shared.sendRegisterOneTimePasscode(identifier: identifier, language: nil)
+            let _ = try await PassageAPIClient.shared
+                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
             XCTAssertTrue(true)
         } catch {
             XCTAssertTrue(false)
@@ -29,7 +30,8 @@ final class OneTimePasscodeTests: XCTestCase {
     func testSendLoginOneTimePasscode() async {
         do {
             PassageAPIClient.shared.appId = otpAppInfoValid.id
-            let _ = try await PassageAPIClient.shared.sendLoginOneTimePasscode(identifier: otpRegisteredUser.email!, language: nil)
+            let _ = try await PassageAPIClient.shared
+                .sendLoginOneTimePasscode(identifier: otpRegisteredUser.email, language: nil)
             XCTAssertTrue(true)
         } catch {
             XCTAssertTrue(false)
@@ -41,7 +43,8 @@ final class OneTimePasscodeTests: XCTestCase {
             PassageAPIClient.shared.appId = otpAppInfoValid.id
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
-            let response = try await PassageAPIClient.shared.sendRegisterOneTimePasscode(identifier: identifier, language: nil)
+            let response = try await PassageAPIClient.shared
+                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
             try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
             let oneTimePasscode = try await MailosaurAPIClient().getMostRecentOneTimePasscode()
             let token = try await PassageAPIClient.shared.activateOneTimePasscode(otp: oneTimePasscode, otpId: response.id)

@@ -1,10 +1,3 @@
-//
-//  testss.swift
-//  
-//
-//  Created by blayne bayer on 2/14/23.
-//
-
 import XCTest
 @testable import Passage
 
@@ -42,7 +35,7 @@ final class AppInfoTests: XCTestCase {
             
             if let thrownError = error as? PassageAPIError {
                 switch thrownError {
-                    case .notFound(let response):
+                    case .notFound:
                         XCTAssertTrue(true)
                 default:
                     XCTAssertFalse(true)
@@ -51,6 +44,5 @@ final class AppInfoTests: XCTestCase {
         }
         
     }
-    
 
 }

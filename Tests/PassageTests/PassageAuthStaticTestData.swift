@@ -30,16 +30,33 @@ let testLoginStartResponse = WebauthnLoginStartResponse(
                 rpId: "TEST_RPID"
             )
         )
-    )
+    ),
+    user: nil
 )
 
 let testLoginFinishResponse = AuthResult(
-    auth_token: "TEST_TOKEN",
-    redirect_url: nil
+    authToken: "TEST_TOKEN",
+    redirectURL: "/",
+    refreshToken: nil,
+    refreshTokenExpiration: nil
 )
 
 let testRegisterStartResponse = WebauthnRegisterStartResponse(
-    user: PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true),
+    user: PassageUserInfo(
+        createdAt: "",
+        email: "",
+        emailVerified: true,
+        id: "",
+        lastLoginAt: "",
+        loginCount: 1,
+        phone: "",
+        phoneVerified: true,
+        status: "",
+        updatedAt: "",
+        webauthn: true,
+        webauthnDevices: [],
+        webauthnTypes: []
+    ),
     handshake: WebauthnRegisterStartResponseHandshake(
         id: "TEST_ID",
         challenge: WebauthnRegisterStartResponseHandshakeChallenge(

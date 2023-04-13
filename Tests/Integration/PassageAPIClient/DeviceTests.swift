@@ -1,15 +1,7 @@
-//
-//  File.swift
-//  
-//
-//  Created by blayne bayer on 2/16/23.
-//
-
 import XCTest
 @testable import Passage
 
 final class ListDevicesTests: XCTestCase {
-    
     
     override func setUp() {
         super.setUp()
@@ -30,7 +22,7 @@ final class ListDevicesTests: XCTestCase {
             let response = try await PassageAPIClient.shared.listDevices(token: authToken)
             XCTAssertGreaterThan(response.count, 0)
             XCTAssertEqual(response.count, 2)
-            XCTAssertEqual(response[0].user_id,currentUser.id)
+            XCTAssertEqual(response[0].userId,currentUser.id)
         } catch {
             XCTAssertTrue(false)
         }
@@ -39,15 +31,13 @@ final class ListDevicesTests: XCTestCase {
     func testListDevicesUnAuthed() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.listDevices(token: "")
+            let _ = try await PassageAPIClient.shared.listDevices(token: "")
             XCTAssertTrue(false)
         } catch {
-            
             XCTAssertTrue(error is PassageAPIError)
-            
             if let thrownError = error as? PassageAPIError {
                 switch thrownError {
-                    case .unauthorized(let response):
+                    case .unauthorized:
                         XCTAssertTrue(true)
                 default:
                     XCTAssertFalse(true)
@@ -60,11 +50,12 @@ final class ListDevicesTests: XCTestCase {
     func testAddDeviceStart() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.addDeviceStart(token: authToken)
+            let _ = try await PassageAPIClient.shared.addDeviceStart(token: authToken)
             // ensure we got a response. Pretty much all we can test for now.
             // If the response changes it should throw a swiftdecode error, which would fail the test
             XCTAssertTrue(true)
         } catch {
+            print(error)
             XCTAssertTrue(false)
         }
     }
@@ -73,15 +64,13 @@ final class ListDevicesTests: XCTestCase {
     func testAddDeviceStartUnAuthed() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.addDeviceStart(token: "")
+            let _ = try await PassageAPIClient.shared.addDeviceStart(token: "")
             XCTAssertTrue(false)
         } catch {
-            
             XCTAssertTrue(error is PassageAPIError)
-            
             if let thrownError = error as? PassageAPIError {
                 switch thrownError {
-                    case .unauthorized(let response):
+                    case .unauthorized:
                         XCTAssertTrue(true)
                 default:
                     XCTAssertFalse(true)
@@ -95,7 +84,8 @@ final class ListDevicesTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let listDevicesResponse = try await PassageAPIClient.shared.listDevices(token: authToken)
-            let response = try await PassageAPIClient.shared.updateDevice(token: authToken, deviceId: listDevicesResponse[0].id, friendlyName: "integration test device" )
+            let _ = try await PassageAPIClient.shared
+                .updateDevice(token: authToken, deviceId: listDevicesResponse[0].id, friendlyName: "integration test device" )
             // ensure we got a response. Pretty much all we can test for now.
             // If the response changes it should throw a swiftdecode error, which would fail the test
             XCTAssertTrue(true)

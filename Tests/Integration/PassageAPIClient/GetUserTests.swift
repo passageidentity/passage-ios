@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by blayne bayer on 2/15/23.
-//
-
 import XCTest
 @testable import Passage
 
@@ -23,16 +16,14 @@ final class GetUserTests: XCTestCase {
     func testUserFound() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email ?? "")
+            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUser.email)
             XCTAssertEqual(response.id, currentUser.id)
             XCTAssertEqual(response.status, currentUser.status)
             XCTAssertEqual(response.email, currentUser.email)
-            XCTAssertEqual(response.email_verified, currentUser.email_verified)
+            XCTAssertEqual(response.emailVerified, currentUser.emailVerified)
             XCTAssertEqual(response.phone, currentUser.phone)
-            XCTAssertEqual(response.phone_verified, currentUser.phone_verified)
+            XCTAssertEqual(response.phoneVerified, currentUser.phoneVerified)
             XCTAssertEqual(response.webauthn, currentUser.webauthn)
-
-            
         } catch {
             XCTAssertTrue(false)
         }
@@ -41,12 +32,12 @@ final class GetUserTests: XCTestCase {
     func testUserNotFound() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.getUser(identifier: unregisteredUserEmail)
+            let _ = try await PassageAPIClient.shared.getUser(identifier: unregisteredUserEmail)
             XCTAssertFalse(true)
         }
         catch  {
             XCTAssertTrue(true)
         }
-        
     }
+    
 }

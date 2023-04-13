@@ -40,7 +40,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     
     @available(iOS 16.0, *)
     func webauthnRegistrationFinish(startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> Passage.AuthResult {
-        return AuthResult(auth_token: "TEST_TOKEN", redirect_url: nil)
+        return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
     }
     
     @available(iOS 16.0, *)
@@ -93,7 +93,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func currentUser(token: String) async throws -> Passage.PassageUserDetails {
+    func currentUser(token: String) async throws -> Passage.PassageUserInfo {
         throw PassageError.unknown
     }
     
@@ -117,15 +117,34 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func getUser(identifier: String) async throws -> Passage.PassageUser {
+    func getUser(identifier: String) async throws -> Passage.PassageUserInfo {
         guard identifier == "registered-test-user@passage.id" else {
             throw PassageError.userDoesNotExist
         }
-        return PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true)
+        return PassageUserInfo(
+            createdAt: "",
+            email: "",
+            emailVerified: true,
+            id: "",
+            lastLoginAt: "",
+            loginCount: 1,
+            phone: "",
+            phoneVerified: true,
+            status: "",
+            updatedAt: "",
+            webauthn: true,
+            webauthnDevices: [],
+            webauthnTypes: []
+        )
     }
     
     func refresh(refreshToken: String) async throws -> AuthResult {
-        return AuthResult(auth_token: "TEST_TOKEN", refresh_token: "TEST_REFRESH_TOKEN", redirect_url: "")
+        return AuthResult(
+            authToken: "TEST_TOKEN",
+            redirectURL: "/",
+            refreshToken: "TEST_REFRESH_TOKEN",
+            refreshTokenExpiration: 6000
+        )
     }
     
     func signOut(refreshToken: String) async throws {

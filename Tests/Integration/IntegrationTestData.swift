@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by blayne bayer on 2/14/23.
-//
-
 import AuthenticationServices
 @testable import Passage
 
@@ -16,32 +9,36 @@ let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
 
-let registeredUser = PassageUser(
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
-    status: "active",
+let registeredUser = PassageUserInfo(
+    createdAt: "",
     email:"blayne.bayer@passage.id",
-    email_verified: true,
+    emailVerified: true,
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    lastLoginAt: "",
+    loginCount: 1,
     phone: "",
-    phone_verified: false,
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "",
     webauthn: true,
-    user_metadata: nil,
-    webauthn_types: []
+    webauthnDevices: [],
+    webauthnTypes: []
 )
 
-let currentUser = PassageUserDetails(
-    created_at: "2023-02-16T15:55:28.890571Z",
-    updated_at: "2023-02-16T19:55:38.909048Z",
-    status: "active",
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+let currentUser = PassageUserInfo(
+    createdAt: "2023-02-16T15:55:28.890571Z",
     email: "blayne.bayer@passage.id",
-    email_verified: true,
+    emailVerified: true,
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    lastLoginAt: "2023-02-16T19:55:38.907657Z",
+    loginCount: 2,
     phone: "",
-    phone_verified: false,
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "2023-02-16T19:55:38.909048Z",
     webauthn: true,
-    last_login_at: "2023-02-16T19:55:38.907657Z",
-    login_count: 2,
-    webauthn_devices: [],
-    webauthn_types: []
+    webauthnDevices: [],
+    webauthnTypes: []
 )
 
 
@@ -125,14 +122,18 @@ let otpAppInfoValid = AppInfo(
     sessionTimeoutLength: 6000
 )
 
-let otpRegisteredUser = PassageUser(
-    id: "oiySQzEcqEpzxX3yu5cKKRKe",
-    status: "active",
+let otpRegisteredUser = PassageUserInfo(
+    createdAt: "",
     email:"authentigator+1681334202.318723@passage.id",
-    email_verified: true,
+    emailVerified: true,
+    id: "oiySQzEcqEpzxX3yu5cKKRKe",
+    lastLoginAt: "",
+    loginCount: 1,
     phone: "",
-    phone_verified: false,
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "",
     webauthn: false,
-    user_metadata: nil,
-    webauthn_types: []
+    webauthnDevices: [],
+    webauthnTypes: []
 )
