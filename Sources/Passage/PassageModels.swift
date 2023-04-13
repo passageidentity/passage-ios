@@ -24,7 +24,7 @@ public struct PassageUserInfo: Codable {
     /// when the user was created
     public let createdAt: String?
     /// user's email address
-    public let email: String
+    public let email: String?
     /// has the user's email been verified
     public let emailVerified: Bool
     /// the user's unique id
@@ -34,7 +34,7 @@ public struct PassageUserInfo: Codable {
     /// number of times the user has logged in
     public let loginCount: Int?
     /// user's phone number
-    public let phone: String
+    public let phone: String?
     /// has the user's phone number been verified
     public let phoneVerified: Bool
     /// status of the user
