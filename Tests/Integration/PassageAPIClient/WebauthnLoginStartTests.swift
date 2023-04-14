@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by blayne bayer on 2/15/23.
-//
-
 import XCTest
 @testable import Passage
 
@@ -24,7 +17,7 @@ final class WebauthnLoginStartTests: XCTestCase {
     func testWebauthnLoginStart() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.webauthnLoginStart()
+            let _ = try await PassageAPIClient.shared.webauthnLoginStart()
             // ensure we got a response. Pretty much all we can test for now.
             // If the response changes it should throw a swiftdecode error, which would fail the test
             XCTAssertTrue(true)

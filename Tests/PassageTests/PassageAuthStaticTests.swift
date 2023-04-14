@@ -6,7 +6,7 @@ final class PassageAuthStaticTests: XCTestCase {
     override func setUp() {
         super.setUp()
         PassageSettings.shared.appId = testAppInfo.id
-        PassageSettings.shared.authOrigin = testAppInfo.auth_origin
+        PassageSettings.shared.authOrigin = testAppInfo.authOrigin
         PassageSettings.shared.apiUrl = "TEST_API_URL"
         PassageAPIClient.shared = MockPassageAPIClient()
         if #available(iOS 16.0, *) {
@@ -44,7 +44,7 @@ final class PassageAuthStaticTests: XCTestCase {
         if #available(iOS 16.0, *) {
             XCTAssertTrue(result?.authResult is AuthResult)
         } else {
-            XCTAssertTrue(result?.magicLink is MagicLink)
+            XCTAssertTrue(result?.authFallbackResult is AuthFallbackResult)
         }
     }
     
@@ -53,7 +53,7 @@ final class PassageAuthStaticTests: XCTestCase {
         if #available(iOS 16.0, *) {
             XCTAssertTrue(result?.authResult is AuthResult)
         } else {
-            XCTAssertTrue(result?.magicLink is MagicLink)
+            XCTAssertTrue(result?.authFallbackResult is AuthFallbackResult)
         }
     }
     

@@ -1,12 +1,3 @@
-//
-//  PassageAPIClientProtocol.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/23/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
-import Foundation
 import AuthenticationServices
 
 /// Protocol that any Passage API Client must implement
@@ -123,10 +114,34 @@ protocol PassageAuthAPIClient  {
     func activateMagicLink(magicLink: String) async throws -> AuthResult
     
     
+    /// Send a new login one time passcode to the user's email or phone
+    /// - Parameters:
+    ///   - identifier: The users email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode
+    
+    
+    /// Send a new registration one time passcode to the user's email or phone
+    /// - Parameters:
+    ///   - identifier: The users email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode
+    
+    
+    /// Active a magic link
+    /// - Parameters:
+    ///   - otp: The one time passcode to activate
+    ///   - otpId: The one time passcode id
+    /// - Returns: ``AuthResult``
+    func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult
+    
+    
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
-    /// - Returns: ``PassageUserDetails``
-    func currentUser(token: String) async throws -> PassageUserDetails
+    /// - Returns: ``PassageUserInfo``
+    func currentUser(token: String) async throws -> PassageUserInfo
     
     
     /// Make a request to get the current user's devices
@@ -176,8 +191,8 @@ protocol PassageAuthAPIClient  {
     
     /// Load a user
     /// - Parameter The identifier (email or phone) of the user to get
-    /// - Returns: ``PassageUser``
-    func getUser(identifier: String) async throws -> PassageUser
+    /// - Returns: ``PassageUserInfo``
+    func getUser(identifier: String) async throws -> PassageUserInfo
     
     /// Refresh a session using a refresh token
     ///  - Parameter The user's refresh token
@@ -191,5 +206,3 @@ protocol PassageAuthAPIClient  {
     /// - Throws: ``PassageAPIError``
     func signOut(refreshToken: String) async throws
 }
-
-

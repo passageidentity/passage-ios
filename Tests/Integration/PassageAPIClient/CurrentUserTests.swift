@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by blayne bayer on 2/15/23.
-//
-
 import XCTest
 @testable import Passage
 
@@ -22,32 +15,29 @@ final class CurrentUserTests: XCTestCase {
 
     
     func testCurrentUser() async {
-        
         // make sure we have an authToken.
         XCTAssertNotEqual(authToken, "")
-        
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared.currentUser(token: authToken)
             XCTAssertEqual(response.id, currentUser.id)
-            XCTAssertEqual(response.created_at, currentUser.created_at)
+            XCTAssertEqual(response.createdAt, currentUser.createdAt)
             XCTAssertEqual(response.status, currentUser.status)
             XCTAssertEqual(response.email, currentUser.email)
-            XCTAssertEqual(response.email_verified, currentUser.email_verified)
+            XCTAssertEqual(response.emailVerified, currentUser.emailVerified)
             XCTAssertEqual(response.phone, currentUser.phone)
-            XCTAssertEqual(response.phone_verified, currentUser.phone_verified)
+            XCTAssertEqual(response.phoneVerified, currentUser.phoneVerified)
             XCTAssertEqual(response.webauthn, currentUser.webauthn)
         } catch {
             // fail the test if we catch an error
             XCTAssertTrue(false)
         }
-        
     }
 
     func testCurrentUserNotAuthorized() async {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.currentUser(token: "")
+            let _ = try await PassageAPIClient.shared.currentUser(token: "")
             // fail if we didn't get an error
             XCTAssertTrue(false)
         }
@@ -56,7 +46,7 @@ final class CurrentUserTests: XCTestCase {
             
             if let thrownError = error as? PassageAPIError {
                 switch thrownError {
-                    case .unauthorized(let response):
+                    case .unauthorized:
                         XCTAssertTrue(true)
                 default:
                     XCTAssertFalse(true)

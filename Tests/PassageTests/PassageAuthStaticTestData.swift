@@ -5,18 +5,19 @@ let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "registered-test-user@passage.id"
 
 let testAppInfo = AppInfo(
-    id: "TEST_APP_ID",
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethodString: "magic_link",
+    authOrigin: "TEST_AUTH_ORIGIN",
     ephemeral: true,
+    id: "TEST_APP_ID",
+    loginURL: "TEST_LOGIN_URL",
     name: "TEST_APP",
-    redirect_url: "TEST_APP_URL",
-    login_url: "TEST_LOGIN_URL",
-    allowed_identifier: "TEST_ALLOWED_IDENTIFIER",
-    required_identifier: "TEST_REQUIRED_IDENTIFIER",
-    auth_origin: "TEST_AUTH_ORIGIN",
-    require_email_verification: false,
-    require_identifier_verification: false,
-    session_timeout_length: 6000,
-    public_signup: true
+    publicSignup: true,
+    redirectURL: "TEST_APP_URL",
+    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 6000
 )
 
 let testLoginStartResponse = WebauthnLoginStartResponse(
@@ -29,16 +30,33 @@ let testLoginStartResponse = WebauthnLoginStartResponse(
                 rpId: "TEST_RPID"
             )
         )
-    )
+    ),
+    user: nil
 )
 
 let testLoginFinishResponse = AuthResult(
-    auth_token: "TEST_TOKEN",
-    redirect_url: nil
+    authToken: "TEST_TOKEN",
+    redirectURL: "/",
+    refreshToken: nil,
+    refreshTokenExpiration: nil
 )
 
 let testRegisterStartResponse = WebauthnRegisterStartResponse(
-    user: PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true),
+    user: PassageUserInfo(
+        createdAt: "",
+        email: "",
+        emailVerified: true,
+        id: "",
+        lastLoginAt: "",
+        loginCount: 1,
+        phone: "",
+        phoneVerified: true,
+        status: "",
+        updatedAt: "",
+        webauthn: true,
+        webauthnDevices: [],
+        webauthnTypes: []
+    ),
     handshake: WebauthnRegisterStartResponseHandshake(
         id: "TEST_ID",
         challenge: WebauthnRegisterStartResponseHandshakeChallenge(

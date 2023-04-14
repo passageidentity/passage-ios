@@ -1,162 +1,134 @@
-//
-//  PassageAPIClientModels.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/23/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 /// A respsonse struct for the app info request, contains a root object of type ``AppInfo``
-internal struct AppInfoResponse : Codable {
-    
+internal struct AppInfoResponse: Codable {
     /// Root element of the response of type ``AppInfo``
-    public var app: AppInfo
+    public let app: AppInfo
 }
 
-
 /// Details of the Public Key
-internal struct WebauthnLoginStartResponseHandshakeChallengePublicKey : Codable {
-    
+internal struct WebauthnLoginStartResponseHandshakeChallengePublicKey: Codable {
     /// The challenge to use for the Credential Assertion
-    public var challenge: String
-    
+    public let challenge: String
     /// The timeout
-    public var timeout: Int
-    
-    public var rpId: String
+    public let timeout: Int
+    public let rpId: String
 }
 
 /// Contains the Public Key to use for the credential assertion
-internal struct WebauthnLoginStartResponseHandshakeChallenge : Codable {
-    
+internal struct WebauthnLoginStartResponseHandshakeChallenge: Codable {
     /// ``WebauthnLoginStartResponseHandshakeChallengePublicKey``
-    public var publicKey: WebauthnLoginStartResponseHandshakeChallengePublicKey
+    public let publicKey: WebauthnLoginStartResponseHandshakeChallengePublicKey
 }
 
 /// Represents a handshake
-internal struct WebauthnLoginStartResponseHandshake : Codable {
-    
+internal struct WebauthnLoginStartResponseHandshake: Codable {
     /// The id of the handshake
-    public var id: String
-        
+    public let id: String
     /// ``WebauthnLoginStartResponseHandshakeChallenge``
-    public var challenge: WebauthnLoginStartResponseHandshakeChallenge
+    public let challenge: WebauthnLoginStartResponseHandshakeChallenge
 }
 
 /// API Response from a webauthn login start request
-internal struct WebauthnLoginStartResponse : Codable {
-    
+internal struct WebauthnLoginStartResponse: Codable {
     /// ``WebauthnLoginStartResponseHandshake``
-    public var handshake: WebauthnLoginStartResponseHandshake
-    
-    /// ``PassageUser`` will only be defined when logging with an identifier
-    public var user: PassageUser?
+    public let handshake: WebauthnLoginStartResponseHandshake
+    /// ``PassageUserInfo`` will only be defined when logging with an identifier
+    public let user: PassageUserInfo?
+}
+
+internal struct AuthResultResponse: Codable {
+    /// ``AuthResult``
+    public let authResult: AuthResult
+    internal enum CodingKeys: String, CodingKey {
+        case authResult = "auth_result"
+    }
+}
+
+internal struct MagicLinkResponse: Codable {
+    public let magicLink: MagicLink
+    internal enum CodingKeys: String, CodingKey {
+        case magicLink = "magic_link"
+    }
 }
 
 /// API Response from a webauthn login finish request
-internal struct WebauthnLoginFinishResponse : Codable {
-    
-    /// ``AuthResult``
-    public var auth_result: AuthResult
+internal typealias WebauthnLoginFinishResponse = AuthResultResponse
+
+internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyPubKeyCredParam: Codable {
+    public let alg: Int
+    public let type: String
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyPubKeyCredParam : Codable {
-    public var alg: Int
-    public var type: String
+internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyRelyingParty: Codable {
+    public let name: String
+    public let id: String
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyRelyingParty : Codable {
-    public var name: String
-    public var id: String
+internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser: Codable {
+    public let displayName: String
+    public let id: String
+    public let name: String
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser : Codable {
-    public var displayName: String
-    public var id: String
-    public var name: String
+internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection: Codable {
+    public let authenticatorAttachment: String
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection : Codable {
-    public var authenticatorAttachment: String
+internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKey: Codable {
+    public let attestation: String
+    public let pubKeyCredParams: [WebauthnRegisterStartResponseHandshakeChallengePublicKeyPubKeyCredParam]
+    public let rp: WebauthnRegisterStartResponseHandshakeChallengePublicKeyRelyingParty
+    public let user: WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser
+    public let challenge: String
+    public let authenticatorSelection: WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection
+    public let timeout: Int
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKey : Codable {
-    public var attestation: String
-    public var pubKeyCredParams: [WebauthnRegisterStartResponseHandshakeChallengePublicKeyPubKeyCredParam]
-    public var rp: WebauthnRegisterStartResponseHandshakeChallengePublicKeyRelyingParty
-    public var user: WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser
-    public var challenge: String
-    public var authenticatorSelection: WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection
-    public var timeout: Int
+internal struct WebauthnRegisterStartResponseHandshakeChallenge: Codable {
+    public let publicKey: WebauthnRegisterStartResponseHandshakeChallengePublicKey
 }
 
-internal struct WebauthnRegisterStartResponseHandshakeChallenge : Codable {
-    public var publicKey: WebauthnRegisterStartResponseHandshakeChallengePublicKey
-}
-
-internal struct WebauthnRegisterStartResponseHandshake : Codable {
-    public var id: String
-    public var challenge: WebauthnRegisterStartResponseHandshakeChallenge
+internal struct WebauthnRegisterStartResponseHandshake: Codable {
+    public let id: String
+    public let challenge: WebauthnRegisterStartResponseHandshakeChallenge
 }
 
 /// API Response from a webauthn registration start request
-internal struct WebauthnRegisterStartResponse : Codable {
-    public var user: PassageUser
-    public var handshake: WebauthnRegisterStartResponseHandshake
+internal struct WebauthnRegisterStartResponse: Codable {
+    public let user: PassageUserInfo
+    public let handshake: WebauthnRegisterStartResponseHandshake
 }
 
 /// API Response from webauthn registration finish
-internal struct WebauthnRegisterFinishResponse : Codable {
-    
-    /// ``AuthResult``
-    public var auth_result: AuthResult
+internal typealias WebauthnRegisterFinishResponse = AuthResultResponse
+
+internal typealias WebauthnAddDeviceFinishResponse = AuthResultResponse
+
+internal typealias SendMagicLinkResponse = MagicLinkResponse
+
+internal typealias MagicLinkStatusResponse = AuthResultResponse
+
+internal typealias ActivateMagicLinkResponse = AuthResultResponse
+
+internal typealias ActivateOneTimePasscodeResponse = AuthResultResponse
+
+internal struct CurrentUserResponse: Codable {
+    public let user: PassageUserInfo
 }
 
-internal struct WebauthnAddDeviceFinishResponse : Codable {
-    /// ``AuthResult``
-    public var auth_result: AuthResult
+internal struct ListDevicesResponse: Codable {
+    public let devices: [DeviceInfo]
 }
 
-internal struct SendMagicLinkResponse : Codable {
-    public var magic_link: MagicLink
+internal typealias ChangeEmailResponse = MagicLinkResponse
+
+internal typealias ChangePhoneResponse = MagicLinkResponse
+
+internal struct UpdateDeviceResponse: Codable {
+    public let device: DeviceInfo
 }
 
-internal struct MagicLinkStatusResponse : Codable {
-    public var auth_result: AuthResult
+internal struct GetUserResponse: Codable {
+    public let user: PassageUserInfo
 }
 
-internal struct ActivateMagicLinkResponse : Codable {
-    public var auth_result: AuthResult
-}
-
-
-internal struct CurrentUserResponse : Codable {
-    public var user: PassageUserDetails
-}
-
-
-internal struct ListDevicesResponse : Codable {
-    public var devices: [DeviceInfo]
-}
-
-internal struct ChangeEmailResponse : Codable {
-    public var magic_link: MagicLink
-}
-
-internal struct ChangePhoneResponse : Codable {
-    public var magic_link: MagicLink
-}
-
-internal struct UpdateDeviceResponse : Codable {
-    public var device: DeviceInfo
-}
-
-internal struct GetUserResponse : Codable {
-    public var user: PassageUser
-}
-
-internal struct RefreshResponse : Codable {
-    public var auth_result: AuthResult
-}
-
-
+internal typealias RefreshResponse = AuthResultResponse

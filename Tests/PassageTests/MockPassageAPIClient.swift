@@ -32,7 +32,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     
     @available(iOS 16.0, *)
     func webauthnRegistrationStart(identifier: String) async throws -> Passage.WebauthnRegisterStartResponse {
-        guard identifier == "unregistered-test-user@passage.id" else {
+        guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
         return testRegisterStartResponse
@@ -40,7 +40,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     
     @available(iOS 16.0, *)
     func webauthnRegistrationFinish(startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> Passage.AuthResult {
-        return AuthResult(auth_token: "TEST_TOKEN", redirect_url: nil)
+        return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
     }
     
     @available(iOS 16.0, *)
@@ -54,14 +54,14 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
-        guard identifier == "registered-test-user@passage.id" else {
+        guard identifier == registeredUserEmail else {
             throw PassageError.unknown
         }
         return Passage.MagicLink(id: "TEST_MAGIC_LINK")
     }
     
     func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> Passage.MagicLink {
-        guard identifier == "unregistered-test-user@passage.id" else {
+        guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
         return Passage.MagicLink(id: "TEST_MAGIC_LINK")
@@ -75,7 +75,25 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func currentUser(token: String) async throws -> Passage.PassageUserDetails {
+    func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
+        guard identifier == registeredUserEmail else {
+            throw PassageError.unknown
+        }
+        return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
+    }
+    
+    func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> Passage.OneTimePasscode {
+        guard identifier == unregisteredUserEmail else {
+            throw PassageError.userAlreadyExists
+        }
+        return Passage.OneTimePasscode(id: "TEST_ONE_TIME_PASSCODE")
+    }
+    
+    func activateOneTimePasscode(otp: String, otpId: String) async throws -> Passage.AuthResult {
+        throw PassageError.unknown
+    }
+    
+    func currentUser(token: String) async throws -> Passage.PassageUserInfo {
         throw PassageError.unknown
     }
     
@@ -99,15 +117,34 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
-    func getUser(identifier: String) async throws -> Passage.PassageUser {
-        guard identifier == "registered-test-user@passage.id" else {
+    func getUser(identifier: String) async throws -> Passage.PassageUserInfo {
+        guard identifier == registeredUserEmail else {
             throw PassageError.userDoesNotExist
         }
-        return PassageUser(id: "TEST_ID", email_verified: true, phone_verified: true, webauthn: true)
+        return PassageUserInfo(
+            createdAt: "",
+            email: "",
+            emailVerified: true,
+            id: "",
+            lastLoginAt: "",
+            loginCount: 1,
+            phone: "",
+            phoneVerified: true,
+            status: "",
+            updatedAt: "",
+            webauthn: true,
+            webauthnDevices: [],
+            webauthnTypes: []
+        )
     }
     
     func refresh(refreshToken: String) async throws -> AuthResult {
-        return AuthResult(auth_token: "TEST_TOKEN", refresh_token: "TEST_REFRESH_TOKEN", redirect_url: "")
+        return AuthResult(
+            authToken: "TEST_TOKEN",
+            redirectURL: "/",
+            refreshToken: "TEST_REFRESH_TOKEN",
+            refreshTokenExpiration: 6000
+        )
     }
     
     func signOut(refreshToken: String) async throws {

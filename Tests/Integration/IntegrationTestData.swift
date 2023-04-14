@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by blayne bayer on 2/14/23.
-//
-
 import AuthenticationServices
 @testable import Passage
 
@@ -16,94 +9,131 @@ let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
 
-let registeredUser = PassageUser(
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
-    status: "active",
+let registeredUser = PassageUserInfo(
+    createdAt: "",
     email:"blayne.bayer@passage.id",
-    email_verified: true,
+    emailVerified: true,
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    lastLoginAt: "",
+    loginCount: 1,
     phone: "",
-    phone_verified: false,
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "",
     webauthn: true,
-    user_metadata: nil,
-    webauthn_types: []
+    webauthnDevices: [],
+    webauthnTypes: []
 )
 
-let currentUser = PassageUserDetails(
-    created_at: "2023-02-16T15:55:28.890571Z",
-    updated_at: "2023-02-16T19:55:38.909048Z",
-    status: "active",
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+let currentUser = PassageUserInfo(
+    createdAt: "2023-02-16T15:55:28.890571Z",
     email: "blayne.bayer@passage.id",
-    email_verified: true,
+    emailVerified: true,
+    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    lastLoginAt: "2023-02-16T19:55:38.907657Z",
+    loginCount: 2,
     phone: "",
-    phone_verified: false,
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "2023-02-16T19:55:38.909048Z",
     webauthn: true,
-    last_login_at: "2023-02-16T19:55:38.907657Z",
-    login_count: 2,
-    webauthn_devices: [],
-    webauthn_types: []
+    webauthnDevices: [],
+    webauthnTypes: []
 )
 
 
 let appInfoValid = AppInfo(
-    id: "czLTOVFIytGqrhRVoHV9o8Wo",
+    allowedIdentifier: "both",
+    authFallbackMethodString: "magic_link",
+    authOrigin: "http://localhost:4173",
     ephemeral: false,
+    id: "czLTOVFIytGqrhRVoHV9o8Wo",
+    loginURL: "/",
     name: "passage-ios uat",
-    redirect_url: "/dashboard",
-    login_url: "/",
-    allowed_identifier: "both",
-    required_identifier: "both",
-    auth_origin: "http://localhost:4173",
-    require_email_verification: false,
-    require_identifier_verification: false,
-    session_timeout_length: 0,
-    public_signup: true
+    publicSignup: true,
+    redirectURL: "/dashboard",
+    requiredIdentifier: "both",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 0
 )
 
 let appInfoInvalid = AppInfo(
-    id: "TEST_APP_ID",
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethodString: "magic_link",
+    authOrigin: "TEST_AUTH_ORIGIN",
     ephemeral: true,
+    id: "TEST_APP_ID",
+    loginURL: "TEST_LOGIN_URL",
     name: "TEST_APP",
-    redirect_url: "TEST_APP_URL",
-    login_url: "TEST_LOGIN_URL",
-    allowed_identifier: "TEST_ALLOWED_IDENTIFIER",
-    required_identifier: "TEST_REQUIRED_IDENTIFIER",
-    auth_origin: "TEST_AUTH_ORIGIN",
-    require_email_verification: false,
-    require_identifier_verification: false,
-    session_timeout_length: 6000,
-    public_signup: true
+    publicSignup: true,
+    redirectURL: "TEST_APP_URL",
+    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 6000
 )
 
 let appInfoRefreshToken = AppInfo(
-    id: "uFZlFit7nglPuzcYRVesCUBZ",
+    allowedIdentifier: "both",
+    authFallbackMethodString: "magic_link",
+    authOrigin: "http://localhost:4173",
     ephemeral: false,
+    id: "uFZlFit7nglPuzcYRVesCUBZ",
+    loginURL: "/",
     name: "passage-ios uat refresh tokens",
-    redirect_url: "/dashboard",
-    login_url: "/",
-    allowed_identifier: "both",
-    required_identifier: "both",
-    auth_origin: "http://localhost:4173",
-    require_email_verification: false,
-    require_identifier_verification: false,
-    session_timeout_length: 5,
-    public_signup: true
+    publicSignup: true,
+    redirectURL: "/dashboard",
+    requiredIdentifier: "both",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 5
 )
 
-
-
-
 let appInfoTest = AppInfo(
-    id: "TEST_APP_ID",
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethodString: "magic_link",
+    authOrigin: "TEST_AUTH_ORIGIN",
     ephemeral: true,
+    id: "TEST_APP_ID",
+    loginURL: "TEST_LOGIN_URL",
     name: "TEST_APP",
-    redirect_url: "TEST_APP_URL",
-    login_url: "TEST_LOGIN_URL",
-    allowed_identifier: "TEST_ALLOWED_IDENTIFIER",
-    required_identifier: "TEST_REQUIRED_IDENTIFIER",
-    auth_origin: "TEST_AUTH_ORIGIN",
-    require_email_verification: false,
-    require_identifier_verification: false,
-    session_timeout_length: 6000,
-    public_signup: true
+    publicSignup: true,
+    redirectURL: "TEST_APP_URL",
+    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 6000
+)
+
+let otpAppInfoValid = AppInfo(
+    allowedIdentifier: "both",
+    authFallbackMethodString: "otp",
+    authOrigin: "http://localhost:4173",
+    ephemeral: false,
+    id: "pTBeTnbvm1z3U6hznMTD33Es",
+    loginURL: "/",
+    name: "UAT OTP App",
+    publicSignup: true,
+    redirectURL: "/dashboard",
+    requiredIdentifier: "both",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    sessionTimeoutLength: 6000
+)
+
+let otpRegisteredUser = PassageUserInfo(
+    createdAt: "",
+    email:"authentigator+1681334202.318723@passage.id",
+    emailVerified: true,
+    id: "oiySQzEcqEpzxX3yu5cKKRKe",
+    lastLoginAt: "",
+    loginCount: 1,
+    phone: "",
+    phoneVerified: false,
+    status: "active",
+    updatedAt: "",
+    webauthn: false,
+    webauthnDevices: [],
+    webauthnTypes: []
 )

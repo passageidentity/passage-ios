@@ -1,12 +1,3 @@
-//
-//  PassageAPIClient.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/23/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
-import Foundation
 import AuthenticationServices
 import os
 
@@ -14,6 +5,12 @@ import os
 ///
 /// Implements all the network requests to the Passage API's 
 internal class PassageAPIClient : PassageAuthAPIClient {
+    
+    private enum RequestMethod: String {
+        case get = "GET"
+        case patch = "PATCH"
+        case post = "POST"
+    }
 
     /// Singleton instance of the PassageAPIClient
     ///
@@ -125,7 +122,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
     }
     
     /// Peform a webauthn login start request for the specified identifier
@@ -190,7 +187,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
         
     }
 
@@ -209,7 +206,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         
-        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 200)
+        try assertValidResponse(response: response, responseData: responseData)
         
         let registrationResponse = try JSONDecoder().decode(WebauthnRegisterStartResponse.self, from: responseData)
         
@@ -255,11 +252,11 @@ internal class PassageAPIClient : PassageAuthAPIClient {
 
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
-        try assertValidResponse(response: resp,responseData: responseData, successStatusCode: 201)
+        try assertValidResponse(response: resp,responseData: responseData)
 
         let authResponse = try JSONDecoder().decode(WebauthnRegisterFinishResponse.self, from: responseData)
 
-        return authResponse.auth_result
+        return authResponse.authResult
     }
     
     /// Peform a webauthn add device start request
@@ -318,7 +315,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
-        try assertValidResponse(response: resp, responseData: responseData, successStatusCode: 201)
+        try assertValidResponse(response: resp, responseData: responseData)
         
     }
     
@@ -330,25 +327,14 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``
     internal func sendLoginMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
-        let url = try self.appUrl(path: "login/magic-link/")
-        let request = buildRequest(url: url, method: "POST")
-        
-        var jsonObject = ["identifier": identifier]
-        if ( path != nil) {
-            jsonObject["path"] = path
-        }
-        if ( language != nil) {
-            jsonObject["language"] = language
-        }
-        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-                
-        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-
-        try assertValidResponse(response: response, responseData: responseData)
-        
+        let params = [
+            "identifier": identifier,
+            "path": path,
+            "language": language
+        ]
+        let responseData = try await sendRequest(path: "login/magic-link/", method: .post, params: params)
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
-        
-        return sendMagicLinkResponse.magic_link
+        return sendMagicLinkResponse.magicLink
     }
     
     /// Send a new registration magic link to the users email or phone
@@ -357,27 +343,16 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - path: optional path to append to the redirect url
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
+    /// - Throws: ``PassageAPIError``
     internal func sendRegisterMagicLink(identifier: String, path: String?, language: String? = nil) async throws -> MagicLink {
-        let url = try self.appUrl(path: "register/magic-link/")
-        
-        let request = buildRequest(url: url, method: "POST")
-        
-        var jsonObject = ["identifier": identifier]
-        if ( path != nil) {
-            jsonObject["path"] = path
-        }
-        if ( language != nil) {
-            jsonObject["language"] = language
-        }
-        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-                
-        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-
-        try assertValidResponse(response: response,responseData: responseData, successStatusCode: 201)
-        
+        let params = [
+            "identifier": identifier,
+            "path": path,
+            "language": language
+        ]
+        let responseData = try await sendRequest(path: "register/magic-link/", method: .post, params: params)
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
-        
-        return sendMagicLinkResponse.magic_link
+        return sendMagicLinkResponse.magicLink
     }
     
     /// Check the status of a magic link
@@ -385,47 +360,76 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     internal func magicLinkStatus(id: String) async throws -> AuthResult {
-        let url = try self.appUrl(path: "magic-link/status/")
-        
-        let request = buildRequest(url: url, method: "POST")
-                
-        let data = try JSONSerialization.data(withJSONObject: ["id": id], options: [])
-        
-        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-                
-        try assertValidResponse(response: response, responseData: responseData)
-        
+        let params = ["id": id]
+        let responseData = try await sendRequest(path: "magic-link/status/", method: .post, params: params)
         let magicLinkStatusResponse = try JSONDecoder().decode(MagicLinkStatusResponse.self, from: responseData)
-        
-        return magicLinkStatusResponse.auth_result
+        return magicLinkStatusResponse.authResult
     }
-    
     
     /// Active a magic link
     /// - Parameter magicLink: The magic link to activate
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     internal func activateMagicLink(magicLink: String) async throws -> AuthResult {
-        let url = try self.appUrl(path: "magic-link/activate/")
-        
-        let request = buildRequest(url: url, method: "PATCH")
-        
-        let data = try JSONSerialization.data(withJSONObject: ["magic_link": magicLink], options: [])
-        
-        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-                
-        try assertValidResponse(response: response, responseData: responseData)
-        
+        let params = ["magic_link": magicLink]
+        let responseData = try await sendRequest(path: "magic-link/activate/", method: .patch, params: params)
         let activateMagicLinkResponse = try JSONDecoder().decode(ActivateMagicLinkResponse.self, from: responseData)
-        
-        return activateMagicLinkResponse.auth_result
+        return activateMagicLinkResponse.authResult
+    }
+    
+    /// Send a new login one time passcode to the user's email or phone
+    /// - Parameters:
+    ///   - identifier: The user's email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``
+    func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
+        let params = [
+            "identifier": identifier,
+            "language": language
+        ]
+        let responseData = try await sendRequest(path: "login/otp", method: .post, params: params)
+        let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
+        return oneTimePasscode
+    }
+    
+    /// Send a new registration one time passcode to the users email or phone
+    /// - Parameters:
+    ///   - identifier: The user's email or phone number
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``
+    func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
+        let params = [
+            "identifier": identifier,
+            "language": language
+        ]
+        let responseData = try await sendRequest(path: "register/otp", method: .post, params: params)
+        let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
+        return oneTimePasscode
+    }
+    
+    /// Active a one time passcode
+    /// - Parameters:
+    ///   - otp: The user's one time passcode
+    ///   - otpId: The one time passcode id
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``
+    func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult {
+        let params = [
+            "otp": otp,
+            "otp_id": otpId
+        ]
+        let responseData = try await sendRequest(path: "otp/activate", method: .post, params: params)
+        let activateOneTimePasscodeResponse = try JSONDecoder().decode(ActivateOneTimePasscodeResponse.self, from: responseData)
+        return activateOneTimePasscodeResponse.authResult
     }
     
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
-    /// - Returns: ``PassageUserDetails``
+    /// - Returns: ``PassageUserInfo``
     /// - Throws: ``PassageAPIError``
-    internal func currentUser(token: String) async throws -> PassageUserDetails {
+    internal func currentUser(token: String) async throws -> PassageUserInfo {
         let url = try self.appUrl(path: "currentuser/")
 
         let request = buildAuthenticatedRequest(url: url, method: "GET", token: token)
@@ -492,7 +496,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let changeEmailResponse = try JSONDecoder().decode(ChangeEmailResponse.self, from: responseData)
         
-        return changeEmailResponse.magic_link
+        return changeEmailResponse.magicLink
 
     }
     
@@ -530,7 +534,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
       
       let changePhoneResponse = try JSONDecoder().decode(ChangePhoneResponse.self, from: responseData)
           
-        return changePhoneResponse.magic_link
+        return changePhoneResponse.magicLink
     }
     
     /// Update the user's device, only supports the friendly name currently
@@ -575,9 +579,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     
     /// Load a user
     /// - Parameter The identifier (email or phone) of the user to get
-    /// - Returns: ``PassageUser``
+    /// - Returns: ``PassageUserInfo``
     /// - Throws: ``PassageAPIError``
-    internal func getUser(identifier: String) async throws -> PassageUser {
+    internal func getUser(identifier: String) async throws -> PassageUserInfo {
         let url = try self.appUrl(path: "users/?identifier=\(identifier.addingPercentEncoding(withAllowedCharacters: .alphanumerics)!)")
         
         let request = buildRequest(url: url, method: "GET")
@@ -605,11 +609,11 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
                 
-        try assertValidResponse(response: response, responseData: responseData, successStatusCode: 201)
+        try assertValidResponse(response: response, responseData: responseData)
         
         let refreshResponse = try JSONDecoder().decode(RefreshResponse.self, from: responseData)
         
-        return refreshResponse.auth_result
+        return refreshResponse.authResult
     }
     
     /// Sign out the current user's session
@@ -646,8 +650,9 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     
     
 
-    internal func assertValidResponse(response: URLResponse, responseData: Data? = nil, successStatusCode: Int = 200) throws {
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == successStatusCode else {
+    internal func assertValidResponse(response: URLResponse, responseData: Data? = nil) throws {
+        let successStatusCodes = [200, 201]
+        guard let httpResponse = response as? HTTPURLResponse, successStatusCodes.contains(httpResponse.statusCode) else {
             let httpResponse = response as? HTTPURLResponse
             
             var errorResponseBody: PassageErrorResponseBody? = nil
@@ -699,6 +704,20 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         request.httpMethod = method
                 
         return request
+    }
+    
+    private func sendRequest(path: String, method: RequestMethod, params: [String: String?]) async throws -> Data {
+        let url = try appUrl(path: path)
+        let request = buildRequest(url: url, method: method.rawValue)
+        var jsonObject: [String: String] = [:]
+        for (key, value) in params {
+            guard let value else { continue }
+            jsonObject[key] = value
+        }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+        try assertValidResponse(response: response,responseData: responseData)
+        return responseData
     }
     
 }
