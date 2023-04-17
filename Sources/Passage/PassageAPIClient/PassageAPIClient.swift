@@ -232,19 +232,18 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         ]
      
         let credId = params.credentialID.toBase64Url();
-        let handshakeResponse = [
+        let handshakeResponse: [String :Any] = [
             "rawId": credId,
             "id": credId,
             "type": "public-key",
             "response": response
-        ] as [String :Any]
+        ]
         
-        let parameters = [
+        let parameters: [String :Any] = [
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
-            "user_id": startResponse.user.id,
-            "cred_type": "passkey"
-        ] as [String :Any]
+            "user_id": startResponse.user.id
+        ]
      
         let request = buildRequest(url: url, method: "POST")
         
