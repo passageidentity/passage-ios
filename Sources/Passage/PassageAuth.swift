@@ -190,6 +190,34 @@ public class PassageAuth {
         return authResult
     }
     
+    /// Activates a One-Time Passcode
+    ///
+    /// Upon successful activation the tokens will be stored in the tokenStore on the instance.
+    ///
+    /// - Parameter otp: string - The OTP provided by your user
+    /// - Parameter otpId: string - The OTP id returned from login or register method
+    /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func oneTimePasscodeActivate(otp: String, otpId: String) async throws -> AuthResult {
+        clearTokens()
+        let authResult = try await PassageAuth.oneTimePasscodeActivate(otp: otp, otpId: otpId)
+        setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
+    /// Checks the status of a magic link to see if it has been activated.
+    ///
+    /// Upon successful activation the tokens will be stored in the tokenStore on the instance.
+    ///
+    /// - Parameter id: string - ID of the magic link (from response body of login or register with magic link)
+    /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func getMagicLinkStatus(id: String) async throws -> AuthResult {
+        clearTokens()
+        let authResult = try await PassageAuth.getMagicLinkStatus(id: id)
+        setTokensFromAuthResult(authResult: authResult)
+        return authResult
+   }
     
     /// This method fetches the current authenticated user
     ///
@@ -362,16 +390,11 @@ public class PassageAuth {
     ///  If an Error occures, the account might already be registered and should login with a passkey
     ///  or a magic link.
     ///
-    ///  This method does not check for AppInfo.require_identifier_verification. It should be checked
-    ///  prior to this and if true should call sendRegisterMagicLink()
-    ///
-    ///  This method is private because it could bypass the Passage App Configuration requiring identifiers to be verified.
-    ///
     /// - Parameter identifier: The users email or phone number
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    private func registerWithPasskey(identifier: String) async throws -> AuthResult {
+    public func registerWithPasskey(identifier: String) async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.registerWithPasskey(identifier: identifier)
         self.setTokensFromAuthResult(authResult: authResult)
