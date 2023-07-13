@@ -24,6 +24,7 @@ internal class PassageSettings : PassageAuthSettings {
     internal var authOrigin: String?
     internal var apiUrl: String? = "https://auth.passage.id"
     internal var version: String
+    internal var language: String?
     
     internal static let shared = PassageSettings()
     
@@ -52,6 +53,9 @@ internal class PassageSettings : PassageAuthSettings {
             }
             if let apiUrl = unwrappedConfig["apiUrl"] {
                 self.apiUrl = apiUrl
+            }
+            if let language = unwrappedConfig["language"] {
+                self.language = language
             }
             else {
                 self.apiUrl = "https://auth.passage.id"
