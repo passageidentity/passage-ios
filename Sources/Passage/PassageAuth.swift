@@ -348,14 +348,12 @@ public class PassageAuth {
     ///
     /// Auth Token from the instance tokenStore will be used.
     ///
-    /// Still some issues to work out with Passkeys, so this is private for now.
-    ///
     /// - Parameters:
     ///   - newEmail: string - valid email address
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private func changeEmail(newEmail: String, language: String? = nil) async throws -> MagicLink? {
+    public func changeEmail(newEmail: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
@@ -367,14 +365,12 @@ public class PassageAuth {
     ///
     /// Auth Token from the instance tokenStore will be used.
     ///
-    /// Still some issues to work out with Passkeys, so this is private for now.
-    ///
     /// - Parameters:
     ///   - newPhone: string - valid E164 formatted phone number.
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private  func changePhone(newPhone: String, language: String? = nil) async throws -> MagicLink? {
+    public func changePhone(newPhone: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
@@ -977,33 +973,26 @@ public class PassageAuth {
     
     /// Initiates an email change for the currently authenticated user. An email will be sent to the provided email, which they will need to verify before the change takes effect.
     ///
-    /// Still some issues to work out with Passkeys, so this is private for now.
-    ///
     /// - Parameters:
     ///   - token: The user's auth token
     ///   - newEmail: string - valid email address
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private static func changeEmail(token: String, newEmail: String, language: String? = nil) async throws -> MagicLink {
-        var magicLink: MagicLink?
+    public static func changeEmail(token: String, newEmail: String, language: String? = nil) async throws -> MagicLink {
         do {
-            magicLink = try await PassageAPIClient.shared.changeEmail(token: token, newEmail: newEmail, magicLinkPath: nil, redirectUrl: nil, language: language)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let magicLink = try await PassageAPIClient.shared
+                .changeEmail(token: token, newEmail: newEmail, magicLinkPath: nil, redirectUrl: nil, language: language)
+            return magicLink
         } catch {
+            if let apiError = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: apiError)
+            }
             throw error
-        }
-        if let unwrappedMagicLink = magicLink {
-            return unwrappedMagicLink
-        } else {
-            throw PassageError.unknown
         }
     }
     
     /// Initiates a phone number change for the currently authenticated user. A text will be sent to the provided phone number, which they will need to verify before the change takes effect.
-    ///
-    /// Still some issues to work out with Passkeys, so this is private for now.
     ///
     /// - Parameters:
     ///   - token: The user's auth token
@@ -1011,19 +1000,16 @@ public class PassageAuth {
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    private static func changePhone(token: String, newPhone: String, language: String? = nil) async throws -> MagicLink {
-        var magicLink: MagicLink?
+    public static func changePhone(token: String, newPhone: String, language: String? = nil) async throws -> MagicLink {
         do {
-            magicLink = try await PassageAPIClient.shared.changePhone(token: token, newPhone: newPhone, magicLinkPath: nil, redirectUrl: nil, language: language)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let magicLink = try await PassageAPIClient.shared
+                .changePhone(token: token, newPhone: newPhone, magicLinkPath: nil, redirectUrl: nil, language: language)
+            return magicLink
         } catch {
+            if let apiError = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: apiError)
+            }
             throw error
-        }
-        if let unwrappedMagicLink = magicLink {
-            return unwrappedMagicLink
-        } else {
-            throw PassageError.unknown
         }
     }
     
