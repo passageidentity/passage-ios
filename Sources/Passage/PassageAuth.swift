@@ -284,13 +284,14 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func addDevice() async throws -> Void {
+    public func addDevice() async throws -> DeviceInfo {
         
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
         
-        try await PassageAuth.addDevice(token: token)        
+        let device = try await PassageAuth.addDevice(token: token)
+        return device
     }
 
     
