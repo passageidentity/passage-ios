@@ -883,16 +883,21 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func addDevice(token: String) async throws -> Void {
+    public static func addDevice(token: String) async throws -> DeviceInfo {
         do {
             let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
-            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
-            try await PassageAPIClient.shared.addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest!)
-        }
-        catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
-        }
-        catch {
+            guard let registrationRequest = try await RegistrationAuthorizationController.shared
+                .register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
+            else {
+                throw PassageError.unknown
+            }
+            let device = try await PassageAPIClient.shared
+                .addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest)
+            return device
+        }  catch {
+            if let apiError = error as? PassageAPIError {
+                try PassageAuth.handlePassageAPIError(error: apiError)
+            }
             throw error
         }
     }

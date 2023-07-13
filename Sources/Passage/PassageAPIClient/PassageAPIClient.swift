@@ -285,7 +285,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``Void``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void {
+    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
@@ -315,7 +315,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
         try assertValidResponse(response: resp, responseData: responseData)
-        
+        let addDeviceResponse = try JSONDecoder().decode(WebauthnAddDeviceFinishResponse.self, from: responseData)
+        return addDeviceResponse.device
     }
     
     /// Send a new login magic link to the user's email or phone
