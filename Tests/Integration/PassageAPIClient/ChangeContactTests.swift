@@ -19,7 +19,7 @@ final class ChangeContactTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let response = try await PassageAPIClient.shared
-                .changeEmail(token: authToken, newEmail: "blayne.bayer+2@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
+                .changeEmail(token: authToken, newEmail: "ricky.padilla+user02@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
             XCTAssertNotNil(response.id)
         } catch {
             XCTAssertTrue(false)
@@ -30,7 +30,7 @@ final class ChangeContactTests: XCTestCase {
         do {
             PassageAPIClient.shared.appId = appInfoValid.id
             let _ = try await PassageAPIClient.shared
-                .changeEmail(token: "", newEmail: "blayne.bayer+2@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
+                .changeEmail(token: "", newEmail: "ricky.padilla+user02@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
             XCTAssertTrue(false)
         } catch {
             XCTAssertTrue(error is PassageAPIError)

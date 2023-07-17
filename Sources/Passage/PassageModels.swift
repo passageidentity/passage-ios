@@ -44,7 +44,7 @@ public struct PassageUserInfo: Codable {
     /// does the user support webauthn
     public let webauthn: Bool?
     /// Devices the user has used webauthn on
-    public let webauthnDevices: [WebauthnDevice]?
+    public let webauthnDevices: [DeviceInfo]?
     /// types of webauthn the user has used - passkey or platform
     public let webauthnTypes: [String]?
     
@@ -63,12 +63,6 @@ public struct PassageUserInfo: Codable {
         case webauthnDevices = "webauthn_devices"
         case webauthnTypes = "webauthn_types"
     }
-}
-
-
-/// Devices used with webauthn
-public struct WebauthnDevice: Codable {
-    public var id: String
 }
 
 /// Struct describing a Passage Application

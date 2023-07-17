@@ -49,7 +49,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func addDeviceFinish(token: String, startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void {
+    func addDeviceFinish(token: String, startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Passage.DeviceInfo {
         throw PassageError.unknown
     }
     

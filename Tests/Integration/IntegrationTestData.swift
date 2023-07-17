@@ -7,15 +7,17 @@ let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
 let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
-let registeredUserEmail = "blayne.bayer+integrationtest@passge.id"
+let registeredUserEmail = "ricky.padilla+user01@passage.id"
+let magicLinkAppId = "czLTOVFIytGqrhRVoHV9o8Wo"
+let magicLinkRegisteredUserEmail = "blayne.bayer@passage.id"
 
-let registeredUser = PassageUserInfo(
-    createdAt: "",
-    email:"blayne.bayer@passage.id",
+let currentUser = PassageUserInfo(
+    createdAt: "2023-07-17T17:45:41.807075Z",
+    email: "ricky.padilla+user01@passage.id",
     emailVerified: true,
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
+    id: "sjHQv68O5gnS2ipj0Rb4IkKy",
     lastLoginAt: "",
-    loginCount: 1,
+    loginCount: 2,
     phone: "",
     phoneVerified: false,
     status: "active",
@@ -25,33 +27,16 @@ let registeredUser = PassageUserInfo(
     webauthnTypes: []
 )
 
-let currentUser = PassageUserInfo(
-    createdAt: "2023-02-16T15:55:28.890571Z",
-    email: "blayne.bayer@passage.id",
-    emailVerified: true,
-    id: "BMQ9Jbi90ubPvX9H1XU5oyfR",
-    lastLoginAt: "2023-02-16T19:55:38.907657Z",
-    loginCount: 2,
-    phone: "",
-    phoneVerified: false,
-    status: "active",
-    updatedAt: "2023-02-16T19:55:38.909048Z",
-    webauthn: true,
-    webauthnDevices: [],
-    webauthnTypes: []
-)
-
-
 let appInfoValid = AppInfo(
     allowedIdentifier: "both",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "http://localhost:4173",
+    authFallbackMethodString: "otp",
+    authOrigin: "https://try-uat.passage.dev",
     ephemeral: false,
-    id: "czLTOVFIytGqrhRVoHV9o8Wo",
+    id: "jlSg3Vr4MyKi1dcl3otVz9xa",
     loginURL: "/",
-    name: "passage-ios uat",
+    name: "iOS Integration Test App",
     publicSignup: true,
-    redirectURL: "/dashboard",
+    redirectURL: "/",
     requiredIdentifier: "both",
     requireEmailVerification: false,
     requireIdentifierVerification: false,

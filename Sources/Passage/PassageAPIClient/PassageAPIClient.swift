@@ -28,6 +28,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// This should be set in the Passage.plist file or it will default to the production url
     internal var baseUrl: String?
     
+    /// The language messages to user should be sent in.
+    ///
+    /// This can be configured in the Passage.plist file.
+    internal var language: String?
     
     /// Private initializer
     ///
@@ -37,6 +41,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     private init() {
         self.appId = PassageSettings.shared.appId!
         self.baseUrl = PassageSettings.shared.apiUrl ?? "https://auth.passage.id"
+        self.language = PassageSettings.shared.language
     }
 
     /// Get the configured Passage Application details.
@@ -285,7 +290,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``Void``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Void {
+    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
@@ -315,7 +320,8 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
         
         try assertValidResponse(response: resp, responseData: responseData)
-        
+        let addDeviceResponse = try JSONDecoder().decode(WebauthnAddDeviceFinishResponse.self, from: responseData)
+        return addDeviceResponse.device
     }
     
     /// Send a new login magic link to the user's email or phone
@@ -329,7 +335,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let params = [
             "identifier": identifier,
             "path": path,
-            "language": language
+            "language": language ?? self.language
         ]
         let responseData = try await sendRequest(path: "login/magic-link/", method: .post, params: params)
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
@@ -347,7 +353,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         let params = [
             "identifier": identifier,
             "path": path,
-            "language": language
+            "language": language ?? self.language
         ]
         let responseData = try await sendRequest(path: "register/magic-link/", method: .post, params: params)
         let sendMagicLinkResponse = try JSONDecoder().decode(SendMagicLinkResponse.self, from: responseData)
@@ -385,7 +391,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     func sendLoginOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
         let params = [
             "identifier": identifier,
-            "language": language
+            "language": language ?? self.language
         ]
         let responseData = try await sendRequest(path: "login/otp", method: .post, params: params)
         let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
@@ -401,7 +407,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     func sendRegisterOneTimePasscode(identifier: String, language: String?) async throws -> OneTimePasscode {
         let params = [
             "identifier": identifier,
-            "language": language
+            "language": language ?? self.language
         ]
         let responseData = try await sendRequest(path: "register/otp", method: .post, params: params)
         let oneTimePasscode = try JSONDecoder().decode(OneTimePasscode.self, from: responseData)
@@ -484,9 +490,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         if (magicLinkPath != nil) {
             jsonObject["magic_link_path"] = magicLinkPath
         }
-        if(language != nil) {
-            jsonObject["language"] = language
-        }
+        jsonObject["language"] = language ?? self.language
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
@@ -509,30 +513,20 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``
     internal func changePhone(token: String, newPhone: String, magicLinkPath: String?, redirectUrl: String?, language: String?) async throws -> MagicLink {
-        
-      let url = try self.appUrl(path: "currentuser/phone/")
-    
-      let request = buildAuthenticatedRequest(url: url, method: "PATCH", token: token)
-        
-      var jsonObject = ["new_phone": newPhone]
-        
-      if (redirectUrl != nil) {
+        let url = try self.appUrl(path: "currentuser/phone/")
+        let request = buildAuthenticatedRequest(url: url, method: "PATCH", token: token)
+        var jsonObject = ["new_phone": newPhone]
+        if (redirectUrl != nil) {
           jsonObject["redirect_url"] = redirectUrl
-      }
-      if (magicLinkPath != nil) {
+        }
+        if (magicLinkPath != nil) {
           jsonObject["magic_link_path"] = magicLinkPath
-      }
-      if(language != nil) {
-          jsonObject["language"] = language
-      }
-      let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-      
-      let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-      
+        }
+        jsonObject["language"] = language ?? self.language
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         try assertValidResponse(response: response, responseData: responseData)
-      
-      let changePhoneResponse = try JSONDecoder().decode(ChangePhoneResponse.self, from: responseData)
-          
+        let changePhoneResponse = try JSONDecoder().decode(ChangePhoneResponse.self, from: responseData)
         return changePhoneResponse.magicLink
     }
     

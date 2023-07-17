@@ -101,7 +101,7 @@ internal struct WebauthnRegisterStartResponse: Codable {
 /// API Response from webauthn registration finish
 internal typealias WebauthnRegisterFinishResponse = AuthResultResponse
 
-internal typealias WebauthnAddDeviceFinishResponse = AuthResultResponse
+internal typealias WebauthnAddDeviceFinishResponse = UpdateDeviceResponse
 
 internal typealias SendMagicLinkResponse = MagicLinkResponse
 
