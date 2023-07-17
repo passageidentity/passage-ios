@@ -6,7 +6,7 @@ final class MagicLinkTests: XCTestCase {
     override func setUp() {
         super.setUp()
         PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
+        PassageSettings.shared.appId = magicLinkAppId
     }
     
     override func tearDown() {
@@ -16,7 +16,7 @@ final class MagicLinkTests: XCTestCase {
     @available(iOS 15.0, *)
     func testSendRegisterMagicLink() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
+            PassageAPIClient.shared.appId = magicLinkAppId
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
             let response = try await PassageAPIClient.shared
@@ -34,9 +34,9 @@ final class MagicLinkTests: XCTestCase {
     
     func testSendLoginMagicLink() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
+            PassageAPIClient.shared.appId = magicLinkAppId
             let response = try await PassageAPIClient.shared
-                .sendLoginMagicLink(identifier: registeredUser.email ?? "", path: nil, language: nil)
+                .sendLoginMagicLink(identifier: magicLinkRegisteredUserEmail, path: nil, language: nil)
             do {
                 _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
                 XCTAssertTrue(false) // the status should error as it is unactivated
@@ -51,7 +51,7 @@ final class MagicLinkTests: XCTestCase {
     
     func testActivateMagicLink() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
+            PassageAPIClient.shared.appId = magicLinkAppId
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             let response = try await PassageAPIClient.shared
