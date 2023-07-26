@@ -41,6 +41,8 @@ public struct PassageUserInfo: Codable {
     public let status: String
     /// when the user was last update
     public let updatedAt: String?
+    /// Custom metadata collected about the user
+    let userMetadata: UserMetadata?
     /// does the user support webauthn
     public let webauthn: Bool?
     /// Devices the user has used webauthn on
@@ -59,9 +61,46 @@ public struct PassageUserInfo: Codable {
         case phoneVerified = "phone_verified"
         case status
         case updatedAt = "updated_at"
+        case userMetadata = "user_metadata"
         case webauthn
         case webauthnDevices = "webauthn_devices"
         case webauthnTypes = "webauthn_types"
+    }
+}
+
+public typealias UserMetadata = [String: MetadataValue?]
+
+public enum MetadataValue: Codable, Equatable {
+    case double(Double)
+    case string(String)
+    case bool(Bool)
+    case none
+    
+    public init(from decoder: Decoder) {
+        let container = try? decoder.singleValueContainer()
+        if let x = try? container?.decode(Double.self) {
+            self = .double(x)
+        } else if let x = try? container?.decode(Bool.self) {
+            self = .bool(x)
+        } else if let x = try? container?.decode(String.self) {
+            self = .string(x)
+        } else {
+            self = .none
+        }
+    }
+    
+    public func encode(to encoder: Encoder) {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .double(let x):
+            try? container.encode(x)
+        case .string(let x):
+            try? container.encode(x)
+        case .bool(let x):
+            try? container.encode(x)
+        case .none:
+            try? container.encodeNil()
+        }
     }
 }
 
@@ -93,6 +132,8 @@ public struct AppInfo: Codable, Equatable {
     public let requireIdentifierVerification: Bool
     /// How long is the auth token valid
     public let sessionTimeoutLength: Int
+    /// Custom user metadata schema the app collects
+    public let userMetadataSchema: [UserMetadataSchema]?
 
     internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
@@ -108,6 +149,7 @@ public struct AppInfo: Codable, Equatable {
         case requireEmailVerification = "require_email_verification"
         case requireIdentifierVerification = "require_identifier_verification"
         case sessionTimeoutLength = "session_timeout_length"
+        case userMetadataSchema = "user_metadata_schema"
     }
     
     public enum AuthFallbackMethod: String {
@@ -121,6 +163,24 @@ public struct AppInfo: Codable, Equatable {
         return AuthFallbackMethod(rawValue: authFallbackMethodString)
     }
     
+}
+
+public struct UserMetadataSchema: Codable, Equatable {
+    let fieldName: String?
+    let friendlyName: String?
+    let id: String?
+    let profile: Bool?
+    let registration: Bool?
+    let type: String?
+    
+    internal enum CodingKeys: String, CodingKey {
+        case fieldName = "field_name"
+        case friendlyName = "friendly_name"
+        case id
+        case profile
+        case registration
+        case type
+    }
 }
 
 public protocol AuthFallbackResult: Codable {

@@ -22,6 +22,7 @@ let currentUser = PassageUserInfo(
     phoneVerified: false,
     status: "active",
     updatedAt: "",
+    userMetadata: nil,
     webauthn: true,
     webauthnDevices: [],
     webauthnTypes: []
@@ -40,7 +41,8 @@ let appInfoValid = AppInfo(
     requiredIdentifier: "both",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 0
+    sessionTimeoutLength: 0,
+    userMetadataSchema: []
 )
 
 let appInfoInvalid = AppInfo(
@@ -56,7 +58,8 @@ let appInfoInvalid = AppInfo(
     requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000
+    sessionTimeoutLength: 6000,
+    userMetadataSchema: nil
 )
 
 let appInfoRefreshToken = AppInfo(
@@ -72,7 +75,8 @@ let appInfoRefreshToken = AppInfo(
     requiredIdentifier: "both",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 5
+    sessionTimeoutLength: 5,
+    userMetadataSchema: nil
 )
 
 let appInfoTest = AppInfo(
@@ -88,7 +92,8 @@ let appInfoTest = AppInfo(
     requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000
+    sessionTimeoutLength: 6000,
+    userMetadataSchema: nil
 )
 
 let otpAppInfoValid = AppInfo(
@@ -104,7 +109,8 @@ let otpAppInfoValid = AppInfo(
     requiredIdentifier: "both",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000
+    sessionTimeoutLength: 6000,
+    userMetadataSchema: nil
 )
 
 let otpRegisteredUser = PassageUserInfo(
@@ -118,6 +124,7 @@ let otpRegisteredUser = PassageUserInfo(
     phoneVerified: false,
     status: "active",
     updatedAt: "",
+    userMetadata: nil,
     webauthn: false,
     webauthnDevices: [],
     webauthnTypes: []
