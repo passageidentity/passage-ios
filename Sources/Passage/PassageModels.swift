@@ -70,7 +70,7 @@ public struct PassageUserInfo: Codable {
 
 public typealias UserMetadata = [String: MetadataValue?]
 
-public enum MetadataValue: Codable {
+public enum MetadataValue: Codable, Equatable {
     case double(Double)
     case string(String)
     case bool(Bool)

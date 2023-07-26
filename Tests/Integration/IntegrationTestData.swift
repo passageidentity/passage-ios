@@ -42,7 +42,7 @@ let appInfoValid = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 0,
-    userMetadataSchema: nil
+    userMetadataSchema: []
 )
 
 let appInfoInvalid = AppInfo(

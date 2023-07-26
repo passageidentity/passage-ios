@@ -28,6 +28,7 @@ final class CurrentUserTests: XCTestCase {
             XCTAssertEqual(response.phone, currentUser.phone)
             XCTAssertEqual(response.phoneVerified, currentUser.phoneVerified)
             XCTAssertEqual(response.webauthn, currentUser.webauthn)
+            XCTAssertEqual(response.userMetadata, currentUser.userMetadata)
         } catch {
             // fail the test if we catch an error
             XCTAssertTrue(false)
