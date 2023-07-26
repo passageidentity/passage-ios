@@ -17,7 +17,8 @@ let testAppInfo = AppInfo(
     requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000
+    sessionTimeoutLength: 6000,
+    userMetadataSchema: nil
 )
 
 let testLoginStartResponse = WebauthnLoginStartResponse(
@@ -53,6 +54,7 @@ let testRegisterStartResponse = WebauthnRegisterStartResponse(
         phoneVerified: true,
         status: "",
         updatedAt: "",
+        userMetadata: nil,
         webauthn: true,
         webauthnDevices: [],
         webauthnTypes: []
