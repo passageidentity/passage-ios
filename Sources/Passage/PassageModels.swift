@@ -187,12 +187,12 @@ public struct AppInfo: Codable, Equatable {
 }
 
 public struct UserMetadataSchema: Codable, Equatable {
-    let fieldName: String?
-    let friendlyName: String?
-    let id: String?
-    let profile: Bool?
-    let registration: Bool?
-    let type: String?
+    public let fieldName: String?
+    public let friendlyName: String?
+    public let id: String?
+    public let profile: Bool?
+    public let registration: Bool?
+    public let type: String?
     
     internal enum CodingKeys: String, CodingKey {
         case fieldName = "field_name"
