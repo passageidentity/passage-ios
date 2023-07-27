@@ -132,10 +132,10 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
             phoneVerified: true,
             status: "",
             updatedAt: "",
-            userMetadata: nil,
             webauthn: true,
             webauthnDevices: [],
-            webauthnTypes: []
+            webauthnTypes: [],
+            codableUserMetadata: nil
         )
     }
     

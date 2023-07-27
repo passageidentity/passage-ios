@@ -54,10 +54,10 @@ let testRegisterStartResponse = WebauthnRegisterStartResponse(
         phoneVerified: true,
         status: "",
         updatedAt: "",
-        userMetadata: nil,
         webauthn: true,
         webauthnDevices: [],
-        webauthnTypes: []
+        webauthnTypes: [],
+        codableUserMetadata: nil
     ),
     handshake: WebauthnRegisterStartResponseHandshake(
         id: "TEST_ID",

@@ -41,14 +41,14 @@ public struct PassageUserInfo: Codable {
     public let status: String
     /// when the user was last update
     public let updatedAt: String?
-    /// Custom metadata collected about the user
-    let userMetadata: UserMetadata?
     /// does the user support webauthn
     public let webauthn: Bool?
     /// Devices the user has used webauthn on
     public let webauthnDevices: [DeviceInfo]?
     /// types of webauthn the user has used - passkey or platform
     public let webauthnTypes: [String]?
+    
+    internal let codableUserMetadata: CodableUserMetadata?
     
     internal enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"
@@ -61,16 +61,37 @@ public struct PassageUserInfo: Codable {
         case phoneVerified = "phone_verified"
         case status
         case updatedAt = "updated_at"
-        case userMetadata = "user_metadata"
+        case codableUserMetadata = "user_metadata"
         case webauthn
         case webauthnDevices = "webauthn_devices"
         case webauthnTypes = "webauthn_types"
     }
+    
+    /// Custom metadata collected about the user
+    public var userMetadata: [String: Any]? {
+        guard let codableUserMetadata else { return nil }
+        var dict: [String: Any] = [:]
+        for (key, value) in codableUserMetadata {
+            switch value {
+            case .double(let num):
+                dict[key] = num
+            case .string(let str):
+                dict[key] = str
+            case .bool(let bool):
+                dict[key] = bool
+            case .none?:
+                dict[key] = NSNull()
+            default:
+                break
+            }
+        }
+        return dict
+    }
 }
 
-public typealias UserMetadata = [String: MetadataValue?]
+internal typealias CodableUserMetadata = [String: MetadataValue?]
 
-public enum MetadataValue: Codable, Equatable {
+internal enum MetadataValue: Codable, Equatable {
     case double(Double)
     case string(String)
     case bool(Bool)

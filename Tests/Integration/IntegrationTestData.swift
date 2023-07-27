@@ -22,10 +22,10 @@ let currentUser = PassageUserInfo(
     phoneVerified: false,
     status: "active",
     updatedAt: "",
-    userMetadata: nil,
     webauthn: true,
     webauthnDevices: [],
-    webauthnTypes: []
+    webauthnTypes: [],
+    codableUserMetadata: nil
 )
 
 let appInfoValid = AppInfo(
@@ -124,8 +124,8 @@ let otpRegisteredUser = PassageUserInfo(
     phoneVerified: false,
     status: "active",
     updatedAt: "",
-    userMetadata: nil,
     webauthn: false,
     webauthnDevices: [],
-    webauthnTypes: []
+    webauthnTypes: [],
+    codableUserMetadata: nil
 )
