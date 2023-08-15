@@ -133,8 +133,6 @@ public struct AppInfo: Codable, Equatable {
     internal let authFallbackMethodString: String
     /// The Passage Applications auth origin
     public let authOrigin: String
-    /// If this is an ephemeral app
-    public let ephemeral: Bool
     /// The id of the Passage Application
     public let id: String
     /// The Login URL of the Passage Application
@@ -160,7 +158,6 @@ public struct AppInfo: Codable, Equatable {
         case allowedIdentifier = "allowed_identifier"
         case authFallbackMethodString = "auth_fallback_method"
         case authOrigin = "auth_origin"
-        case ephemeral
         case id
         case loginURL = "login_url"
         case name
