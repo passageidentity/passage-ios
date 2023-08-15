@@ -3,8 +3,8 @@ import AuthenticationServices
 
 let apiUrl = "https://auth-uat.passage.dev"
 
-let authToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1jQWNwMzFhb3dwS0xOb0Y4M2ZwQTVkMSIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL3RyeS11YXQucGFzc2FnZS5kZXYiLCJleHAiOjE2OTI1NDQ4NjQsImlhdCI6MTY5MjExMjg2NCwiaXNzIjoiaHR0cHM6Ly9hdXRoLXVhdC5wYXNzYWdlLmRldi92MS9hcHBzL2psU2czVnI0TXlLaTFkY2wzb3RWejl4YSIsIm5iZiI6MTY5MjExMjg1OSwic3ViIjoic2pIUXY2OE81Z25TMmlwajBSYjRJa0t5In0.EMcevxcLTPo_JK1bs9ULs8Ng-bOOWJrRqnCRo7KG1-Y57EeR1p6X-c3B0Puii9LC9oCGMUrwZIhlZdkRsJEeklz4b9LmiBn81JXtX7dLHJKduJ08aezJMOdKHVXQ1EixhIMfZxGjthMKm3sXH6uIcrLtlQiJkNtMamaRBVI0X4Lf9Wkgo78_khqgEBlerUkul1Wlo4bFWbGQerUtQa_C8EREX8LBI6ozFE4YxV0nArO2Wbv0D-pLlPN6Lk6DLkVQKPd_x8DgKVBEM9rkX3MOXXrVK6vNvGYf6CZW-4xzz-DAfq1fTqdOG0pJd8vzXHSbUgkttfHgE1NckxUXZ-l1gw"//ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
-let mailosaurAPIKey = "udoOEVY0FNE11tTh"//ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
+let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
+let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"
