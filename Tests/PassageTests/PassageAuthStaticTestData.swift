@@ -8,7 +8,6 @@ let testAppInfo = AppInfo(
     allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
     authFallbackMethodString: "magic_link",
     authOrigin: "TEST_AUTH_ORIGIN",
-    ephemeral: true,
     id: "TEST_APP_ID",
     loginURL: "TEST_LOGIN_URL",
     name: "TEST_APP",
