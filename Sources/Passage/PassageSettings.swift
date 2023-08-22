@@ -57,9 +57,6 @@ internal class PassageSettings : PassageAuthSettings {
             if let language = unwrappedConfig["language"] {
                 self.language = language
             }
-            else {
-                self.apiUrl = "https://auth.passage.id"
-            }
         }
         
         #if SWIFT_PACKAGE
