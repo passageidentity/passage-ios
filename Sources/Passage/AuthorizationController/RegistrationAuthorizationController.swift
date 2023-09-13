@@ -1,11 +1,3 @@
-//
-//  PassageAuthAsyncAuthorizationController.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/24/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 import Foundation
 import os
 import AuthenticationServices
@@ -21,18 +13,13 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
     
     static var shared: RegistrationAuthorizationControllerProtocol = RegistrationAuthorizationController()
     
-    public var domain: String
-    
-    private override init() {
-        self.domain = PassageSettings.shared.authOrigin!
-    }
-    
-    
     func register(from response: WebauthnRegisterStartResponse, identifier: String) async throws -> ASAuthorizationPlatformPublicKeyCredentialRegistration? {
         
         PassageAutofillAuthorizationController.shared.cancel()
         
-        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+        let rpId = response.handshake.challenge.publicKey.rp.id
+        
+        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
         
         let challenge = response.handshake.challenge.publicKey.challenge
         let userId = response.user.id

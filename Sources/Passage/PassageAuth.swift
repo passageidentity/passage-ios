@@ -351,6 +351,9 @@ public class PassageAuth {
         return tokens.authToken
     }
     
+    public func overrideApiUrl(with newUrl: String) {
+        PassageSettings.shared.apiUrl = newUrl
+    }
     
     // MARK: Instance Private Methods
     

@@ -9,7 +9,6 @@ import Foundation
 import os
 protocol PassageAuthSettings {
     var appId: String? { get set }
-    var authOrigin: String? { get set }
     var apiUrl: String? { get set }
 }
 
@@ -21,7 +20,6 @@ internal class PassageSettings : PassageAuthSettings {
     
     // MARK: - Properties
     internal var appId: String?
-    internal var authOrigin: String?
     internal var apiUrl: String? = "https://auth.passage.id"
     internal var version: String
     internal var language: String?
@@ -47,9 +45,6 @@ internal class PassageSettings : PassageAuthSettings {
         if let unwrappedConfig = config {
             if let appId = unwrappedConfig["appId"] {
                 self.appId = appId
-            }
-            if let authOrigin = unwrappedConfig["authOrigin"] {
-                self.authOrigin = authOrigin
             }
             if let apiUrl = unwrappedConfig["apiUrl"] {
                 self.apiUrl = apiUrl
