@@ -25,6 +25,16 @@ public class PassageAuth {
         self.tokenStore = tokenStore
     }
     
+    public init(appId: String) {
+        self.tokenStore = PassageStore.shared
+        PassageSettings.shared.appId = appId
+    }
+    
+    public init(appId: String, tokenStore: PassageTokenStore) {
+        self.tokenStore = tokenStore
+        PassageSettings.shared.appId = appId
+    }
+    
     // MARK: Instance Public Methods
     
 
