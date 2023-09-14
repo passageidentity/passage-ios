@@ -75,6 +75,7 @@ internal class MailosaurAPIClient {
             let messages = try await listMessages()
             guard !messages.isEmpty else { return "" }
             let message = try await getMessage(id: messages[0].id)
+            guard !message.html.links.isEmpty else { return "" }
             let incomingURL = message.html.links[0].href
             let components = NSURLComponents(url: URL(string: incomingURL)!, resolvingAgainstBaseURL: true)
             guard let magicLink = components!.queryItems?.filter({$0.name == "psg_magic_link"}).first?.value else {

@@ -56,7 +56,7 @@ final class MagicLinkTests: XCTestCase {
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             let response = try await PassageAPIClient.shared
                 .sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
-            try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
+            try await Task.sleep(nanoseconds: checkEmailWaitTime)
             let magicLink = try await MailosaurAPIClient().getMostRecentMagicLink()
             let token = try await PassageAPIClient.shared.activateMagicLink(magicLink: magicLink)
             XCTAssertNotNil(token)
