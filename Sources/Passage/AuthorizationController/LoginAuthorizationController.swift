@@ -11,27 +11,6 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
 
     static var shared: LoginAuthorizationControllerProtocol = LoginAuthorizationController()
     
-    func loginWithIdentifier(from response: WebauthnLoginStartResponse, identifier: String) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion {
-        PassageAutofillAuthorizationController.shared.cancel()
-        let rpId = response.handshake.challenge.publicKey.rpId
-        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
-        let challenge = response.handshake.challenge.publicKey.challenge
-        let decodedChallenge = challenge.decodeBase64Url()
-        let assertionRequest = publicKeyCredentialProvider.createCredentialAssertionRequest(challenge: decodedChallenge!)
-        let authController = ASAuthorizationController(authorizationRequests: [ assertionRequest ] )
-        authController.delegate = self
-        authController.performRequests()
-        
-        return try await withCheckedThrowingContinuation(
-            { [weak self] (continuation: CredentialAssertionCheckedThrowingContinuation) in
-                guard let self = self else {
-                    return
-                }
-                self.credentialAssertionThrowingContinuation = continuation
-            }
-        )
-    }
-    
     func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
         let rpId = response.handshake.challenge.publicKey.rpId

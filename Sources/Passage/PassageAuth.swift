@@ -1070,37 +1070,6 @@ public class PassageAuth {
 
     }
     
-    /// Login a user by their identifier (Not supported at this time)
-    ///
-    /// This method is currently not supported in iOS
-    /// Currently only passkey login is supported. Does not use passkey.
-    /// - Parameter identifier: <#identifier description#>
-    /// - Returns: <#description#>
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
-    private static func loginWithIdentifier(identifier: String) async throws -> AuthResult {
-        var authResult: AuthResult?
-        do {
-            // if error status code of 404 userNotFound
-            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginWithIdentifierStart(identifier: identifier )
-            
-            let credentialAssertion = try await LoginAuthorizationController.shared.loginWithIdentifier(from: loginWithIdentifierStartResponse, identifier: identifier)
-            
-            authResult = try await PassageAPIClient.shared.webauthnLoginWithIdentifierFinish(startResponse: loginWithIdentifierStartResponse, credentialAssertion: credentialAssertion)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
-        }
-        catch {
-            throw error
-        }
-        
-        if let unwrappedAuthResult = authResult {
-            return unwrappedAuthResult
-        } else {
-            throw PassageError.unknown
-        }
-    }
-    
     /// Private method to instantiate a logger and log the errors we catch
     ///
     /// - Parameters:
