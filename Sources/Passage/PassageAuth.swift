@@ -411,21 +411,6 @@ public class PassageAuth {
         return authResult
     }
     
-    /// Login a user by their identifier (Not supported at this time)
-    ///
-    /// This method is currently not supported in iOS
-    /// Currently only passkey login is supported. Does not use passkey.
-    /// - Parameter identifier: <#identifier description#>
-    /// - Returns: <#description#>
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
-    private func loginWithIdentifier(identifier: String) async throws -> AuthResult {
-        self.clearTokens()
-        let authResult = try await PassageAuth.loginWithIdentifier(identifier: identifier)
-        self.setTokensFromAuthResult(authResult: authResult)
-        return authResult
-    }
-    
     private func clearTokens() -> Void {
         self.tokenStore.clearTokens()
     }
