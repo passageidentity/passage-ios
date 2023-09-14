@@ -1,11 +1,3 @@
-//
-//  PassageAutoFillAuthorizationController.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/22/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 import Foundation
 import AuthenticationServices
 import os
@@ -52,9 +44,11 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         self.onCancel = onCancel
         
         self.authenticationAnchor = anchor
-        self.startResponse = try await PassageAuth.autoFillStart()
+        let startResponse = try await PassageAuth.autoFillStart()
+        self.startResponse = startResponse
         
-        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: PassageSettings.shared.authOrigin!)
+        let rpId = startResponse.handshake.challenge.publicKey.rpId
+        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
         
         let challenge = self.startResponse!.handshake.challenge.publicKey.challenge
         let decodedChallenge = challenge.decodeBase64Url()

@@ -1,11 +1,3 @@
-//
-//  PassageAuthAsyncAuthorizationController.swift
-//  Shiny
-//
-//  Created by blayne bayer on 8/24/22.
-//  Copyright © 2022 Apple. All rights reserved.
-//
-
 import Foundation
 import os
 import AuthenticationServices
@@ -17,39 +9,12 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
         CheckedContinuation<ASAuthorizationPlatformPublicKeyCredentialAssertion, Error>
     private var credentialAssertionThrowingContinuation: CredentialAssertionCheckedThrowingContinuation? = nil
 
-    
     static var shared: LoginAuthorizationControllerProtocol = LoginAuthorizationController()
-    
-    public var domain: String
-    
-    private override init() {
-        self.domain = PassageSettings.shared.authOrigin!
-    }
-    
-    
-    func loginWithIdentifier(from response: WebauthnLoginStartResponse, identifier: String) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion {
-        PassageAutofillAuthorizationController.shared.cancel()
-        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
-        let challenge = response.handshake.challenge.publicKey.challenge
-        let decodedChallenge = challenge.decodeBase64Url()
-        let assertionRequest = publicKeyCredentialProvider.createCredentialAssertionRequest(challenge: decodedChallenge!)
-        let authController = ASAuthorizationController(authorizationRequests: [ assertionRequest ] )
-        authController.delegate = self
-        authController.performRequests()
-        
-        return try await withCheckedThrowingContinuation(
-            { [weak self] (continuation: CredentialAssertionCheckedThrowingContinuation) in
-                guard let self = self else {
-                    return
-                }
-                self.credentialAssertionThrowingContinuation = continuation
-            }
-        )
-    }
     
     func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPlatformPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
-        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: domain)
+        let rpId = response.handshake.challenge.publicKey.rpId
+        let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
         let challenge = response.handshake.challenge.publicKey.challenge
         let decodedChallenge = challenge.decodeBase64Url()
         let assertionRequest = publicKeyCredentialProvider.createCredentialAssertionRequest(challenge: decodedChallenge!)

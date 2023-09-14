@@ -45,7 +45,7 @@ final class OneTimePasscodeTests: XCTestCase {
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             let response = try await PassageAPIClient.shared
                 .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
-            try await Task.sleep(nanoseconds: UInt64(3 * Double(NSEC_PER_SEC)))
+            try await Task.sleep(nanoseconds: checkEmailWaitTime)
             let oneTimePasscode = try await MailosaurAPIClient().getMostRecentOneTimePasscode()
             let token = try await PassageAPIClient.shared.activateOneTimePasscode(otp: oneTimePasscode, otpId: response.id)
             XCTAssertNotNil(token)
