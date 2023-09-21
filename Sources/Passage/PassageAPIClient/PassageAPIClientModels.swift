@@ -70,7 +70,7 @@ internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser: Co
 }
 
 internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection: Codable {
-    public let authenticatorAttachment: String
+    public let authenticatorAttachment: String?
 }
 
 internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKey: Codable {

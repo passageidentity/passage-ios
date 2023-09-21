@@ -1038,18 +1038,31 @@ public class PassageAuth {
         do {
             let registrationStartResponse = try await PassageAPIClient.shared.webauthnRegistrationStart(identifier: identifier)
             
-            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
+            if registrationStartResponse.handshake.challenge.publicKey.authenticatorSelection.authenticatorAttachment != "cross-platform" {
+                print("is NOT cross platform")
+                let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
+                
+                authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
+            } else {
+                print("is cross platform")
+                let registrationRequest = try await RegistrationAuthorizationController.shared.registerSecurityKey(from: registrationStartResponse, identifier: identifier)
+                print("🇫🇷 GOT HERE")
+                authResult = try await PassageAPIClient.shared.webauthnRegistrationSecurityFinish(startResponse: registrationStartResponse, params: registrationRequest)
+            }
             
-            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
+            
         } catch (let error as PassageAPIError) {
+            print(error)
             try PassageAuth.handlePassageAPIError(error: error)
         } catch  {
+            print(error)
             throw error
         }
         
         if let unwrappedAuthResult = authResult {
             return unwrappedAuthResult
         } else {
+            print("error unknown")
             throw PassageError.unknown
         }
 

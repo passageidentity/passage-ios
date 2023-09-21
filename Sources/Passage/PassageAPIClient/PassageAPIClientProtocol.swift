@@ -39,6 +39,8 @@ protocol PassageAuthAPIClient  {
     func webauthnLoginWithIdentifierStart(identifier: String) async throws -> WebauthnLoginStartResponse
     
     
+    func webauthnRegistrationSecurityFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?) async throws -> AuthResult
+    
     /// Perform a webauthn login finish request to complete an authentication attempt
     /// - Parameters:
     ///   - startResponse: ``WebauthnLoginStartResponse`` from the previous login start request
