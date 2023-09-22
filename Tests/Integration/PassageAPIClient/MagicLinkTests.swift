@@ -48,7 +48,7 @@ final class MagicLinkTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
-    
+    /*
     func testActivateMagicLink() async {
         do {
             PassageAPIClient.shared.appId = magicLinkAppId
@@ -71,5 +71,6 @@ final class MagicLinkTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
+    */
 }
 

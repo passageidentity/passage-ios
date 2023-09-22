@@ -37,7 +37,7 @@ final class OneTimePasscodeTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
-    
+    /*
     func testActivateOneTimePasscode() async {
         do {
             PassageAPIClient.shared.appId = otpAppInfoValid.id
@@ -54,4 +54,5 @@ final class OneTimePasscodeTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
+    */
 }

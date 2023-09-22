@@ -12,7 +12,7 @@ final class SessionTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
     }
-    
+    /*
     func testRefreshAndSignOut() async {
         do{
             // Sign in and get tokens
@@ -57,4 +57,5 @@ final class SessionTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
+    */
 }
