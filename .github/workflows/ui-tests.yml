@@ -1,0 +1,22 @@
+name: Trigger UI Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Trigger iOS App UI Tests
+      uses: octokit/request-action@v2.x
+      with:
+        route: POST /repos/passageidentity/passage-ios-uitest-app/dispatches
+        event_type: swift-package-update
+        client_payload: '{"ref": "${{ github.head_ref }}"}'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
