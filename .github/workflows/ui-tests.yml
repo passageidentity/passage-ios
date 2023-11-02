@@ -13,6 +13,6 @@ jobs:
         with:
           owner: passageidentity
           repo: passage-ios-uitest-app
-          github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
           workflow_file_name: ui-tests.yml
           inputs: '{"passage_ios_branch_name": "${{ github.head_ref }}"}'
