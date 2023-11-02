@@ -1,22 +1,18 @@
-name: Trigger UI Tests
+name: Trigger iOS App UI Tests
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  notify:
+  trigger-ui-test:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Trigger iOS App UI Tests
-      uses: octokit/request-action@v2.x
-      with:
-        route: POST /repos/passageidentity/passage-ios-uitest-app/dispatches
-        event_type: swift-package-update
-        client_payload: '{"ref": "${{ github.head_ref }}"}'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger UI Test Workflow in iOS App Repo
+        uses: convictional/trigger-workflow-and-wait@v1.6.3
+        with:
+          owner: passageidentity
+          repo: passage-ios-uitest-app
+          github_token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+          workflow_file_name: ui-tests.yml
+          inputs: '{"passage_ios_branch_name": "${{ github.head_ref }}"}'
