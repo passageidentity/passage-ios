@@ -15,4 +15,5 @@ jobs:
           repo: passage-ios-uitest-app
           github_token: ${{ secrets.GH_ACCESS_TOKEN }}
           workflow_file_name: ui-tests.yml
-          inputs: '{"passage_ios_branch_name": "${{ github.head_ref }}"}'
+          github_user: rickycpadilla
+          client_payload: '{"passage_ios_branch_name": "${{ github.head_ref }}"}'
