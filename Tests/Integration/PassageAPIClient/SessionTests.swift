@@ -12,7 +12,7 @@ final class SessionTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
     }
-    /*
+    
     func testRefreshAndSignOut() async {
         do{
             // Sign in and get tokens
@@ -21,8 +21,17 @@ final class SessionTests: XCTestCase {
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             _ = try await PassageAPIClient.shared
                 .sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
-            try await Task.sleep(nanoseconds: checkEmailWaitTime)
-            let magicLink = try await MailosaurAPIClient().getMostRecentMagicLink()
+            var magicLink: String? = nil
+            let mailosaurApiClient = MailosaurAPIClient()
+            for _ in 1...checkEmailTryCount {
+                try? await Task.sleep(nanoseconds: checkEmailWaitTime)
+                magicLink = await mailosaurApiClient.getMostRecentMagicLink()
+                if magicLink != nil {
+                    break
+                }
+            }
+            XCTAssertNotNil(magicLink)
+            guard let magicLink else { return }
             let tokens = try await PassageAPIClient.shared.activateMagicLink(magicLink: magicLink)
             XCTAssertNotNil(tokens.refreshToken)
             
@@ -57,5 +66,5 @@ final class SessionTests: XCTestCase {
             XCTAssertTrue(false)
         }
     }
-    */
+    
 }
