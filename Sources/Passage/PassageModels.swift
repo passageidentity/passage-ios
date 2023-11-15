@@ -154,7 +154,7 @@ public struct AppInfo: Codable, Equatable {
     /// Custom user metadata schema the app collects
     public let userMetadataSchema: [UserMetadataSchema]?
     /// The  authentication methods currently enabled for this application
-    public let allowedAuthMethods: [AllowedAuthMethods]
+    public let allowedAuthMethods: AllowedAuthMethods
 
     internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
@@ -188,9 +188,9 @@ public struct AppInfo: Codable, Equatable {
 }
 
 public struct AllowedAuthMethods: Codable, Equatable {
-    public let passkeys: [PasskeyAuthMethod]?
-    public let otp: [EmailAndSMSAuthMethod]?
-    public let magicLink: [EmailAndSMSAuthMethod]?
+    public let passkeys: PasskeyAuthMethod?
+    public let otp: EmailAndSMSAuthMethod?
+    public let magicLink: EmailAndSMSAuthMethod?
     
     internal enum CodingKeys: String, CodingKey {
         case passkeys
