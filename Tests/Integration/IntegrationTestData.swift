@@ -6,7 +6,8 @@ let apiUrl = "https://auth-uat.passage.dev"
 let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
 let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 
-let checkEmailWaitTime = UInt64(6 * Double(NSEC_PER_SEC))// nanoseconds
+let checkEmailWaitTime = UInt64(4 * Double(NSEC_PER_SEC))// nanoseconds
+let checkEmailTryCount = 3
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"

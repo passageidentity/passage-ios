@@ -70,35 +70,26 @@ internal class MailosaurAPIClient {
         return "Basic: \(apiKey!)"
     }
     
-    func getMostRecentMagicLink() async throws -> String {
-        do{
-            let messages = try await listMessages()
-            guard !messages.isEmpty else { return "" }
-            let message = try await getMessage(id: messages[0].id)
-            guard !message.html.links.isEmpty else { return "" }
-            let incomingURL = message.html.links[0].href
-            let components = NSURLComponents(url: URL(string: incomingURL)!, resolvingAgainstBaseURL: true)
-            guard let magicLink = components!.queryItems?.filter({$0.name == "psg_magic_link"}).first?.value else {
-                return ""
-            }
-            return magicLink
-        } catch {
-            print(error)
-            return ""
-        }
+    func getMostRecentMagicLink() async -> String? {
+        guard let messages = try? await listMessages(),
+              !messages.isEmpty,
+              let message = try? await getMessage(id: messages[0].id),
+              !message.html.links.isEmpty,
+              let incomingURL = URL(string: message.html.links[0].href),
+              let components = NSURLComponents(url: incomingURL, resolvingAgainstBaseURL: true),
+              let magicLink = components.queryItems?.filter({$0.name == "psg_magic_link"}).first?.value
+        else { return nil }
+        return magicLink
     }
     
-    func getMostRecentOneTimePasscode() async throws -> String {
-        do{
-            let messages = try await listMessages()
-            guard !messages.isEmpty else { return "" }
-            let message = try await getMessage(id: messages[0].id)
-            let oneTimePasscode = message.html.codes.isEmpty ? "" : message.html.codes[0].value
-            return oneTimePasscode
-        } catch {
-            print(error)
-            return ""
-        }
+    func getMostRecentOneTimePasscode() async -> String? {
+        guard let messages = try? await listMessages(),
+              !messages.isEmpty,
+              let message = try? await getMessage(id: messages[0].id),
+              !message.html.codes.isEmpty
+        else { return nil }
+        let oneTimePasscode = message.html.codes[0].value
+        return oneTimePasscode
     }
     
     func getMessage(id: String) async throws -> GetMessageResponse {
