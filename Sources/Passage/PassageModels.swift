@@ -207,10 +207,10 @@ public struct EmailAndSMSAuthMethod: Codable, Equatable {
     internal let ttlDisplayUnitString: String
     
     public enum DisplayUnit: String {
-        case seconds = "s"
-        case minutes = "m"
-        case hours = "h"
-        case days = "d"
+        case Seconds = "s"
+        case Minutes = "m"
+        case Hours = "h"
+        case Days = "d"
     }
     
     public var ttlDisplayUnit: DisplayUnit? {
