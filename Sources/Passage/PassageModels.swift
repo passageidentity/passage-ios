@@ -153,6 +153,8 @@ public struct AppInfo: Codable, Equatable {
     public let sessionTimeoutLength: Int
     /// Custom user metadata schema the app collects
     public let userMetadataSchema: [UserMetadataSchema]?
+    /// The  authentication methods currently enabled for this application
+    public let allowedAuthMethods: [AllowedAuthMethods]
 
     internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
@@ -168,6 +170,7 @@ public struct AppInfo: Codable, Equatable {
         case requireIdentifierVerification = "require_identifier_verification"
         case sessionTimeoutLength = "session_timeout_length"
         case userMetadataSchema = "user_metadata_schema"
+        case allowedAuthMethods = "allowed_auth_methods"
     }
     
     public enum AuthFallbackMethod: String {
@@ -177,10 +180,47 @@ public struct AppInfo: Codable, Equatable {
     }
     
     /// Which fallback method is set in the Passage Application when Passkeys are not available
+    /// @available(*, deprecated, message: "Check the allowedAuthMethods property for the full list of supported authentication methods and their configurations.")
     public var authFallbackMethod: AuthFallbackMethod? {
         return AuthFallbackMethod(rawValue: authFallbackMethodString)
     }
     
+}
+
+public struct AllowedAuthMethods: Codable, Equatable {
+    public let passkeys: [PasskeyAuthMethod]?
+    public let otp: [EmailAndSMSAuthMethod]?
+    public let magicLink: [EmailAndSMSAuthMethod]?
+    
+    internal enum CodingKeys: String, CodingKey {
+        case passkeys
+        case otp
+        case magicLink = "magic_link"
+    }
+}
+
+public struct PasskeyAuthMethod: Codable, Equatable {
+}
+
+public struct EmailAndSMSAuthMethod: Codable, Equatable {
+    public let ttl: Int
+    internal let ttlDisplayUnitString: String
+    
+    public enum DisplayUnit: String {
+        case seconds = "s"
+        case minutes = "m"
+        case hours = "h"
+        case days = "d"
+    }
+    
+    public var ttlDisplayUnit: DisplayUnit? {
+        return DisplayUnit(rawValue: ttlDisplayUnitString)
+    }
+    
+    internal enum CodingKeys: String, CodingKey {
+        case ttl
+        case ttlDisplayUnitString = "ttl_display_unit"
+    }
 }
 
 public struct UserMetadataSchema: Codable, Equatable {
