@@ -154,7 +154,7 @@ public struct AppInfo: Codable, Equatable {
     /// Custom user metadata schema the app collects
     public let userMetadataSchema: [UserMetadataSchema]?
     /// The  authentication methods currently enabled for this application
-    public let allowedAuthMethods: AllowedAuthMethods
+    public let authMethods: AuthMethods
 
     internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
@@ -170,7 +170,7 @@ public struct AppInfo: Codable, Equatable {
         case requireIdentifierVerification = "require_identifier_verification"
         case sessionTimeoutLength = "session_timeout_length"
         case userMetadataSchema = "user_metadata_schema"
-        case allowedAuthMethods = "allowed_auth_methods"
+        case authMethods = "auth_methods"
     }
     
     public enum AuthFallbackMethod: String {
@@ -187,7 +187,7 @@ public struct AppInfo: Codable, Equatable {
     
 }
 
-public struct AllowedAuthMethods: Codable, Equatable {
+public struct AuthMethods: Codable, Equatable {
     public let passkeys: PasskeyAuthMethod?
     public let otp: EmailAndSMSAuthMethod?
     public let magicLink: EmailAndSMSAuthMethod?

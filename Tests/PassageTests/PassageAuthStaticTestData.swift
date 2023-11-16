@@ -18,7 +18,7 @@ let testAppInfo = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
     userMetadataSchema: nil,
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: nil,
         magicLink: EmailAndSMSAuthMethod(

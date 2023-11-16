@@ -45,7 +45,7 @@ let appInfoValid = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 0,
     userMetadataSchema: [],
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: EmailAndSMSAuthMethod(
             ttl: 300,
@@ -69,7 +69,7 @@ let appInfoInvalid = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
     userMetadataSchema: nil,
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: nil,
         magicLink: EmailAndSMSAuthMethod(
@@ -93,7 +93,7 @@ let appInfoRefreshToken = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 5,
     userMetadataSchema: nil,
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: nil,
         magicLink: EmailAndSMSAuthMethod(
@@ -117,7 +117,7 @@ let appInfoTest = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
     userMetadataSchema: nil,
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: nil,
         magicLink: EmailAndSMSAuthMethod(
@@ -141,7 +141,7 @@ let otpAppInfoValid = AppInfo(
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
     userMetadataSchema: nil,
-    allowedAuthMethods: AllowedAuthMethods(
+    authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: EmailAndSMSAuthMethod(
             ttl: 300,
