@@ -180,7 +180,7 @@ public struct AppInfo: Codable, Equatable {
     }
     
     /// Which fallback method is set in the Passage Application when Passkeys are not available
-    /// @available(*, deprecated, message: "Check the allowedAuthMethods property for the full list of supported authentication methods and their configurations.")
+    @available(*, deprecated, message: "Check the allowedAuthMethods property for the full list of supported authentication methods and their configurations.")
     public var authFallbackMethod: AuthFallbackMethod? {
         return AuthFallbackMethod(rawValue: authFallbackMethodString)
     }
