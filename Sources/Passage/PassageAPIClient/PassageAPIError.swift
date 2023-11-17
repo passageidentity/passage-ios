@@ -10,6 +10,7 @@ import Foundation
 
 public struct PassageErrorResponseBody : Codable {
     var status: String?
+    var code: String?
     var error: String?
     var errors: [String:String]?
 }

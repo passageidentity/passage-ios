@@ -801,8 +801,16 @@ public class PassageAuth {
             let authResult = try await PassageAPIClient.shared.activateOneTimePasscode(otp: otp, otpId: otpId)
             return authResult
         } catch {
-            if let error = error as? PassageAPIError {
-                try PassageAuth.handlePassageAPIError(error: error)
+            if let passageError = error as? PassageAPIError {
+                switch passageError {
+                case .unauthorized(let response):
+                    if (response.body?.code == "exceeded_attempts") {
+                        throw PassageOTPError.exceededAttempts
+                    } else {
+                        try PassageAuth.handlePassageAPIError(error: passageError)
+                    }
+                default: try PassageAuth.handlePassageAPIError(error: passageError)
+                }
             }
             throw error
         }
