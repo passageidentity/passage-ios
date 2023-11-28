@@ -17,7 +17,15 @@ let testAppInfo = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
-    userMetadataSchema: nil
+    userMetadataSchema: nil,
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: nil,
+        magicLink: EmailAndSMSAuthMethod(
+            ttl: 300,
+            ttlDisplayUnitString: "s"
+        )
+    )
 )
 
 let testLoginStartResponse = WebauthnLoginStartResponse(

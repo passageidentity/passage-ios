@@ -44,7 +44,15 @@ let appInfoValid = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 0,
-    userMetadataSchema: []
+    userMetadataSchema: [],
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: EmailAndSMSAuthMethod(
+            ttl: 30000000,
+            ttlDisplayUnitString: "s"
+        ),
+        magicLink: nil
+    )
 )
 
 let appInfoInvalid = AppInfo(
@@ -60,7 +68,15 @@ let appInfoInvalid = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
-    userMetadataSchema: nil
+    userMetadataSchema: nil,
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: nil,
+        magicLink: EmailAndSMSAuthMethod(
+            ttl: 300,
+            ttlDisplayUnitString: "s"
+        )
+    )
 )
 
 let appInfoRefreshToken = AppInfo(
@@ -76,7 +92,15 @@ let appInfoRefreshToken = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 5,
-    userMetadataSchema: nil
+    userMetadataSchema: nil,
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: nil,
+        magicLink: EmailAndSMSAuthMethod(
+            ttl: 300,
+            ttlDisplayUnitString: "s"
+        )
+    )
 )
 
 let appInfoTest = AppInfo(
@@ -92,7 +116,15 @@ let appInfoTest = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
-    userMetadataSchema: nil
+    userMetadataSchema: nil,
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: nil,
+        magicLink: EmailAndSMSAuthMethod(
+            ttl: 300,
+            ttlDisplayUnitString: "s"
+        )
+    )
 )
 
 let otpAppInfoValid = AppInfo(
@@ -108,7 +140,15 @@ let otpAppInfoValid = AppInfo(
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     sessionTimeoutLength: 6000,
-    userMetadataSchema: nil
+    userMetadataSchema: nil,
+    authMethods: AuthMethods(
+        passkeys: PasskeyAuthMethod(),
+        otp: EmailAndSMSAuthMethod(
+            ttl: 300,
+            ttlDisplayUnitString: "s"
+        ),
+        magicLink: nil
+    )
 )
 
 let otpRegisteredUser = PassageUserInfo(
