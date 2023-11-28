@@ -22,6 +22,11 @@ public enum PassageLoginError: Error {
     case identifierRequired
 }
 
+// OTP Error
+public enum PassageOTPError: Error {
+    case exceededAttempts
+}
+
 /// Any unspecified PassageError
 public enum PassageError: Error, Equatable {
     case unauthorized
