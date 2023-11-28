@@ -201,6 +201,7 @@ public struct UserMetadataSchema: Codable, Equatable {
     }
 }
 
+@available(*, deprecated, message: "`AuthFallbackResult` protocol will be removed in a following release.")
 public protocol AuthFallbackResult: Codable {
     var id: String { get set }
 }

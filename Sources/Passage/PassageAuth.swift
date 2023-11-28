@@ -60,6 +60,7 @@ public class PassageAuth {
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
+    @available(*, deprecated, message: "Use `registerWithPasskey` instead")
     public func register(identifier: String) async throws -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
         clearTokens()
         let result = try await PassageAuth.register(identifier: identifier)
@@ -122,6 +123,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     /// - Throws: ``PasageLoginError``, ``PassageAPIError``, ``PassageError``
+    @available(*, deprecated, message: "Use `loginWithPasskey` instead")
     public func login(identifier: String) async throws -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
         clearTokens()
         let result = try await PassageAuth.login(identifier: identifier)
@@ -444,6 +446,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns:  (authResult: ``AuthResult``?, magicLink: ``MagicLink``?)
     /// - Throws: ``PassageError``, ``PassageAPIError``
+    @available(*, deprecated, message: "Use `registerWithPasskey` instead")
     public static func register(identifier: String) async throws -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
         guard let appInfo = try? await PassageAuth.appInfo() else {
             throw PassageError.invalidAppInfo
@@ -495,6 +498,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns:  (authResult: ``AuthResult``?, authFallbackResult: ``AuthFallbackResult``?)
     /// - Throws: ``PasageLoginError``, ``PassageAPIError``, ``PassageError``
+    @available(*, deprecated, message: "Use `loginWithPasskey` instead")
     public static func login(identifier: String) async throws  -> (authResult: AuthResult?, authFallbackResult: AuthFallbackResult?) {
         guard (try? await PassageAuth.identifierExists(identifier: identifier)) == true else {
             throw PassageError.userDoesNotExist
