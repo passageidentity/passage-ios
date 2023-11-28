@@ -154,7 +154,7 @@ public struct AppInfo: Codable, Equatable {
     /// Custom user metadata schema the app collects
     public let userMetadataSchema: [UserMetadataSchema]?
     /// The  authentication methods currently enabled for this application
-    public let authMethods: AuthMethods
+    public let authMethods: AuthMethods?
 
     internal enum CodingKeys: String, CodingKey {
         case allowedIdentifier = "allowed_identifier"
