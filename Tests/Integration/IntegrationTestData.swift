@@ -48,7 +48,7 @@ let appInfoValid = AppInfo(
     authMethods: AuthMethods(
         passkeys: PasskeyAuthMethod(),
         otp: EmailAndSMSAuthMethod(
-            ttl: 300,
+            ttl: 30000000,
             ttlDisplayUnitString: "s"
         ),
         magicLink: nil
