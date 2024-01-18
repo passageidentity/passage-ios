@@ -8,12 +8,18 @@ public enum PassageSocialConnection: String {
     case google
 }
 
-final internal class PassageWebAuthenticationController: NSObject, ASWebAuthenticationPresentationContextProviding {
+final internal class PassageSocialAuthController:
+    NSObject,
+    ASWebAuthenticationPresentationContextProviding,
+    ASAuthorizationControllerDelegate,
+    ASAuthorizationControllerPresentationContextProviding
+{
     
     internal var verifier = ""
     
-    private var webAuthSession: ASWebAuthenticationSession?
     private var window: UIWindow
+    private var webAuthSession: ASWebAuthenticationSession?
+    private var siwaContinuation: CheckedContinuation<String, Error>?
     
     // MARK: INIT METHODS
     
@@ -23,8 +29,37 @@ final internal class PassageWebAuthenticationController: NSObject, ASWebAuthenti
     
     // MARK: DELEGATE METHODS
     
+    // ASWebAuthentication delegate methods
+    
     internal func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
         return window
+    }
+    
+    // ASAuthorizationControllerDelegate delegate methods
+    
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return window
+    }
+    
+    internal func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        switch authorization.credential {
+        case let appleIDCredential as ASAuthorizationAppleIDCredential:
+            guard
+                let authCodeData = appleIDCredential.authorizationCode,
+                let authCode = String(data: authCodeData, encoding: .utf8) else
+            {
+                siwaContinuation?.resume(throwing: PassageSocialError.missingAuthCode)
+                return
+            }
+            siwaContinuation?.resume(returning: authCode)
+        default:
+            siwaContinuation?.resume(throwing: PassageSocialError.missingAuthCode)
+            break
+        }
+    }
+    
+    internal func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        siwaContinuation?.resume(throwing: error)
     }
     
     // MARK: STATIC METHODS
@@ -57,10 +92,10 @@ final internal class PassageWebAuthenticationController: NSObject, ASWebAuthenti
     
     internal func getSocialAuthQueryParams(appId: String, connection: PassageSocialConnection) -> String {
         let redirectURI = "\(appId)://"
-        let state = PassageWebAuthenticationController.getRandomString(length: 32)
-        let randomString = PassageWebAuthenticationController.getRandomString(length: 32)
+        let state = PassageSocialAuthController.getRandomString(length: 32)
+        let randomString = PassageSocialAuthController.getRandomString(length: 32)
         verifier = randomString
-        let codeChallenge = PassageWebAuthenticationController.sha256Hash(randomString)
+        let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
         let codeChallengeMethod = "S256"
         let params = """
             redirect_uri=\(redirectURI)&
@@ -99,6 +134,25 @@ final internal class PassageWebAuthenticationController: NSObject, ASWebAuthenti
             webAuthSession?.presentationContextProvider = self
             webAuthSession?.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
             webAuthSession?.start()
+        }
+    }
+    
+    internal func signInWithApple() async throws -> String {
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        let randomString = PassageSocialAuthController.getRandomString(length: 32)
+        verifier = randomString
+        let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
+        let state = PassageSocialAuthController.getRandomString(length: 32)
+        let request = appleIDProvider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = codeChallenge
+        request.state = state
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        return try await withCheckedThrowingContinuation { continuation in
+            self.siwaContinuation = continuation
+            authorizationController.performRequests()
         }
     }
     

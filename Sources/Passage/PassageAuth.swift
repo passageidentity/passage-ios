@@ -837,20 +837,25 @@ public class PassageAuth {
         guard let appInfo = try? await PassageAuth.appInfo() else {
             throw PassageError.invalidAppInfo
         }
-        let webAuthController = PassageWebAuthenticationController(window: window)
-        let queryParams = webAuthController.getSocialAuthQueryParams(
-            appId: appInfo.id,
-            connection: connection
-        )
-        let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
-        let authCode = try await webAuthController.openSecureWebView(
-            url: authUrl,
-            callbackURLScheme: appInfo.id,
-            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
-        )
+        let socialAuthController = PassageSocialAuthController(window: window)
+        var authCode: String
+        if connection == .apple {
+            authCode = try await socialAuthController.signInWithApple()
+        } else {
+            let queryParams = socialAuthController.getSocialAuthQueryParams(
+                appId: appInfo.id,
+                connection: connection
+            )
+            let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
+            authCode = try await socialAuthController.openSecureWebView(
+                url: authUrl,
+                callbackURLScheme: appInfo.id,
+                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+            )
+        }
         let authResult = try await PassageAPIClient.shared.exchangeAuthCode(
             authCode,
-            verifier: webAuthController.verifier
+            verifier: socialAuthController.verifier
         )
         return authResult
     }
