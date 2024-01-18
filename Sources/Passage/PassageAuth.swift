@@ -820,6 +820,40 @@ public class PassageAuth {
         }
     }
     
+    /// Authorizes user via a supported third-party social provider.
+    /// - Parameters:
+    ///   - connection: PassageSocialConnection - the Social connection to use for authorization
+    ///   - window: UIWindow - the window used as context for presenting the secured web view
+    ///   - prefersEphemeralWebBrowserSession: Bool - Set prefersEphemeralWebBrowserSession to true to request that the
+    ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
+    ///   Defaults to false.
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageSocialError``,  ``PassageAPIError``, ``PassageError``
+    public func authorize(
+        with connection: PassageSocialConnection,
+        in window: UIWindow,
+        prefersEphemeralWebBrowserSession: Bool = false
+    ) async throws -> AuthResult {
+        guard let appInfo = try? await PassageAuth.appInfo() else {
+            throw PassageError.invalidAppInfo
+        }
+        let webAuthController = PassageWebAuthenticationController(window: window)
+        let queryParams = webAuthController.getSocialAuthQueryParams(
+            appId: appInfo.id,
+            connection: connection
+        )
+        let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
+        let authCode = try await webAuthController.openSecureWebView(
+            url: authUrl,
+            callbackURLScheme: appInfo.id,
+            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+        )
+        let authResult = try await PassageAPIClient.shared.exchangeAuthCode(
+            authCode,
+            verifier: webAuthController.verifier
+        )
+        return authResult
+    }
            
     /// This method fetches the user by the specified token.
     /// - Parameter token: an auth token from the AuthResult object
