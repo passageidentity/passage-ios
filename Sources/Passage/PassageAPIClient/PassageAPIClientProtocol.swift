@@ -150,6 +150,13 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``AuthResult``
     func exchangeAuthCode(_ code: String, verifier: String) async throws -> AuthResult
     
+    /// Exchange social auth code and id token for AuthResult
+    /// - Parameters:
+    ///   - code: Social auth code
+    ///   - idToken: Social auth id token
+    /// - Returns: ``AuthResult``
+    func exchange(code: String, idToken: String) async throws -> AuthResult
+    
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
     /// - Returns: ``PassageUserInfo``

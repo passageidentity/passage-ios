@@ -452,6 +452,28 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         return authResultResponse.authResult
     }
     
+    /// Exchange social auth code and id token for AuthResult
+    /// - Parameters:
+    ///   - code: Social auth code
+    ///   - idToken: Social id token
+    /// - Returns: ``AuthResult``
+    func exchange(code: String, idToken: String) async throws -> AuthResult {
+        let url = try self.appUrl(path: "social/id_token")
+        let request = buildRequest(url: url, method: "POST")
+        let data = try JSONSerialization.data(
+            withJSONObject: [
+                "code": code,
+                "id_token": idToken,
+                "connection_type": "apple"
+            ],
+            options: []
+        )
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+        try assertValidResponse(response: response, responseData: responseData)
+        let authResultResponse = try JSONDecoder().decode(AuthResultResponse.self, from: responseData)
+        return authResultResponse.authResult
+    }
+    
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
     /// - Returns: ``PassageUserInfo``

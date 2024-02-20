@@ -19,7 +19,7 @@ final internal class PassageSocialAuthController:
     
     private var window: UIWindow
     private var webAuthSession: ASWebAuthenticationSession?
-    private var siwaContinuation: CheckedContinuation<String, Error>?
+    private var siwaContinuation: CheckedContinuation<(String, String), Error>?
     
     // MARK: INIT METHODS
     
@@ -46,14 +46,16 @@ final internal class PassageSocialAuthController:
         case let appleIDCredential as ASAuthorizationAppleIDCredential:
             guard
                 let authCodeData = appleIDCredential.authorizationCode,
-                let authCode = String(data: authCodeData, encoding: .utf8) else
+                let authCode = String(data: authCodeData, encoding: .utf8),
+                let idTokenData = appleIDCredential.identityToken,
+                let idToken = String(data: idTokenData, encoding: .utf8) else
             {
-                siwaContinuation?.resume(throwing: PassageSocialError.missingAuthCode)
+                siwaContinuation?.resume(throwing: PassageSocialError.missingAppleCredentials)
                 return
             }
-            siwaContinuation?.resume(returning: authCode)
+            siwaContinuation?.resume(returning: (authCode, idToken))
         default:
-            siwaContinuation?.resume(throwing: PassageSocialError.missingAuthCode)
+            siwaContinuation?.resume(throwing: PassageSocialError.missingAppleCredentials)
             break
         }
     }
@@ -137,10 +139,9 @@ final internal class PassageSocialAuthController:
         }
     }
     
-    internal func signInWithApple() async throws -> String {
+    internal func signInWithApple() async throws -> (String, String) {
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         let randomString = PassageSocialAuthController.getRandomString(length: 32)
-        verifier = randomString
         let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
         let state = PassageSocialAuthController.getRandomString(length: 32)
         let request = appleIDProvider.createRequest()

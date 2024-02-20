@@ -29,6 +29,7 @@ public enum PassageOTPError: Error {
 
 public enum PassageSocialError: Error {
     case missingAuthCode
+    case missingAppleCredentials
 }
 
 /// Any unspecified PassageError

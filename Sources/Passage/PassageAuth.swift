@@ -838,25 +838,26 @@ public class PassageAuth {
             throw PassageError.invalidAppInfo
         }
         let socialAuthController = PassageSocialAuthController(window: window)
-        var authCode: String
+        var authResult: AuthResult
         if connection == .apple {
-            authCode = try await socialAuthController.signInWithApple()
+            let (authCode, idToken) = try await socialAuthController.signInWithApple()
+            authResult = try await PassageAPIClient.shared.exchange(code: authCode, idToken: idToken)
         } else {
             let queryParams = socialAuthController.getSocialAuthQueryParams(
                 appId: appInfo.id,
                 connection: connection
             )
             let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
-            authCode = try await socialAuthController.openSecureWebView(
+            let authCode = try await socialAuthController.openSecureWebView(
                 url: authUrl,
                 callbackURLScheme: appInfo.id,
                 prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
             )
+            authResult = try await PassageAPIClient.shared.exchangeAuthCode(
+                authCode,
+                verifier: socialAuthController.verifier
+            )
         }
-        let authResult = try await PassageAPIClient.shared.exchangeAuthCode(
-            authCode,
-            verifier: socialAuthController.verifier
-        )
         return authResult
     }
            
