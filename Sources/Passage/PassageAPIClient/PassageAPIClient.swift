@@ -443,7 +443,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     ///   - code: Social auth code
     ///   - verifier: Social auth verifier
     /// - Returns: ``AuthResult``
-    func exchangeAuthCode(_ code: String, verifier: String) async throws -> AuthResult {
+    func exchange(code: String, verifier: String) async throws -> AuthResult {
         let url = try self.appUrl(path: "social/token?code=\(code)&verifier=\(verifier)")
         let request = buildRequest(url: url, method: "GET")
         let (responseData, response) = try await URLSession.shared.data(for: request)
@@ -460,14 +460,12 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     func exchange(code: String, idToken: String) async throws -> AuthResult {
         let url = try self.appUrl(path: "social/id_token")
         let request = buildRequest(url: url, method: "POST")
-        let data = try JSONSerialization.data(
-            withJSONObject: [
-                "code": code,
-                "id_token": idToken,
-                "connection_type": "apple"
-            ],
-            options: []
-        )
+        let params = [
+            "code": code,
+            "id_token": idToken,
+            "connection_type": "apple"
+        ]
+        let data = try JSONSerialization.data(withJSONObject: params, options: [])
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         try assertValidResponse(response: response, responseData: responseData)
         let authResultResponse = try JSONDecoder().decode(AuthResultResponse.self, from: responseData)

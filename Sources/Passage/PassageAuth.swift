@@ -217,6 +217,33 @@ public class PassageAuth {
         return authResult
     }
     
+    /// Authorizes user via a supported third-party social provider.
+    ///
+    /// Using `PassageSocialConnection.apple` connection triggers the native Sign in with Apple UI, while all other connections trigger a secure web view.
+    ///
+    /// - Parameters:
+    ///   - connection: PassageSocialConnection - the Social connection to use for authorization
+    ///   - window: UIWindow - the window used as context for presenting the secured web view
+    ///   - prefersEphemeralWebBrowserSession: Bool - Set prefersEphemeralWebBrowserSession to true to request that the
+    ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
+    ///   Defaults to false.
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageSocialError``,  ``PassageAPIError``, ``PassageError``
+    public func authorize(
+        with connection: PassageSocialConnection,
+        in window: UIWindow,
+        prefersEphemeralWebBrowserSession: Bool = false
+    ) async throws -> AuthResult {
+        clearTokens()
+        let authResult = try await PassageAuth.authorize(
+            with: connection,
+            in: window,
+            prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+        )
+        setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
     /// Checks the status of a magic link to see if it has been activated.
     ///
     /// Upon successful activation the tokens will be stored in the tokenStore on the instance.
@@ -821,6 +848,9 @@ public class PassageAuth {
     }
     
     /// Authorizes user via a supported third-party social provider.
+    ///
+    /// Using `PassageSocialConnection.apple` connection triggers the native Sign in with Apple UI, while all other connections trigger a secure web view.
+    ///
     /// - Parameters:
     ///   - connection: PassageSocialConnection - the Social connection to use for authorization
     ///   - window: UIWindow - the window used as context for presenting the secured web view
@@ -829,7 +859,7 @@ public class PassageAuth {
     ///   Defaults to false.
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageSocialError``,  ``PassageAPIError``, ``PassageError``
-    public func authorize(
+    public static func authorize(
         with connection: PassageSocialConnection,
         in window: UIWindow,
         prefersEphemeralWebBrowserSession: Bool = false
@@ -838,10 +868,9 @@ public class PassageAuth {
             throw PassageError.invalidAppInfo
         }
         let socialAuthController = PassageSocialAuthController(window: window)
-        var authResult: AuthResult
         if connection == .apple {
             let (authCode, idToken) = try await socialAuthController.signInWithApple()
-            authResult = try await PassageAPIClient.shared.exchange(code: authCode, idToken: idToken)
+            return try await PassageAPIClient.shared.exchange(code: authCode, idToken: idToken)
         } else {
             let queryParams = socialAuthController.getSocialAuthQueryParams(
                 appId: appInfo.id,
@@ -853,12 +882,9 @@ public class PassageAuth {
                 callbackURLScheme: appInfo.id,
                 prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
             )
-            authResult = try await PassageAPIClient.shared.exchangeAuthCode(
-                authCode,
-                verifier: socialAuthController.verifier
-            )
+            let verifier = socialAuthController.verifier
+            return try await PassageAPIClient.shared.exchange(code: authCode, verifier: verifier)
         }
-        return authResult
     }
            
     /// This method fetches the user by the specified token.

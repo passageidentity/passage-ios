@@ -148,7 +148,7 @@ protocol PassageAuthAPIClient  {
     ///   - code: Social auth code
     ///   - verifier: Social auth verifier
     /// - Returns: ``AuthResult``
-    func exchangeAuthCode(_ code: String, verifier: String) async throws -> AuthResult
+    func exchange(code: String, verifier: String) async throws -> AuthResult
     
     /// Exchange social auth code and id token for AuthResult
     /// - Parameters:
