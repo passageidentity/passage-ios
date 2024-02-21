@@ -41,9 +41,11 @@ final internal class PassageSocialAuthController:
         return window
     }
     
-    internal func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        switch authorization.credential {
-        case let appleIDCredential as ASAuthorizationAppleIDCredential:
+    internal func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithAuthorization authorization: ASAuthorization
+    ) {
+        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
             guard
                 let authCodeData = appleIDCredential.authorizationCode,
                 let authCode = String(data: authCodeData, encoding: .utf8),
@@ -54,13 +56,15 @@ final internal class PassageSocialAuthController:
                 return
             }
             siwaContinuation?.resume(returning: (authCode, idToken))
-        default:
+        } else {
             siwaContinuation?.resume(throwing: PassageSocialError.missingAppleCredentials)
-            break
         }
     }
     
-    internal func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    internal func authorizationController(
+        controller: ASAuthorizationController,
+        didCompleteWithError error: Error
+    ) {
         siwaContinuation?.resume(throwing: error)
     }
     
@@ -71,7 +75,11 @@ final internal class PassageSocialAuthController:
         var randomString = ""
         for _ in 0..<length {
             let randomValue = Int(arc4random_uniform(UInt32(characters.count)))
-            randomString += String(characters[characters.index(characters.startIndex, offsetBy: randomValue)])
+            randomString += String(
+                characters[
+                    characters.index(characters.startIndex, offsetBy: randomValue)
+                ]
+            )
         }
         return randomString
     }
@@ -117,25 +125,41 @@ final internal class PassageSocialAuthController:
         prefersEphemeralWebBrowserSession: Bool
     ) async throws -> String {
         return try await withCheckedThrowingContinuation { continuation in
-            webAuthSession = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme)
-                { callbackURL, error in
-                    guard error == nil else {
-                        continuation.resume(throwing: error!)
-                        return
-                    }
-                    guard
-                        let callbackURL = callbackURL,
-                        let components = NSURLComponents(url: callbackURL, resolvingAgainstBaseURL: true),
-                        let authCode = components.queryItems?.filter({$0.name == "code"}).first?.value
-                    else {
-                        continuation.resume(throwing: PassageSocialError.missingAuthCode)
-                        return
-                    }
-                    continuation.resume(returning: authCode)
-                }
+            webAuthSession = getWebAuthSession(
+                url: url,
+                callbackURLScheme: callbackURLScheme,
+                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession,
+                continuation: continuation
+            )
             webAuthSession?.presentationContextProvider = self
             webAuthSession?.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
             webAuthSession?.start()
+        }
+    }
+    
+    private func getWebAuthSession(
+        url: URL,
+        callbackURLScheme: String,
+        prefersEphemeralWebBrowserSession: Bool,
+        continuation: CheckedContinuation<String, Error>
+    ) -> ASWebAuthenticationSession {
+        return ASWebAuthenticationSession(
+            url: url,
+            callbackURLScheme: callbackURLScheme
+        ) { callbackURL, error in
+            guard error == nil else {
+                continuation.resume(throwing: error!)
+                return
+            }
+            guard
+                let callbackURL = callbackURL,
+                let components = NSURLComponents(url: callbackURL, resolvingAgainstBaseURL: true),
+                let authCode = components.queryItems?.filter({$0.name == "code"}).first?.value
+            else {
+                continuation.resume(throwing: PassageSocialError.missingAuthCode)
+                return
+            }
+            continuation.resume(returning: authCode)
         }
     }
     
