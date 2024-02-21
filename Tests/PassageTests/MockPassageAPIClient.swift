@@ -93,6 +93,18 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
         throw PassageError.unknown
     }
     
+    func getAuthUrl(queryParams: String) throws -> URL {
+        throw PassageError.unknown
+    }
+    
+    func exchange(code: String, verifier: String) async throws -> Passage.AuthResult {
+        throw PassageError.unknown
+    }
+    
+    func exchange(code: String, idToken: String) async throws -> Passage.AuthResult {
+        throw PassageError.unknown
+    }
+    
     func currentUser(token: String) async throws -> Passage.PassageUserInfo {
         throw PassageError.unknown
     }
