@@ -7,6 +7,7 @@ final class SocialAuthControllerTests: XCTestCase {
         super.setUp()
         PassageSettings.shared.apiUrl = apiUrl
         PassageSettings.shared.appId = appInfoValid.id
+        PassageAPIClient.shared.appId = appInfoValid.id
     }
     
     override func tearDown() {
@@ -48,9 +49,6 @@ final class SocialAuthControllerTests: XCTestCase {
             let connection = PassageSocialConnection.github
             guard let appId = PassageSettings.shared.appId else {
                 return XCTFail("App id not found")
-            }
-            guard let apiUrl = PassageSettings.shared.apiUrl else {
-                return XCTFail("API URL not found")
             }
             let queryParams = socialAuthController.getSocialAuthQueryParams(
                 appId: appId,

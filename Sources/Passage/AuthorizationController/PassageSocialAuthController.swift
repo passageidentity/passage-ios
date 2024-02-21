@@ -99,15 +99,15 @@ final internal class PassageSocialAuthController:
         verifier = randomString
         let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
         let codeChallengeMethod = "S256"
-        let params = """
-            redirect_uri=\(redirectURI)&
-            state=\(state)&
-            code_challenge=\(codeChallenge)&
-            code_challenge_method=\(codeChallengeMethod)&
-            connection_type=\(connection.rawValue)
-        """
-            .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: "\n", with: "")
+        var components = URLComponents()
+        components.queryItems = [
+            URLQueryItem(name: "redirect_uri", value: redirectURI),
+            URLQueryItem(name: "state", value: state),
+            URLQueryItem(name: "code_challenge", value: codeChallenge),
+            URLQueryItem(name: "code_challenge_method", value: codeChallengeMethod),
+            URLQueryItem(name: "connection_type", value: connection.rawValue)
+        ]
+        let params = components.url?.query ?? ""
         return params
     }
         
