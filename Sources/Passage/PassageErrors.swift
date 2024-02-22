@@ -27,6 +27,11 @@ public enum PassageOTPError: Error {
     case exceededAttempts
 }
 
+public enum PassageSocialError: Error {
+    case missingAuthCode
+    case missingAppleCredentials
+}
+
 /// Any unspecified PassageError
 public enum PassageError: Error, Equatable {
     case unauthorized

@@ -137,6 +137,25 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``AuthResult``
     func activateOneTimePasscode(otp: String, otpId: String) async throws -> AuthResult
     
+    /// Get social authorization url
+    /// - Parameters:
+    ///   - queryParams: Request query parameters
+    /// - Returns: ``URL``
+    func getAuthUrl(queryParams: String) throws -> URL
+    
+    /// Exchange social auth code for AuthResult
+    /// - Parameters:
+    ///   - code: Social auth code
+    ///   - verifier: Social auth verifier
+    /// - Returns: ``AuthResult``
+    func exchange(code: String, verifier: String) async throws -> AuthResult
+    
+    /// Exchange social auth code and id token for AuthResult
+    /// - Parameters:
+    ///   - code: Social auth code
+    ///   - idToken: Social auth id token
+    /// - Returns: ``AuthResult``
+    func exchange(code: String, idToken: String) async throws -> AuthResult
     
     /// Get the detail for the current user
     /// - Parameter token: The user's access token
