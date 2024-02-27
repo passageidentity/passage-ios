@@ -7,7 +7,7 @@ let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
 let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
 
 let checkEmailWaitTime = UInt64(4 * Double(NSEC_PER_SEC))// nanoseconds
-let checkEmailTryCount = 3
+let checkEmailTryCount = 6
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"
