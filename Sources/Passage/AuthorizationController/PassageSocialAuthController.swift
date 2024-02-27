@@ -70,6 +70,10 @@ final internal class PassageSocialAuthController:
     
     // MARK: STATIC METHODS
     
+    internal static func getCallbackUrlScheme(appId: String) -> String {
+        return "passage-\(appId)"
+    }
+    
     private static func getRandomString(length: Int) -> String {
         let characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         var randomString = ""
@@ -101,7 +105,8 @@ final internal class PassageSocialAuthController:
     // MARK: INSTANCE METHODS
     
     internal func getSocialAuthQueryParams(appId: String, connection: PassageSocialConnection) -> String {
-        let redirectURI = "\(appId)://"
+        let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appId)
+        let redirectURI = "\(urlScheme)://"
         let state = PassageSocialAuthController.getRandomString(length: 32)
         let randomString = PassageSocialAuthController.getRandomString(length: 32)
         verifier = randomString

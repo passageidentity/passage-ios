@@ -877,9 +877,10 @@ public class PassageAuth {
                 connection: connection
             )
             let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
+            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appInfo.id)
             let authCode = try await socialAuthController.openSecureWebView(
                 url: authUrl,
-                callbackURLScheme: appInfo.id,
+                callbackURLScheme: urlScheme,
                 prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
             )
             let verifier = socialAuthController.verifier
