@@ -35,7 +35,7 @@ final class SocialAuthControllerTests: XCTestCase {
         XCTAssert(!socialAuthController.verifier.isEmpty)
         
         // Query params should contain the following strings:
-        XCTAssert(queryParams.contains("redirect_uri=\(appId)://"))
+        XCTAssert(queryParams.contains("redirect_uri=passage-\(appId)://"))
         XCTAssert(queryParams.contains("state="))
         XCTAssert(queryParams.contains("code_challenge="))
         XCTAssert(queryParams.contains("code_challenge_method=S256"))
