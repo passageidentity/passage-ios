@@ -11,23 +11,13 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnLoginStart() async throws -> Passage.WebauthnLoginStartResponse {
+    func webauthnLoginStart(identifier: String?) async throws -> Passage.WebauthnLoginStartResponse {
         return testLoginStartResponse
     }
     
     @available(iOS 16.0, *)
     func webauthnLoginFinish(startResponse: Passage.WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> Passage.AuthResult {
         return testLoginFinishResponse
-    }
-    
-    @available(iOS 16.0, *)
-    func webauthnLoginWithIdentifierStart(identifier: String) async throws -> Passage.WebauthnLoginStartResponse {
-        throw PassageError.unknown
-    }
-    
-    @available(iOS 16.0, *)
-    func webauthnLoginWithIdentifierFinish(startResponse: Passage.WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> Passage.AuthResult {
-        throw PassageError.unknown
     }
     
     @available(iOS 16.0, *)

@@ -151,9 +151,9 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func loginWithPasskey() async throws -> AuthResult {
+    public func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         self.clearTokens()
-        let authResult = try await PassageAuth.loginWithPasskey()
+        let authResult = try await PassageAuth.loginWithPasskey(identifier: identifier)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
     }
@@ -569,11 +569,11 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func loginWithPasskey() async throws -> AuthResult {
+    public static func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         
         var authResult : AuthResult?
         do {
-            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart()
+            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: identifier)
             
             let credentialAssertion = try await LoginAuthorizationController.shared.login(from: loginWithIdentifierStartResponse)
             
@@ -1195,7 +1195,7 @@ public class PassageAuth {
     internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
 
         // should check error status if code == 404 throw userNotFound
-        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart()
+        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil)
 
         return loginStartResponse
     }

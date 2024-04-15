@@ -17,7 +17,15 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
         let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
         let challenge = response.handshake.challenge.publicKey.challenge
         let decodedChallenge = challenge.decodeBase64Url()
+        let credentialIds = response.handshake.challenge.publicKey.allowCredentials?
+            .compactMap { $0.id.decodeBase64Url() }
+            .map { ASAuthorizationPlatformPublicKeyCredentialDescriptor(
+                credentialID: $0
+            ) }
         let assertionRequest = publicKeyCredentialProvider.createCredentialAssertionRequest(challenge: decodedChallenge!)
+        if let credentialIds {
+            assertionRequest.allowedCredentials = credentialIds
+        }
         let authController = ASAuthorizationController(authorizationRequests: [ assertionRequest ] )
         authController.delegate = self
         authController.performRequests()
