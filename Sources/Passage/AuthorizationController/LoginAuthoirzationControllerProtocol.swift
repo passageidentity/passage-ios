@@ -11,4 +11,6 @@ protocol LoginAuthorizationControllerProtocol: NSObject, ASAuthorizationControll
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error)
     
+    func requestSecurityKeyAssertion(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+    
 }

@@ -291,3 +291,8 @@ public struct DeviceInfo: Codable {
         case userId = "user_id"
     }
 }
+
+internal enum AuthenticatorAttachment: String {
+    case platform = "platform"
+    case crossPlatform = "cross-platform"
+}

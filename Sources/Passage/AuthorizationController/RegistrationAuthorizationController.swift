@@ -9,7 +9,12 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
     private typealias CredentialRegistrationCheckedThrowingContinuation = CheckedContinuation<ASAuthorizationPlatformPublicKeyCredentialRegistration, Error>
     private var credentialRegistrationCheckedThrowingContinuation: CredentialRegistrationCheckedThrowingContinuation? = nil
 
-    
+    private typealias CredentialRegistrationSecurityCheckedThrowingContinuation = CheckedContinuation<
+        ASAuthorizationSecurityKeyPublicKeyCredentialRegistration,
+        Error
+    >
+    private var credentialRegistrationSecurityCheckedThrowingContinuation:
+        CredentialRegistrationSecurityCheckedThrowingContinuation? = nil
     
     static var shared: RegistrationAuthorizationControllerProtocol = RegistrationAuthorizationController()
     
@@ -44,6 +49,45 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
 
     }
     
+    func requestSecurityKeyRegistration(
+        from response: WebauthnRegisterStartResponse,
+        identifier: String
+    ) async throws -> ASAuthorizationSecurityKeyPublicKeyCredentialRegistration? {
+        PassageAutofillAuthorizationController.shared.cancel()
+        let rpId = response.handshake.challenge.publicKey.rp.id
+        let securityKeyCredentialProvider = ASAuthorizationSecurityKeyPublicKeyCredentialProvider(
+            relyingPartyIdentifier: rpId
+        )
+        let challenge = response.handshake.challenge.publicKey.challenge
+        let userId = response.user.id
+        guard let decodedChallenge = challenge.decodeBase64Url() else {
+            return nil
+        }
+        let registrationRequest = securityKeyCredentialProvider
+            .createCredentialRegistrationRequest(
+                challenge: decodedChallenge,
+                displayName: identifier,
+                name: identifier,
+                userID: Data(userId.utf8)
+            )
+        registrationRequest.credentialParameters = [
+            ASAuthorizationPublicKeyCredentialParameters(algorithm: ASCOSEAlgorithmIdentifier.ES256)
+        ]
+        let authController = ASAuthorizationController(
+            authorizationRequests: [ registrationRequest ]
+        )
+        authController.delegate = self
+        authController.performRequests()
+
+        return try await withCheckedThrowingContinuation(
+            { [weak self] (continuation: CredentialRegistrationSecurityCheckedThrowingContinuation) in
+                guard let self = self else {
+                    return
+                }
+                self.credentialRegistrationSecurityCheckedThrowingContinuation = continuation
+            }
+        )
+    }
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         let logger = Logger()
@@ -52,6 +96,9 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
             logger.log("A new passkey was registered: \(credentialRegistration)")
             credentialRegistrationCheckedThrowingContinuation?.resume(returning: credentialRegistration)
             credentialRegistrationCheckedThrowingContinuation = nil
+        case let credentialRegistration as ASAuthorizationSecurityKeyPublicKeyCredentialRegistration:
+            credentialRegistrationSecurityCheckedThrowingContinuation?.resume(returning: credentialRegistration)
+            credentialRegistrationSecurityCheckedThrowingContinuation = nil
         default:
             credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.credentialRegistration)
         }

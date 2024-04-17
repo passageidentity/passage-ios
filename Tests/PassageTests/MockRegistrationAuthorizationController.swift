@@ -15,5 +15,12 @@ class MockRegistrationAuthorizationController : NSObject, ASAuthorizationControl
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
     }
+    
+    func requestSecurityKeyRegistration(
+        from response: WebauthnRegisterStartResponse,
+        identifier: String
+    ) async throws -> ASAuthorizationSecurityKeyPublicKeyCredentialRegistration? {
+        return nil
+    }
 
 }

@@ -11,7 +11,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnLoginStart(identifier: String?) async throws -> Passage.WebauthnLoginStartResponse {
+    func webauthnLoginStart(identifier: String?, authenticatorAttachment: AuthenticatorAttachment?) async throws -> Passage.WebauthnLoginStartResponse {
         return testLoginStartResponse
     }
     
@@ -21,7 +21,18 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnRegistrationStart(identifier: String) async throws -> Passage.WebauthnRegisterStartResponse {
+    func webauthnLoginFinish(
+        startResponse: WebauthnLoginStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+    ) async throws -> AuthResult {
+        return testLoginFinishResponse
+    }
+    
+    @available(iOS 16.0, *)
+    func webauthnRegistrationStart(
+        identifier: String,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> Passage.WebauthnRegisterStartResponse {
         guard identifier == unregisteredUserEmail else {
             throw PassageError.userAlreadyExists
         }
@@ -30,6 +41,14 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     
     @available(iOS 16.0, *)
     func webauthnRegistrationFinish(startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> Passage.AuthResult {
+        return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
+    }
+    
+    @available(iOS 16.0, *)
+    func webauthnRegistrationFinish(
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+    ) async throws -> AuthResult {
         return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
     }
     

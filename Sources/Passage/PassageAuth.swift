@@ -148,12 +148,31 @@ public class PassageAuth {
     ///
     /// This would be a good time to let them enter their identifier and get a login magic link or register
     /// for a new account.
+    /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
     public func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.loginWithPasskey(identifier: identifier)
+        self.setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
+    /// Login a user using a physical security key.
+    ///
+    /// NOTE: Only available on iOS 16+.
+    ///
+    /// If the user is authenticated the tokens will be stored in the tokenStore on the instance.
+    ///
+    /// Prompts a user to login to your app using a physical security key. This function handles the WebAuthn interactions with Passage and the user's device.
+    /// - Parameter identifier: The user's email, phone number, or other unique id
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
+    @available(iOS 16.0, *)
+    public func loginWithSecurityKey(identifier: String? = nil) async throws -> AuthResult {
+        self.clearTokens()
+        let authResult = try await PassageAuth.loginWithSecurityKey(identifier: identifier)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
     }
@@ -440,6 +459,24 @@ public class PassageAuth {
         return authResult
     }
     
+    /// Register a new account with a physical security key.
+    ///
+    ///  This method registers a new account.
+    ///
+    ///  If an Error occures, the account might already be registered and should login with a passkey
+    ///  or a magic link.
+    ///
+    /// - Parameter identifier: The users email or phone number
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
+    @available(iOS 16.0, *)
+    public func registerWithSecurityKey(identifier: String) async throws -> AuthResult {
+        self.clearTokens()
+        let authResult = try await PassageAuth.registerWithSecurityKey(identifier: identifier)
+        self.setTokensFromAuthResult(authResult: authResult)
+        return authResult
+    }
+    
     private func clearTokens() -> Void {
         self.tokenStore.clearTokens()
     }
@@ -566,6 +603,7 @@ public class PassageAuth {
     /// This would be a good time to let them enter their identifier and get a login magic link or register
     /// for a new account.
     ///
+    /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
@@ -573,7 +611,7 @@ public class PassageAuth {
         
         var authResult : AuthResult?
         do {
-            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: identifier)
+            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: identifier, authenticatorAttachment: .platform)
             
             let credentialAssertion = try await LoginAuthorizationController.shared.login(from: loginWithIdentifierStartResponse)
             
@@ -588,6 +626,39 @@ public class PassageAuth {
             return unwrappedAuthResult
         } else {
             throw PassageError.unknown
+        }
+    }
+    
+    /// Login a user using a physical security key.
+    ///
+    /// NOTE: Only available on iOS 16+.
+    ///
+    /// If the user is authenticated the tokens will be stored in the tokenStore on the instance.
+    ///
+    /// Prompts a user to login to your app using a physical security key. This function handles the WebAuthn interactions with Passage and the user's device.
+    /// - Parameter identifier: The user's email, phone number, or other unique id
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
+    @available(iOS 16.0, *)
+    public static func loginWithSecurityKey(identifier: String? = nil) async throws -> AuthResult {
+        do {
+            let loginStartResponse = try await PassageAPIClient.shared
+                .webauthnLoginStart(
+                    identifier: identifier,
+                    authenticatorAttachment: .crossPlatform
+                )
+            let credential = try await LoginAuthorizationController.shared
+                .requestSecurityKeyAssertion(from: loginStartResponse)
+            return try await PassageAPIClient.shared
+                .webauthnLoginFinish(
+                    startResponse: loginStartResponse,
+                    credentialAssertion: credential
+                )
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+            throw PassageError.unknown
+        } catch  {
+            throw error
         }
     }
     
@@ -1115,7 +1186,11 @@ public class PassageAuth {
     private static func registerWithPasskey(identifier: String) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
-            let registrationStartResponse = try await PassageAPIClient.shared.webauthnRegistrationStart(identifier: identifier)
+            let registrationStartResponse = try await PassageAPIClient.shared
+                .webauthnRegistrationStart(
+                    identifier: identifier,
+                    authenticatorAttachment: .platform
+                )
             
             let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
             
@@ -1132,6 +1207,42 @@ public class PassageAuth {
             throw PassageError.unknown
         }
 
+    }
+    
+    /// Register a new account with a physical security key.
+    ///
+    ///  This method registers a new account.
+    ///
+    ///  If an Error occures, the account might already be registered and should login with a passkey
+    ///  or a magic link.
+    ///
+    /// - Parameter identifier: The users email or phone number
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
+    @available(iOS 16.0, *)
+    public static func registerWithSecurityKey(identifier: String) async throws -> AuthResult {
+        do {
+            let registrationStartResponse = try await PassageAPIClient.shared
+                .webauthnRegistrationStart(
+                    identifier: identifier,
+                    authenticatorAttachment: .crossPlatform
+                )
+            let credential = try await RegistrationAuthorizationController.shared
+                .requestSecurityKeyRegistration(
+                    from: registrationStartResponse,
+                    identifier: identifier
+                )
+            return try await PassageAPIClient.shared
+                .webauthnRegistrationFinish(
+                    startResponse: registrationStartResponse,
+                    params: credential
+                )
+        } catch (let error as PassageAPIError) {
+            try PassageAuth.handlePassageAPIError(error: error)
+            throw PassageError.unknown
+        } catch  {
+            throw error
+        }
     }
     
     /// Private method to instantiate a logger and log the errors we catch
@@ -1195,7 +1306,7 @@ public class PassageAuth {
     internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
 
         // should check error status if code == 404 throw userNotFound
-        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil)
+        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil, authenticatorAttachment: .platform)
 
         return loginStartResponse
     }

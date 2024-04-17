@@ -35,7 +35,8 @@ let testLoginStartResponse = WebauthnLoginStartResponse(
             publicKey: WebauthnLoginStartResponseHandshakeChallengePublicKey(
                 challenge: "TEST_CHALLENGE",
                 timeout: 6000,
-                rpId: "TEST_RPID"
+                rpId: "TEST_RPID",
+                allowCredentials: nil
             )
         )
     ),

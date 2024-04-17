@@ -65,7 +65,10 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnLoginStart(identifier: String? = nil) async throws -> WebauthnLoginStartResponse {
+    internal func webauthnLoginStart(
+        identifier: String? = nil,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> WebauthnLoginStartResponse {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
         
@@ -74,8 +77,11 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         if let identifier {
             jsonObject["identifier"] = identifier
         }
+        if let authenticatorAttachment {
+            jsonObject["authenticator_attachment"] = authenticatorAttachment.rawValue
+        }
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
-        var (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
         // validate the response
         // calling code should check status, if status code 404 throw userNotFound
@@ -134,6 +140,43 @@ internal class PassageAPIClient : PassageAuthAPIClient {
 
         return authResponse.authResult
     }
+    
+    @available(iOS 16.0, *)
+    internal func webauthnLoginFinish(
+        startResponse: WebauthnLoginStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+    ) async throws -> AuthResult {
+        guard let credential else {
+            throw PassageASAuthorizationError.credentialRegistration
+        }
+        let url = try self.appUrl(path: "login/webauthn/finish/")
+        let response = [
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url(),
+            "authenticatorData": credential.rawAuthenticatorData.toBase64Url(),
+            "signature": credential.signature.toBase64Url(),
+            "userHandle": credential.userID.toBase64Url()
+        ]
+        let credId = credential.credentialID.toBase64Url();
+        let handshakeResponse = [
+            "rawId": credId,
+            "id": credId,
+            "type": "public-key",
+            "response": response
+        ] as [String : Any]
+        var parameters = [
+            "handshake_id": startResponse.handshake.id,
+            "handshake_response": handshakeResponse,
+        ] as [String : Any]
+        if let userId = startResponse.user?.id {
+            parameters["user_id"] = userId
+        }
+        let request = buildRequest(url: url, method: "POST")
+        let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
+        try assertValidResponse(response: resp, responseData: responseData)
+        let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
+        return authResponse.authResult
+    }
 
 
     /// Perform a webauthn registration start request
@@ -141,12 +184,19 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse {
+    internal func webauthnRegistrationStart(
+        identifier: String,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "register/webauthn/start/")
         
         let request = buildRequest(url: url, method: "POST")
 
-        let data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
+        var jsonObject = ["identifier": identifier]
+        if let authenticatorAttachment {
+            jsonObject["authenticator_attachment"] = authenticatorAttachment.rawValue
+        }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -199,6 +249,39 @@ internal class PassageAPIClient : PassageAuthAPIClient {
 
         let authResponse = try JSONDecoder().decode(WebauthnRegisterFinishResponse.self, from: responseData)
 
+        return authResponse.authResult
+    }
+    
+    @available(iOS 16.0, *)
+    internal func webauthnRegistrationFinish(
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+    ) async throws -> AuthResult {
+        guard let credential else {
+            throw PassageError.unknown
+        }
+        let url = try self.appUrl(path: "register/webauthn/finish/")
+        let response = [
+            "attestationObject": credential.rawAttestationObject?.toBase64Url(),
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url()
+        ]
+        let credId = credential.credentialID.toBase64Url();
+        let handshakeResponse: [String :Any] = [
+            "rawId": credId,
+            "id": credId,
+            "type": "public-key",
+            "response": response
+        ]
+        let parameters: [String :Any] = [
+            "handshake_id": startResponse.handshake.id,
+            "handshake_response": handshakeResponse,
+            "user_id": startResponse.user.id
+        ]
+        let request = buildRequest(url: url, method: "POST")
+        let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
+        try assertValidResponse(response: resp,responseData: responseData)
+        let authResponse = try JSONDecoder().decode(WebauthnRegisterFinishResponse.self, from: responseData)
         return authResponse.authResult
     }
     

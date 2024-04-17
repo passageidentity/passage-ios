@@ -19,7 +19,7 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnLoginStart(identifier: String?) async throws -> WebauthnLoginStartResponse
+    func webauthnLoginStart(identifier: String?, authenticatorAttachment: AuthenticatorAttachment?) async throws -> WebauthnLoginStartResponse
     
     
     /// Perform a webauthn login finish request to complete an authentication attempt
@@ -31,13 +31,22 @@ protocol PassageAuthAPIClient  {
     @available(iOS 16.0, *)
     func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> AuthResult
     
+    @available(iOS 16.0, *)
+    func webauthnLoginFinish(
+        startResponse: WebauthnLoginStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+    ) async throws -> AuthResult
+    
     
     /// Perform a webauthn registration start request
     /// - Parameter identifier: The users identifier (email or phone number)
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse
+    func webauthnRegistrationStart(
+        identifier: String,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> WebauthnRegisterStartResponse
     
     
     /// Performa a webauthn registration finish request
@@ -48,6 +57,12 @@ protocol PassageAuthAPIClient  {
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
     func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult
+    
+    @available(iOS 16.0, *)
+    func webauthnRegistrationFinish(
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+    ) async throws -> AuthResult
     
     
     /// Peform a webauthn add device start request

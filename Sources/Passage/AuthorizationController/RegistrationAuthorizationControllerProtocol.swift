@@ -5,6 +5,11 @@ protocol RegistrationAuthorizationControllerProtocol: NSObject, ASAuthorizationC
     
     func register(from response: WebauthnRegisterStartResponse, identifier: String) async throws -> ASAuthorizationPlatformPublicKeyCredentialRegistration?
     
+    func requestSecurityKeyRegistration(
+        from response: WebauthnRegisterStartResponse,
+        identifier: String
+    ) async throws -> ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+    
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization)
     
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error)

@@ -16,4 +16,10 @@ class MockLoginAuthorizationController : NSObject, ASAuthorizationControllerDele
         
     }
     
+    func requestSecurityKeyAssertion(
+        from response: Passage.WebauthnLoginStartResponse
+    ) async throws -> ASAuthorizationSecurityKeyPublicKeyCredentialAssertion? {
+        return nil
+    }
+    
 }
