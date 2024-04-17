@@ -29,12 +29,9 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> AuthResult
-    
-    @available(iOS 16.0, *)
     func webauthnLoginFinish(
         startResponse: WebauthnLoginStartResponse,
-        credential: ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+        credential: ASAuthorizationPublicKeyCredentialAssertion?
     ) async throws -> AuthResult
     
     
@@ -52,16 +49,13 @@ protocol PassageAuthAPIClient  {
     /// Performa a webauthn registration finish request
     /// - Parameters:
     ///   - startResponse: ``WebauthnRegisterStartResponse`` from the registrationStart request
-    ///   - params: ``ASAuthorizationPlatformPublicKeyCredentialRegistration`` from the credential registration request
+    ///   - credential: ``ASAuthorizationPublicKeyCredentialRegistration`` from the credential registration request
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult
-    
-    @available(iOS 16.0, *)
     func webauthnRegistrationFinish(
         startResponse: WebauthnRegisterStartResponse,
-        credential: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+        credential: ASAuthorizationPublicKeyCredentialRegistration?
     ) async throws -> AuthResult
     
     

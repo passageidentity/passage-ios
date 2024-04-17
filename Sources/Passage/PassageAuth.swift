@@ -615,7 +615,10 @@ public class PassageAuth {
             
             let credentialAssertion = try await LoginAuthorizationController.shared.login(from: loginWithIdentifierStartResponse)
             
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(startResponse: loginWithIdentifierStartResponse, credentialAssertion: credentialAssertion)
+            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
+                startResponse: loginWithIdentifierStartResponse,
+                credential: credentialAssertion
+            )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
@@ -652,7 +655,7 @@ public class PassageAuth {
             return try await PassageAPIClient.shared
                 .webauthnLoginFinish(
                     startResponse: loginStartResponse,
-                    credentialAssertion: credential
+                    credential: credential
                 )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
@@ -1194,7 +1197,11 @@ public class PassageAuth {
             
             let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
             
-            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
+            authResult = try await PassageAPIClient.shared
+                .webauthnRegistrationFinish(
+                    startResponse: registrationStartResponse,
+                    credential: registrationRequest
+                )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch  {
@@ -1235,7 +1242,7 @@ public class PassageAuth {
             return try await PassageAPIClient.shared
                 .webauthnRegistrationFinish(
                     startResponse: registrationStartResponse,
-                    params: credential
+                    credential: credential
                 )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
@@ -1326,7 +1333,10 @@ public class PassageAuth {
         var authResult: AuthResult!
 
         do {
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(startResponse: startResponse, credentialAssertion: credentialAssertion)
+            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
+                startResponse: startResponse,
+                credential: credentialAssertion
+            )
         }
         catch {
             throw error

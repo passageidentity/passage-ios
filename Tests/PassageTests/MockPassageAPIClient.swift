@@ -16,14 +16,9 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnLoginFinish(startResponse: Passage.WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> Passage.AuthResult {
-        return testLoginFinishResponse
-    }
-    
-    @available(iOS 16.0, *)
     func webauthnLoginFinish(
         startResponse: WebauthnLoginStartResponse,
-        credential: ASAuthorizationSecurityKeyPublicKeyCredentialAssertion?
+        credential: ASAuthorizationPublicKeyCredentialAssertion?
     ) async throws -> AuthResult {
         return testLoginFinishResponse
     }
@@ -40,14 +35,9 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnRegistrationFinish(startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> Passage.AuthResult {
-        return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
-    }
-    
-    @available(iOS 16.0, *)
     func webauthnRegistrationFinish(
         startResponse: WebauthnRegisterStartResponse,
-        credential: ASAuthorizationSecurityKeyPublicKeyCredentialRegistration?
+        credential: ASAuthorizationPublicKeyCredentialRegistration?
     ) async throws -> AuthResult {
         return AuthResult(authToken: "TEST_TOKEN", redirectURL: "/", refreshToken: nil, refreshTokenExpiration: nil)
     }
