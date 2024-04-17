@@ -660,8 +660,6 @@ public class PassageAuth {
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
             throw PassageError.unknown
-        } catch  {
-            throw error
         }
     }
     
@@ -1204,8 +1202,6 @@ public class PassageAuth {
                 )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
-        } catch  {
-            throw error
         }
         
         if let unwrappedAuthResult = authResult {
@@ -1247,8 +1243,6 @@ public class PassageAuth {
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
             throw PassageError.unknown
-        } catch  {
-            throw error
         }
     }
     
