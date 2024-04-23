@@ -65,10 +65,7 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnLoginStart(
-        identifier: String? = nil,
-        authenticatorAttachment: AuthenticatorAttachment?
-    ) async throws -> WebauthnLoginStartResponse {
+    internal func webauthnLoginStart(identifier: String? = nil) async throws -> WebauthnLoginStartResponse {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
         
@@ -76,9 +73,6 @@ internal class PassageAPIClient : PassageAuthAPIClient {
         var jsonObject: [String: String] = [:]
         if let identifier {
             jsonObject["identifier"] = identifier
-        }
-        if let authenticatorAttachment {
-            jsonObject["authenticator_attachment"] = authenticatorAttachment.rawValue
         }
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
@@ -185,11 +179,14 @@ internal class PassageAPIClient : PassageAuthAPIClient {
             "clientDataJSON": credential.rawClientDataJSON.toBase64Url()
         ]
         let credId = credential.credentialID.toBase64Url();
+        let authenticatorAttachment = startResponse.handshake.challenge.publicKey
+            .authenticatorSelection.authenticatorAttachment
         let handshakeResponse: [String :Any] = [
-            "rawId": credId,
+            "authenticatorAttachment": authenticatorAttachment,
             "id": credId,
+            "rawId": credId,
+            "response": response,
             "type": "public-key",
-            "response": response
         ]
         let parameters: [String :Any] = [
             "handshake_id": startResponse.handshake.id,
@@ -231,17 +228,21 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``Void``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo {
+    internal func addDeviceFinish(
+        token: String,
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration
+    ) async throws -> DeviceInfo {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
         
         let response = [
-            "attestationObject": params.rawAttestationObject?.toBase64Url(),
-            "clientDataJSON": params.rawClientDataJSON.toBase64Url()
+            "attestationObject": credential.rawAttestationObject?.toBase64Url(),
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url()
         ]
      
-        let credId = params.credentialID.toBase64Url();
+        let credId = credential.credentialID.toBase64Url();
         let handshakeResponse = [
             "rawId": credId,
             "id": credId,

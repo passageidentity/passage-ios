@@ -19,7 +19,7 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnLoginStart(identifier: String?, authenticatorAttachment: AuthenticatorAttachment?) async throws -> WebauthnLoginStartResponse
+    func webauthnLoginStart(identifier: String?) async throws -> WebauthnLoginStartResponse
     
     
     /// Perform a webauthn login finish request to complete an authentication attempt
@@ -74,7 +74,11 @@ protocol PassageAuthAPIClient  {
     ///   - params: The ASAuthorizationPlatformPublicKeyCredentialRegistration
     /// - Returns: ``Void``
     @available(iOS 16.0, *)
-    func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse,  params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo
+    func addDeviceFinish(
+        token: String,
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration
+    ) async throws -> DeviceInfo
     
     
     /// Send a new login magic link to the user's email or phone

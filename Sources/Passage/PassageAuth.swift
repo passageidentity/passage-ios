@@ -159,24 +159,6 @@ public class PassageAuth {
         return authResult
     }
     
-    /// Login a user using a physical security key.
-    ///
-    /// NOTE: Only available on iOS 16+.
-    ///
-    /// If the user is authenticated the tokens will be stored in the tokenStore on the instance.
-    ///
-    /// Prompts a user to login to your app using a physical security key. This function handles the WebAuthn interactions with Passage and the user's device.
-    /// - Parameter identifier: The user's email, phone number, or other unique id
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
-    public func loginWithSecurityKey(identifier: String? = nil) async throws -> AuthResult {
-        self.clearTokens()
-        let authResult = try await PassageAuth.loginWithSecurityKey(identifier: identifier)
-        self.setTokensFromAuthResult(authResult: authResult)
-        return authResult
-    }
-    
     /// Login by sending the user a magic link.
     ///
     /// Any tokens stored in the tokenStore on the instance will be cleared before sending the magic link.
@@ -342,13 +324,13 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func addDevice() async throws -> DeviceInfo {
+    public func addDevice(options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
         
-        let device = try await PassageAuth.addDevice(token: token)
+        let device = try await PassageAuth.addDevice(token: token, options: options)
         return device
     }
 
@@ -449,30 +431,17 @@ public class PassageAuth {
     ///  or a magic link.
     ///
     /// - Parameter identifier: The users email or phone number
+    /// - Parameter options: Optional configuration for passkey creation
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    public func registerWithPasskey(identifier: String) async throws -> AuthResult {
+    public func registerWithPasskey(
+        identifier: String,
+        options: PasskeyCreationOptions? = nil
+    ) async throws -> AuthResult {
         self.clearTokens()
-        let authResult = try await PassageAuth.registerWithPasskey(identifier: identifier)
-        self.setTokensFromAuthResult(authResult: authResult)
-        return authResult
-    }
-    
-    /// Register a new account with a physical security key.
-    ///
-    ///  This method registers a new account.
-    ///
-    ///  If an Error occures, the account might already be registered and should login with a passkey
-    ///  or a magic link.
-    ///
-    /// - Parameter identifier: The users email or phone number
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
-    @available(iOS 16.0, *)
-    public func registerWithSecurityKey(identifier: String) async throws -> AuthResult {
-        self.clearTokens()
-        let authResult = try await PassageAuth.registerWithSecurityKey(identifier: identifier)
+        let authResult = try await PassageAuth
+            .registerWithPasskey(identifier: identifier, options: options)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
     }
@@ -608,13 +577,12 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
     public static func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
-        
         var authResult : AuthResult?
         do {
-            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: identifier, authenticatorAttachment: .platform)
-            
-            let credentialAssertion = try await LoginAuthorizationController.shared.login(from: loginWithIdentifierStartResponse)
-            
+            let loginWithIdentifierStartResponse = try await PassageAPIClient
+                .shared.webauthnLoginStart(identifier: identifier)
+            let credentialAssertion = try await LoginAuthorizationController
+                .shared.login(from: loginWithIdentifierStartResponse)
             authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
                 startResponse: loginWithIdentifierStartResponse,
                 credential: credentialAssertion
@@ -624,41 +592,9 @@ public class PassageAuth {
         } catch {
             throw error
         }
-            
         if let unwrappedAuthResult = authResult {
             return unwrappedAuthResult
         } else {
-            throw PassageError.unknown
-        }
-    }
-    
-    /// Login a user using a physical security key.
-    ///
-    /// NOTE: Only available on iOS 16+.
-    ///
-    /// If the user is authenticated the tokens will be stored in the tokenStore on the instance.
-    ///
-    /// Prompts a user to login to your app using a physical security key. This function handles the WebAuthn interactions with Passage and the user's device.
-    /// - Parameter identifier: The user's email, phone number, or other unique id
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
-    @available(iOS 16.0, *)
-    public static func loginWithSecurityKey(identifier: String? = nil) async throws -> AuthResult {
-        do {
-            let loginStartResponse = try await PassageAPIClient.shared
-                .webauthnLoginStart(
-                    identifier: identifier,
-                    authenticatorAttachment: .crossPlatform
-                )
-            let credential = try await LoginAuthorizationController.shared
-                .requestSecurityKeyAssertion(from: loginStartResponse)
-            return try await PassageAPIClient.shared
-                .webauthnLoginFinish(
-                    startResponse: loginStartResponse,
-                    credential: credential
-                )
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
             throw PassageError.unknown
         }
     }
@@ -1033,16 +969,28 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func addDevice(token: String) async throws -> DeviceInfo {
+    public static func addDevice(token: String, options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         do {
             let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
+            let authenticatorAttachment = options?.authenticatorAttachment ?? .platform
+            let includeSecurityKeyOption = authenticatorAttachment == .any
+                || authenticatorAttachment == .crossPlatform
             guard let registrationRequest = try await RegistrationAuthorizationController.shared
-                .register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
+                .register(
+                    from: startResponse,
+                    identifier: startResponse.handshake.challenge.publicKey.user.name,
+                    includeSecurityKeyOption: includeSecurityKeyOption
+                )
             else {
                 throw PassageError.unknown
             }
+            
             let device = try await PassageAPIClient.shared
-                .addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest)
+                .addDeviceFinish(
+                    token: token,
+                    startResponse: startResponse,
+                    credential: registrationRequest
+                )
             return device
         }  catch {
             if let apiError = error as? PassageAPIError {
@@ -1184,17 +1132,26 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    private static func registerWithPasskey(identifier: String) async throws -> AuthResult {
+    private static func registerWithPasskey(
+        identifier: String,
+        options: PasskeyCreationOptions? = nil
+    ) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
+            let authenticatorAttachment = options?.authenticatorAttachment
             let registrationStartResponse = try await PassageAPIClient.shared
                 .webauthnRegistrationStart(
                     identifier: identifier,
-                    authenticatorAttachment: .platform
+                    authenticatorAttachment: authenticatorAttachment ?? .platform
                 )
-            
-            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
-            
+            let includeSecurityKeyOption = authenticatorAttachment == .any
+                || authenticatorAttachment == .crossPlatform
+            let registrationRequest = try await RegistrationAuthorizationController
+                .shared.register(
+                    from: registrationStartResponse,
+                    identifier: identifier,
+                    includeSecurityKeyOption: includeSecurityKeyOption
+                )
             authResult = try await PassageAPIClient.shared
                 .webauthnRegistrationFinish(
                     startResponse: registrationStartResponse,
@@ -1210,40 +1167,6 @@ public class PassageAuth {
             throw PassageError.unknown
         }
 
-    }
-    
-    /// Register a new account with a physical security key.
-    ///
-    ///  This method registers a new account.
-    ///
-    ///  If an Error occures, the account might already be registered and should login with a passkey
-    ///  or a magic link.
-    ///
-    /// - Parameter identifier: The users email or phone number
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
-    @available(iOS 16.0, *)
-    public static func registerWithSecurityKey(identifier: String) async throws -> AuthResult {
-        do {
-            let registrationStartResponse = try await PassageAPIClient.shared
-                .webauthnRegistrationStart(
-                    identifier: identifier,
-                    authenticatorAttachment: .crossPlatform
-                )
-            let credential = try await RegistrationAuthorizationController.shared
-                .requestSecurityKeyRegistration(
-                    from: registrationStartResponse,
-                    identifier: identifier
-                )
-            return try await PassageAPIClient.shared
-                .webauthnRegistrationFinish(
-                    startResponse: registrationStartResponse,
-                    credential: credential
-                )
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
-            throw PassageError.unknown
-        }
     }
     
     /// Private method to instantiate a logger and log the errors we catch
@@ -1307,7 +1230,7 @@ public class PassageAuth {
     internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
 
         // should check error status if code == 404 throw userNotFound
-        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil, authenticatorAttachment: .platform)
+        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil)
 
         return loginStartResponse
     }

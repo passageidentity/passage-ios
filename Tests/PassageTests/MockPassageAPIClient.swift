@@ -11,7 +11,7 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func webauthnLoginStart(identifier: String?, authenticatorAttachment: AuthenticatorAttachment?) async throws -> Passage.WebauthnLoginStartResponse {
+    func webauthnLoginStart(identifier: String?) async throws -> Passage.WebauthnLoginStartResponse {
         return testLoginStartResponse
     }
     
@@ -48,7 +48,11 @@ final class MockPassageAPIClient: PassageAuthAPIClient {
     }
     
     @available(iOS 16.0, *)
-    func addDeviceFinish(token: String, startResponse: Passage.WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> Passage.DeviceInfo {
+    func addDeviceFinish(
+        token: String,
+        startResponse: Passage.WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration
+    ) async throws -> Passage.DeviceInfo {
         throw PassageError.unknown
     }
     
