@@ -17,11 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: List Available Simulators
-        run: xcrun simctl list devices
-
       - name: Test iOS 17.0
-        run: xcodebuild clean build-for-testing test -scheme Passage -sdk iphonesimulator17.0 -destination "OS=17.0,name=iPhone 15 Pro"
+        run: xcodebuild clean build-for-testing test -scheme Passage -sdk iphonesimulator17.0 -destination "OS=17.0,name=iPhone 15 Pro" -derivedDataPath './derivedData'
 
   integration-test-iOS-17:
     name: Build and Integration Tests iOS 17
@@ -34,4 +31,4 @@ jobs:
         run: xcodebuild -list
 
       - name: Test iOS 17.0
-        run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator17.0 -destination "OS=17.0,name=iPhone 15 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
+        run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator17.0 -destination "OS=17.0,name=iPhone 15 Pro" -derivedDataPath './derivedData' PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
