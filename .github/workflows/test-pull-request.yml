@@ -10,18 +10,18 @@ env:
   MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
 
 jobs:
-  unit-test-iOS-17:
-    name: Build and Unit Test iOS 17
+  unit-test-iOS:
+    name: Build and Unit Test
     runs-on: macos-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Test iOS 17.0
-        run: xcodebuild clean build-for-testing test -scheme Passage -sdk iphonesimulator17.0 -destination "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0" -derivedDataPath './derivedData'
+      - name: Test iOS
+        run: xcodebuild clean build-for-testing test -scheme Passage -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15 Pro"
 
-  integration-test-iOS-17:
-    name: Build and Integration Tests iOS 17
+  integration-test-iOS:
+    name: Build and Integration Tests iOS
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -30,10 +30,5 @@ jobs:
       - name: List Schemes
         run: xcodebuild -list
 
-      - name: Confirm XCTest bundle
-        run: ls -l ${DERIVED_DATA_PATH}/Build/Products/Debug-iphonesimulator/
-        env:
-          DERIVED_DATA_PATH: ./derivedData
-
-      - name: Test iOS 17.0
-        run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator17.0 -destination "platform=iOS Simulator,name=iPhone 15 Pro,OS=17.0" -derivedDataPath './derivedData' PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
+      - name: Test iOS
+        run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
