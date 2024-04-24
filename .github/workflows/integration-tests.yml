@@ -11,7 +11,7 @@ env:
 
 jobs:
   integration-test-iOS-16:
-    name: Build and Integration Tests iOS 16
+    name: Build and Integration Tests iOS
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -20,5 +20,5 @@ jobs:
       - name: List Schemes
         run: xcodebuild -list
 
-      - name: Test iOS 16.2
-        run: xcodebuild test -scheme IntegrationTest -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
+      - name: Test iOS
+        run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15 Pro"
