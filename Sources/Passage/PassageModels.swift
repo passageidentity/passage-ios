@@ -291,3 +291,17 @@ public struct DeviceInfo: Codable {
         case userId = "user_id"
     }
 }
+
+public enum AuthenticatorAttachment: String {
+    case platform = "platform"
+    case crossPlatform = "cross-platform"
+    case any = "any"
+}
+
+public struct PasskeyCreationOptions {
+    public let authenticatorAttachment: AuthenticatorAttachment
+    
+    public init(authenticatorAttachment: AuthenticatorAttachment) {
+        self.authenticatorAttachment = authenticatorAttachment
+    }
+}

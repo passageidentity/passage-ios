@@ -4,6 +4,12 @@ internal struct AppInfoResponse: Codable {
     public let app: AppInfo
 }
 
+internal struct WebauthnLoginStartResponseHandshakeChallengePublicKeyCredential: Codable {
+    public let id: String
+    public let transports: [String]?
+    public let type: String
+}
+
 /// Details of the Public Key
 internal struct WebauthnLoginStartResponseHandshakeChallengePublicKey: Codable {
     /// The challenge to use for the Credential Assertion
@@ -11,6 +17,7 @@ internal struct WebauthnLoginStartResponseHandshakeChallengePublicKey: Codable {
     /// The timeout
     public let timeout: Int
     public let rpId: String
+    public let allowCredentials: [WebauthnLoginStartResponseHandshakeChallengePublicKeyCredential]?
 }
 
 /// Contains the Public Key to use for the credential assertion
@@ -70,7 +77,7 @@ internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyUser: Co
 }
 
 internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKeyAuthenticatorSelection: Codable {
-    public let authenticatorAttachment: String
+    public let authenticatorAttachment: String?
 }
 
 internal struct WebauthnRegisterStartResponseHandshakeChallengePublicKey: Codable {

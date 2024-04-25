@@ -148,12 +148,13 @@ public class PassageAuth {
     ///
     /// This would be a good time to let them enter their identifier and get a login magic link or register
     /// for a new account.
+    /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func loginWithPasskey() async throws -> AuthResult {
+    public func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         self.clearTokens()
-        let authResult = try await PassageAuth.loginWithPasskey()
+        let authResult = try await PassageAuth.loginWithPasskey(identifier: identifier)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
     }
@@ -323,13 +324,13 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public func addDevice() async throws -> DeviceInfo {
+    public func addDevice(options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         
         guard let token = self.tokenStore.authToken else {
             throw PassageError.unauthorized
         }
         
-        let device = try await PassageAuth.addDevice(token: token)
+        let device = try await PassageAuth.addDevice(token: token, options: options)
         return device
     }
 
@@ -430,12 +431,17 @@ public class PassageAuth {
     ///  or a magic link.
     ///
     /// - Parameter identifier: The users email or phone number
+    /// - Parameter options: Optional configuration for passkey creation
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    public func registerWithPasskey(identifier: String) async throws -> AuthResult {
+    public func registerWithPasskey(
+        identifier: String,
+        options: PasskeyCreationOptions? = nil
+    ) async throws -> AuthResult {
         self.clearTokens()
-        let authResult = try await PassageAuth.registerWithPasskey(identifier: identifier)
+        let authResult = try await PassageAuth
+            .registerWithPasskey(identifier: identifier, options: options)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
     }
@@ -566,24 +572,26 @@ public class PassageAuth {
     /// This would be a good time to let them enter their identifier and get a login magic link or register
     /// for a new account.
     ///
+    /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func loginWithPasskey() async throws -> AuthResult {
-        
+    public static func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         var authResult : AuthResult?
         do {
-            let loginWithIdentifierStartResponse = try await PassageAPIClient.shared.webauthnLoginStart()
-            
-            let credentialAssertion = try await LoginAuthorizationController.shared.login(from: loginWithIdentifierStartResponse)
-            
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(startResponse: loginWithIdentifierStartResponse, credentialAssertion: credentialAssertion)
+            let loginWithIdentifierStartResponse = try await PassageAPIClient
+                .shared.webauthnLoginStart(identifier: identifier)
+            let credentialAssertion = try await LoginAuthorizationController
+                .shared.login(from: loginWithIdentifierStartResponse)
+            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
+                startResponse: loginWithIdentifierStartResponse,
+                credential: credentialAssertion
+            )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
         } catch {
             throw error
         }
-            
         if let unwrappedAuthResult = authResult {
             return unwrappedAuthResult
         } else {
@@ -961,16 +969,28 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
-    public static func addDevice(token: String) async throws -> DeviceInfo {
+    public static func addDevice(token: String, options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         do {
             let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
+            let authenticatorAttachment = options?.authenticatorAttachment ?? .platform
+            let includeSecurityKeyOption = authenticatorAttachment == .any
+                || authenticatorAttachment == .crossPlatform
             guard let registrationRequest = try await RegistrationAuthorizationController.shared
-                .register(from: startResponse, identifier: startResponse.handshake.challenge.publicKey.user.name )
+                .register(
+                    from: startResponse,
+                    identifier: startResponse.handshake.challenge.publicKey.user.name,
+                    includeSecurityKeyOption: includeSecurityKeyOption
+                )
             else {
                 throw PassageError.unknown
             }
+            
             let device = try await PassageAPIClient.shared
-                .addDeviceFinish(token: token, startResponse: startResponse, params: registrationRequest)
+                .addDeviceFinish(
+                    token: token,
+                    startResponse: startResponse,
+                    credential: registrationRequest
+                )
             return device
         }  catch {
             if let apiError = error as? PassageAPIError {
@@ -1112,18 +1132,33 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    private static func registerWithPasskey(identifier: String) async throws -> AuthResult {
+    private static func registerWithPasskey(
+        identifier: String,
+        options: PasskeyCreationOptions? = nil
+    ) async throws -> AuthResult {
         var authResult: AuthResult?
         do {
-            let registrationStartResponse = try await PassageAPIClient.shared.webauthnRegistrationStart(identifier: identifier)
-            
-            let registrationRequest = try await RegistrationAuthorizationController.shared.register(from: registrationStartResponse, identifier: identifier)
-            
-            authResult = try await PassageAPIClient.shared.webauthnRegistrationFinish(startResponse: registrationStartResponse, params: registrationRequest)
+            let authenticatorAttachment = options?.authenticatorAttachment
+            let registrationStartResponse = try await PassageAPIClient.shared
+                .webauthnRegistrationStart(
+                    identifier: identifier,
+                    authenticatorAttachment: authenticatorAttachment ?? .platform
+                )
+            let includeSecurityKeyOption = authenticatorAttachment == .any
+                || authenticatorAttachment == .crossPlatform
+            let registrationRequest = try await RegistrationAuthorizationController
+                .shared.register(
+                    from: registrationStartResponse,
+                    identifier: identifier,
+                    includeSecurityKeyOption: includeSecurityKeyOption
+                )
+            authResult = try await PassageAPIClient.shared
+                .webauthnRegistrationFinish(
+                    startResponse: registrationStartResponse,
+                    credential: registrationRequest
+                )
         } catch (let error as PassageAPIError) {
             try PassageAuth.handlePassageAPIError(error: error)
-        } catch  {
-            throw error
         }
         
         if let unwrappedAuthResult = authResult {
@@ -1195,7 +1230,7 @@ public class PassageAuth {
     internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
 
         // should check error status if code == 404 throw userNotFound
-        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart()
+        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil)
 
         return loginStartResponse
     }
@@ -1215,7 +1250,10 @@ public class PassageAuth {
         var authResult: AuthResult!
 
         do {
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(startResponse: startResponse, credentialAssertion: credentialAssertion)
+            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
+                startResponse: startResponse,
+                credential: credentialAssertion
+            )
         }
         catch {
             throw error

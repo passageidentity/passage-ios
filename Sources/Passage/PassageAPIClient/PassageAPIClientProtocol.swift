@@ -19,7 +19,7 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnLoginStart() async throws -> WebauthnLoginStartResponse
+    func webauthnLoginStart(identifier: String?) async throws -> WebauthnLoginStartResponse
     
     
     /// Perform a webauthn login finish request to complete an authentication attempt
@@ -29,41 +29,34 @@ protocol PassageAuthAPIClient  {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> AuthResult
+    func webauthnLoginFinish(
+        startResponse: WebauthnLoginStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialAssertion?
+    ) async throws -> AuthResult
     
-    
-    /// Peform a webauthn login start request for the specified identifier
-    /// - Parameter identifier: Email address or phone number
-    /// - Returns: ``WebauthnLoginStartResponse``
-    @available(iOS 16.0, *)
-    func webauthnLoginWithIdentifierStart(identifier: String) async throws -> WebauthnLoginStartResponse
-    
-    
-    /// Perform a webauthn login finish request to complete an authentication attempt
-    /// - Parameters:
-    ///   - startResponse: ``WebauthnLoginStartResponse`` from the previous login start request
-    ///   - credentialAssertion: ``ASAuthorizationPlatformPublicKeyCredentialAssertion``
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIClientError``
-    @available(iOS 16.0, *)
-    func webauthnLoginWithIdentifierFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult
     
     /// Perform a webauthn registration start request
     /// - Parameter identifier: The users identifier (email or phone number)
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse
+    func webauthnRegistrationStart(
+        identifier: String,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> WebauthnRegisterStartResponse
     
     
     /// Performa a webauthn registration finish request
     /// - Parameters:
     ///   - startResponse: ``WebauthnRegisterStartResponse`` from the registrationStart request
-    ///   - params: ``ASAuthorizationPlatformPublicKeyCredentialRegistration`` from the credential registration request
+    ///   - credential: ``ASAuthorizationPublicKeyCredentialRegistration`` from the credential registration request
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIClientError``
     @available(iOS 16.0, *)
-    func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult
+    func webauthnRegistrationFinish(
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration?
+    ) async throws -> AuthResult
     
     
     /// Peform a webauthn add device start request
@@ -81,7 +74,11 @@ protocol PassageAuthAPIClient  {
     ///   - params: The ASAuthorizationPlatformPublicKeyCredentialRegistration
     /// - Returns: ``Void``
     @available(iOS 16.0, *)
-    func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse,  params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo
+    func addDeviceFinish(
+        token: String,
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration
+    ) async throws -> DeviceInfo
     
     
     /// Send a new login magic link to the user's email or phone

@@ -65,13 +65,17 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``WebauthnLoginStartResponse``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnLoginStart() async throws -> WebauthnLoginStartResponse {
+    internal func webauthnLoginStart(identifier: String? = nil) async throws -> WebauthnLoginStartResponse {
         
         let url = try self.appUrl(path: "login/webauthn/start/")
         
         let request = buildRequest(url: url, method: "POST")
-        
-        let (responseData, response) = try await URLSession.shared.data(for: request)
+        var jsonObject: [String: String] = [:]
+        if let identifier {
+            jsonObject["identifier"] = identifier
+        }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
 
         // validate the response
         // calling code should check status, if status code 404 throw userNotFound
@@ -86,114 +90,44 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// Perform a webauthn login finish request to complete an authentication attempt
     /// - Parameters:
     ///   - startResponse: ``WebauthnLoginStartResponse`` from the previous login start request
-    ///   - credentialAssertion: ``ASAuthorizationPlatformPublicKeyCredentialAssertion``
+    ///   - credential: ``ASAuthorizationPublicKeyCredentialAssertion``
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnLoginFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion?) async throws -> AuthResult {
-        guard let credentialAssertion else {
+    internal func webauthnLoginFinish(
+        startResponse: WebauthnLoginStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialAssertion?
+    ) async throws -> AuthResult {
+        guard let credential else {
             throw PassageASAuthorizationError.credentialRegistration
         }
-        
         let url = try self.appUrl(path: "login/webauthn/finish/")
-
         let response = [
-            "clientDataJSON": credentialAssertion.rawClientDataJSON.toBase64Url(),
-            "authenticatorData": credentialAssertion.rawAuthenticatorData.toBase64Url(),
-            "signature": credentialAssertion.signature.toBase64Url(),
-            "userHandle": credentialAssertion.userID.toBase64Url()
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url(),
+            "authenticatorData": credential.rawAuthenticatorData.toBase64Url(),
+            "signature": credential.signature.toBase64Url(),
+            "userHandle": credential.userID.toBase64Url()
         ]
-        let credId = credentialAssertion.credentialID.toBase64Url();
+        let credId = credential.credentialID.toBase64Url();
         let handshakeResponse = [
             "rawId": credId,
             "id": credId,
             "type": "public-key",
             "response": response
         ] as [String : Any]
-        let parameters = [
+        var parameters = [
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
         ] as [String : Any]
-        
+        if let userId = startResponse.user?.id {
+            parameters["user_id"] = userId
+        }
         let request = buildRequest(url: url, method: "POST")
-
-        
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-
-
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
-        
         try assertValidResponse(response: resp, responseData: responseData)
-        
         let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
-
         return authResponse.authResult
-    }
-    
-    /// Peform a webauthn login start request for the specified identifier
-    /// - Parameter identifier: Email address or phone number
-    /// - Returns: ``WebauthnLoginStartResponse``
-    /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
-    internal func webauthnLoginWithIdentifierStart(identifier: String) async throws -> WebauthnLoginStartResponse {
-        
-        let url = try self.appUrl(path: "login/webauthn/start/")
-        
-        let request = buildRequest(url: url, method: "POST")
-
-        let data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
-               
-        let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
-
-        try assertValidResponse(response: response, responseData: responseData)
-
-        let loginResponse = try JSONDecoder().decode(WebauthnLoginStartResponse.self, from: responseData)
-        
-        return loginResponse
-
-    }
-    
-    /// Perform a webauthn login finish request to complete an authentication attempt
-    /// - Parameters:
-    ///   - startResponse: ``WebauthnLoginStartResponse`` from the previous login start request
-    ///   - credentialAssertion: ``ASAuthorizationPlatformPublicKeyCredentialAssertion``
-    /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``
-    @available(iOS 16.0, *)
-    internal func webauthnLoginWithIdentifierFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
-        let url = try self.appUrl(path: "login/webauthn/finish/")
-        
-        let response = [
-            "clientDataJSON": credentialAssertion.rawClientDataJSON.toBase64Url(),
-            "authenticatorData": credentialAssertion.rawAuthenticatorData.toBase64Url(),
-            "signature": credentialAssertion.signature.toBase64Url(),
-            "userHandle": credentialAssertion.userID.toBase64Url()
-        ]
-        let credId = credentialAssertion.credentialID.toBase64Url();
-        let handshakeResponse = [
-            "rawId": credId,
-            "id": credId,
-            "type": "public-key",
-            "response": response
-        ] as [String : Any]
-        let parameters = [
-            "user_id" : startResponse.user!.id,
-            "handshake_id": startResponse.handshake.id,
-            "handshake_response": handshakeResponse,
-        ] as [String : Any]
-        
-        let request = buildRequest(url: url, method: "POST")
-        
-        let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-
-        let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
-        
-        try assertValidResponse(response: resp, responseData: responseData)
-        
-        let authResponse = try JSONDecoder().decode(WebauthnLoginFinishResponse.self, from: responseData)
-
-        return authResponse.authResult
-        
     }
 
 
@@ -202,12 +136,19 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``WebauthnRegisterStartResponse``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnRegistrationStart(identifier: String) async throws -> WebauthnRegisterStartResponse {
+    internal func webauthnRegistrationStart(
+        identifier: String,
+        authenticatorAttachment: AuthenticatorAttachment?
+    ) async throws -> WebauthnRegisterStartResponse {
         let url = try self.appUrl(path: "register/webauthn/start/")
         
         let request = buildRequest(url: url, method: "POST")
 
-        let data = try JSONSerialization.data(withJSONObject: ["identifier": identifier], options: [])
+        var jsonObject = ["identifier": identifier]
+        if let authenticatorAttachment {
+            jsonObject["authenticator_attachment"] = authenticatorAttachment.rawValue
+        }
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
         
         let (responseData, response) = try await URLSession.shared.upload(for: request, from: data)
         
@@ -225,41 +166,38 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func webauthnRegistrationFinish(startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration?) async throws -> AuthResult {
-        guard let params else {
+    internal func webauthnRegistrationFinish(
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration?
+    ) async throws -> AuthResult {
+        guard let credential else {
             throw PassageError.unknown
         }
         let url = try self.appUrl(path: "register/webauthn/finish/")
-        
         let response = [
-            "attestationObject": params.rawAttestationObject?.toBase64Url(),
-            "clientDataJSON": params.rawClientDataJSON.toBase64Url()
+            "attestationObject": credential.rawAttestationObject?.toBase64Url(),
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url()
         ]
-     
-        let credId = params.credentialID.toBase64Url();
+        let credId = credential.credentialID.toBase64Url();
+        let authenticatorAttachment = startResponse.handshake.challenge.publicKey
+            .authenticatorSelection.authenticatorAttachment
         let handshakeResponse: [String :Any] = [
-            "rawId": credId,
+            "authenticatorAttachment": authenticatorAttachment,
             "id": credId,
+            "rawId": credId,
+            "response": response,
             "type": "public-key",
-            "response": response
         ]
-        
         let parameters: [String :Any] = [
             "handshake_id": startResponse.handshake.id,
             "handshake_response": handshakeResponse,
             "user_id": startResponse.user.id
         ]
-     
         let request = buildRequest(url: url, method: "POST")
-        
         let data = try JSONSerialization.data(withJSONObject: parameters, options: [])
-
         let (responseData, resp) = try await URLSession.shared.upload(for: request, from: data)
-        
         try assertValidResponse(response: resp,responseData: responseData)
-
         let authResponse = try JSONDecoder().decode(WebauthnRegisterFinishResponse.self, from: responseData)
-
         return authResponse.authResult
     }
     
@@ -290,17 +228,21 @@ internal class PassageAPIClient : PassageAuthAPIClient {
     /// - Returns: ``Void``
     /// - Throws: ``PassageAPIError``
     @available(iOS 16.0, *)
-    internal func addDeviceFinish(token: String, startResponse: WebauthnRegisterStartResponse, params: ASAuthorizationPlatformPublicKeyCredentialRegistration) async throws -> DeviceInfo {
+    internal func addDeviceFinish(
+        token: String,
+        startResponse: WebauthnRegisterStartResponse,
+        credential: ASAuthorizationPublicKeyCredentialRegistration
+    ) async throws -> DeviceInfo {
         let url = try self.appUrl(path: "currentuser/devices/finish/")
         
         let request = buildAuthenticatedRequest(url: url, method: "POST", token: token)
         
         let response = [
-            "attestationObject": params.rawAttestationObject?.toBase64Url(),
-            "clientDataJSON": params.rawClientDataJSON.toBase64Url()
+            "attestationObject": credential.rawAttestationObject?.toBase64Url(),
+            "clientDataJSON": credential.rawClientDataJSON.toBase64Url()
         ]
      
-        let credId = params.credentialID.toBase64Url();
+        let credId = credential.credentialID.toBase64Url();
         let handshakeResponse = [
             "rawId": credId,
             "id": credId,
