@@ -32,3 +32,16 @@ jobs:
 
       - name: Test iOS
         run: xcodebuild clean build-for-testing test -scheme IntegrationTest -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15 Pro" PASSAGE_AUTH_TOKEN="${{ env.PASSAGE_AUTH_TOKEN }}" MAILOSAUR_API_KEY="${{ secrets.MAILOSAUR_API_KEY }}"
+
+  ui-test-iOS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger UI Test Workflow in iOS App Repo
+        uses: convictional/trigger-workflow-and-wait@v1.6.3
+        with:
+          owner: passageidentity
+          repo: passage-ios-uitest-app
+          github_token: ${{ secrets.GH_ACCESS_TOKEN }}
+          workflow_file_name: ui-tests.yml
+          github_user: rickycpadilla
+          client_payload: '{"passage_ios_branch_name": "${{ github.head_ref }}"}'
