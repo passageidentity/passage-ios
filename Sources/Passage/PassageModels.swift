@@ -227,12 +227,6 @@ public protocol AuthFallbackResult: Codable {
     var id: String { get set }
 }
 
-/// Describes a magic link
-//public struct MagicLink: AuthFallbackResult {
-//    /// id of the magic link
-//    public var id: String
-//}
-
 /// Describes a one time passcode
 public struct OneTimePasscode {
     /// id of the one time passcode
