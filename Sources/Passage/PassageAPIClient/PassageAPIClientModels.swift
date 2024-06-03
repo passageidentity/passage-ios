@@ -50,13 +50,6 @@ internal struct AuthResultResponse: Codable {
     }
 }
 
-internal struct MagicLinkResponse: Codable {
-    public let magicLink: MagicLink
-    internal enum CodingKeys: String, CodingKey {
-        case magicLink = "magic_link"
-    }
-}
-
 /// API Response from a webauthn login finish request
 internal typealias WebauthnLoginFinishResponse = AuthResultResponse
 
@@ -117,10 +110,6 @@ internal typealias MagicLinkStatusResponse = AuthResultResponse
 internal typealias ActivateMagicLinkResponse = AuthResultResponse
 
 internal typealias ActivateOneTimePasscodeResponse = AuthResultResponse
-
-internal struct CurrentUserResponse: Codable {
-    public let user: PassageUserInfo
-}
 
 internal struct ListDevicesResponse: Codable {
     public let devices: [DeviceInfo]

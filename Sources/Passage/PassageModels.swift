@@ -1,24 +1,5 @@
 import Foundation
 
-/// The authentication result containing the users tokens and redirect url
-public struct AuthResult: Codable {
-    /// The user's auth token
-    public let authToken: String
-    /// The redirect url after successful authentication
-    public let redirectURL: String
-    /// The user's refresh token
-    public let refreshToken: String?
-    /// The expiration of the user's refresh token
-    public let refreshTokenExpiration: Int?
-    
-    internal enum CodingKeys: String, CodingKey {
-        case authToken = "auth_token"
-        case redirectURL = "redirect_url"
-        case refreshToken = "refresh_token"
-        case refreshTokenExpiration = "refresh_token_expiration"
-    }
-}
-
 /// Information about a Passage user
 public struct PassageUserInfo: Codable {
     /// when the user was created
@@ -247,13 +228,13 @@ public protocol AuthFallbackResult: Codable {
 }
 
 /// Describes a magic link
-public struct MagicLink: AuthFallbackResult {
-    /// id of the magic link
-    public var id: String
-}
+//public struct MagicLink: AuthFallbackResult {
+//    /// id of the magic link
+//    public var id: String
+//}
 
 /// Describes a one time passcode
-public struct OneTimePasscode: AuthFallbackResult {
+public struct OneTimePasscode {
     /// id of the one time passcode
     public var id: String
     enum CodingKeys: String, CodingKey {
