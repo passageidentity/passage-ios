@@ -1147,10 +1147,10 @@ public class PassageAuth {
     ///
     /// - Returns: <#description#>
     @available(iOS 16.0, *)
-    internal static func autoFillStart() async throws -> WebauthnLoginStartResponse {
+    internal static func autoFillStart() async throws -> LoginWebAuthnStartResponse {
 
         // should check error status if code == 404 throw userNotFound
-        let loginStartResponse = try await PassageAPIClient.shared.webauthnLoginStart(identifier: nil)
+        let loginStartResponse = try await LoginAPI.loginWebauthnStart(appId: appId)
 
         return loginStartResponse
     }
@@ -1165,22 +1165,38 @@ public class PassageAuth {
     ///   - credentialAssertion: The credential assertion from the ASAuthorizationController
     /// - Returns: ``AuthResult``
     @available(iOS 16.0, *)
-    internal static func autoFillFinish(startResponse: WebauthnLoginStartResponse, credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion) async throws -> AuthResult {
-
-        var authResult: AuthResult!
-
+    internal static func autoFillFinish(
+        startResponse: LoginWebAuthnStartResponse,
+        credentialAssertion: ASAuthorizationPlatformPublicKeyCredentialAssertion
+    ) async throws -> AuthResult {
         do {
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
-                startResponse: startResponse,
-                credential: credentialAssertion
+            let assertionResponse = CredentialAssertionResponseResponse(
+                authenticatorData: credentialAssertion.rawAuthenticatorData.toBase64Url(),
+                clientDataJSON: credentialAssertion.rawClientDataJSON.toBase64Url(),
+                signature: credentialAssertion.signature.toBase64Url(),
+                userHandle: credentialAssertion.userID.toBase64Url()
             )
-        }
-        catch {
+            let credentialId = credentialAssertion.credentialID.toBase64Url()
+            let handshakeResponse = CredentialAssertionResponse(
+                id: credentialId,
+                rawId: credentialId,
+                response: assertionResponse,
+                type: "public-key"
+            )
+            let request = LoginWebAuthnFinishRequest(
+                handshakeId: startResponse.handshake.id,
+                handshakeResponse: handshakeResponse,
+                userId: startResponse.user?.id
+            )
+            let response = try await LoginAPI
+                .loginWebauthnFinish(
+                    appId: appId,
+                    loginWebAuthnFinishRequest: request
+                )
+            return response.authResult
+        } catch {
             throw error
         }
-
-        return authResult
-
     }
     
     /// Start the Passkey Autofill Service

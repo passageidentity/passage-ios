@@ -8,7 +8,7 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
     public static let shared = PassageAutofillAuthorizationController()
     
     var authController : ASAuthorizationController?
-    var startResponse : WebauthnLoginStartResponse?
+    var startResponse : LoginWebAuthnStartResponse?
     var isPerformingModalRequest : Bool = false
     var authenticationAnchor: ASPresentationAnchor?
     
@@ -47,7 +47,7 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         let startResponse = try await PassageAuth.autoFillStart()
         self.startResponse = startResponse
         
-        let rpId = startResponse.handshake.challenge.publicKey.rpId
+        guard let rpId = startResponse.handshake.challenge.publicKey.rpId else { return }
         let publicKeyCredentialProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: rpId)
         
         let challenge = self.startResponse!.handshake.challenge.publicKey.challenge
