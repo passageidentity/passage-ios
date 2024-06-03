@@ -11,11 +11,14 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
 
     static var shared: LoginAuthorizationControllerProtocol = LoginAuthorizationController()
     
-    func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPublicKeyCredentialAssertion? {
+    func login(from response: LoginWebAuthnStartResponse) async throws -> ASAuthorizationPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
         let rpId = response.handshake.challenge.publicKey.rpId
         let challenge = response.handshake.challenge.publicKey.challenge
-        guard let decodedChallenge = challenge.decodeBase64Url() else {
+        guard
+            let rpId = response.handshake.challenge.publicKey.rpId,
+            let decodedChallenge = challenge.decodeBase64Url()
+        else {
             return nil
         }
         // Handle platform request

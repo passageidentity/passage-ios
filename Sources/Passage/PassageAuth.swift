@@ -420,29 +420,38 @@ public class PassageAuth {
                     appId: appId,
                     loginWebAuthnStartRequest: startRequest
                 )
-            
-        }
-        
-        
-        var authResult : AuthResult?
-        do {
-            let loginWithIdentifierStartResponse = try await PassageAPIClient
-                .shared.webauthnLoginStart(identifier: identifier)
-            let credentialAssertion = try await LoginAuthorizationController
-                .shared.login(from: loginWithIdentifierStartResponse)
-            authResult = try await PassageAPIClient.shared.webauthnLoginFinish(
-                startResponse: loginWithIdentifierStartResponse,
-                credential: credentialAssertion
+            guard let credentialAssertion = try await LoginAuthorizationController
+                .shared
+                .login(from: startResponse)
+            else {
+                throw PassageASAuthorizationError.credentialRegistration
+            }
+            let assertionResponse = CredentialAssertionResponseResponse(
+                authenticatorData: credentialAssertion.rawAuthenticatorData.toBase64Url(),
+                clientDataJSON: credentialAssertion.rawClientDataJSON.toBase64Url(),
+                signature: credentialAssertion.signature.toBase64Url(),
+                userHandle: credentialAssertion.userID.toBase64Url()
             )
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let credentialId = credentialAssertion.credentialID.toBase64Url()
+            let handshakeResponse = CredentialAssertionResponse(
+                id: credentialId,
+                rawId: credentialId,
+                response: assertionResponse,
+                type: "public-key"
+            )
+            let finishRequest = LoginWebAuthnFinishRequest(
+                handshakeId: startResponse.handshake.id,
+                handshakeResponse: handshakeResponse,
+                userId: identifier
+            )
+            let finishResponse = try await LoginAPI
+                .loginWebauthnFinish(
+                    appId: appId,
+                    loginWebAuthnFinishRequest: finishRequest
+                )
+            return finishResponse.authResult
         } catch {
             throw error
-        }
-        if let unwrappedAuthResult = authResult {
-            return unwrappedAuthResult
-        } else {
-            throw PassageError.unknown
         }
     }
     
@@ -466,7 +475,7 @@ public class PassageAuth {
                 )
             return response.magicLink
         } catch {
-            
+            throw error
         }
     }
     
@@ -566,7 +575,7 @@ public class PassageAuth {
                 )
             return response.magicLink
         } catch {
-            
+            throw error
         }
     }
     
@@ -589,7 +598,7 @@ public class PassageAuth {
                 )
             return response.magicLink
         } catch {
-            
+            throw error
         }
     }
     
@@ -610,7 +619,7 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            
+            throw error
         }
     }
     
@@ -631,7 +640,7 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            
+            throw error
         }
     }
     
@@ -655,7 +664,7 @@ public class PassageAuth {
                 )
             return OneTimePasscode(id: response.otpId)
         } catch {
-            
+            throw error
         }
     }
     
@@ -678,7 +687,7 @@ public class PassageAuth {
                 )
             return OneTimePasscode(id: response.otpId)
         } catch {
-            
+            throw error
         }
     }
     
@@ -705,6 +714,7 @@ public class PassageAuth {
             return response.authResult
         } catch {
             // TODO: handle exceededAttempts error
+            throw error
         }
     }
     
@@ -823,32 +833,61 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     @available(iOS 16.0, *)
     public static func addDevice(token: String, options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
+        setAuthTokenHeader(token: token)
         do {
-            let startResponse = try await PassageAPIClient.shared.addDeviceStart(token: token)
-            let authenticatorAttachment = options?.authenticatorAttachment ?? .platform
+            let authenticatorAttachment = options?.authenticatorAttachment
+            let startRequest = CurrentUserDevicesStartRequest(
+                authenticatorAttachment: authenticatorAttachment
+            )
+            let startResponse = try await CurrentuserAPI
+                .postCurrentuserAddDeviceStart(
+                    appId: appId,
+                    currentUserDevicesStartRequest: startRequest
+                )
             let includeSecurityKeyOption = authenticatorAttachment == .any
                 || authenticatorAttachment == .crossPlatform
-            guard let registrationRequest = try await RegistrationAuthorizationController.shared
-                .register(
-                    from: startResponse,
-                    identifier: startResponse.handshake.challenge.publicKey.user.name,
-                    includeSecurityKeyOption: includeSecurityKeyOption
-                )
+            guard
+                let identifier = startResponse.handshake.challenge.publicKey?.user?.name,
+                let userId = startResponse.user?.id,
+                let credentialCreation = try await RegistrationAuthorizationController
+                    .shared
+                    .register(
+                        from: RegisterWebAuthnStartResponse(
+                            handshake: startResponse.handshake,
+                            user: startResponse.user
+                        ),
+                        identifier: identifier,
+                        includeSecurityKeyOption: includeSecurityKeyOption
+                    )
             else {
-                throw PassageError.unknown
+                throw PassageError.unknown // TODO: update
             }
-            
-            let device = try await PassageAPIClient.shared
-                .addDeviceFinish(
-                    token: token,
-                    startResponse: startResponse,
-                    credential: registrationRequest
+            let credentialId = credentialCreation.credentialID.toBase64Url()
+            let creationResponse = CredentialCreationResponseResponse(
+                attestationObject: credentialCreation.rawAttestationObject?.toBase64Url(),
+                clientDataJSON: credentialCreation.rawClientDataJSON.toBase64Url()
+            )
+            let handshakeResponse = CredentialCreationResponse(
+                authenticatorAttachment: authenticatorAttachment?.rawValue,
+                id: credentialId,
+                rawId: credentialId,
+                response: creationResponse,
+                type: "public-key"
                 )
-            return device
-        }  catch {
-            if let apiError = error as? PassageAPIError {
-                try PassageAuth.handlePassageAPIError(error: apiError)
-            }
+            let finishRequest = AddDeviceFinishRequest(
+                handshakeId: startResponse.handshake.id,
+                handshakeResponse: handshakeResponse,
+                userId: userId
+            )
+            let finishResponse = try await CurrentuserAPI
+                .postCurrentuserAddDeviceFinish(
+                    appId: appId,
+                    addDeviceFinishRequest: finishRequest
+                )
+            clearAuthTokenHeader()
+            return finishResponse.device
+        } catch {
+            clearAuthTokenHeader()
             throw error
         }
     }
@@ -985,41 +1024,61 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
     @available(iOS 16.0, *)
-    private static func registerWithPasskey(
+    public static func registerWithPasskey(
         identifier: String,
         options: PasskeyCreationOptions? = nil
     ) async throws -> AuthResult {
-        var authResult: AuthResult?
         do {
             let authenticatorAttachment = options?.authenticatorAttachment
-            let registrationStartResponse = try await PassageAPIClient.shared
-                .webauthnRegistrationStart(
-                    identifier: identifier,
-                    authenticatorAttachment: authenticatorAttachment ?? .platform
+            let startRequest = RegisterWebAuthnStartRequest(
+                identifier: identifier,
+                authenticatorAttachment: authenticatorAttachment ?? .platform
+            )
+            let startResponse = try await RegisterAPI
+                .registerWebauthnStart(
+                    appId: appId,
+                    registerWebAuthnStartRequest: startRequest
                 )
             let includeSecurityKeyOption = authenticatorAttachment == .any
                 || authenticatorAttachment == .crossPlatform
-            let registrationRequest = try await RegistrationAuthorizationController
-                .shared.register(
-                    from: registrationStartResponse,
-                    identifier: identifier,
-                    includeSecurityKeyOption: includeSecurityKeyOption
+            guard
+                let credentialCreation = try await RegistrationAuthorizationController
+                    .shared
+                    .register(
+                        from: startResponse,
+                        identifier: identifier,
+                        includeSecurityKeyOption: includeSecurityKeyOption
+                    ),
+                  let userId = startResponse.user?.id
+            else {
+                throw PassageError.unknown // TODO: update
+            }
+            let credentialId = credentialCreation.credentialID.toBase64Url()
+            let creationResponse = CredentialCreationResponseResponse(
+                attestationObject: credentialCreation.rawAttestationObject?.toBase64Url(),
+                clientDataJSON: credentialCreation.rawClientDataJSON.toBase64Url()
+            )
+            let handshakeResponse = CredentialCreationResponse(
+                authenticatorAttachment: authenticatorAttachment?.rawValue,
+                id: credentialId,
+                rawId: credentialId,
+                response: creationResponse,
+                type: "public-key"
                 )
-            authResult = try await PassageAPIClient.shared
-                .webauthnRegistrationFinish(
-                    startResponse: registrationStartResponse,
-                    credential: registrationRequest
+            let finishRequest = RegisterWebAuthnFinishRequest(
+                handshakeId: startResponse.handshake.id,
+                handshakeResponse: handshakeResponse,
+                userId: userId
+            )
+            let finishResponse = try await RegisterAPI
+                .registerWebauthnFinish(
+                    appId: appId,
+                    registerWebAuthnFinishRequest: finishRequest
                 )
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            return finishResponse.authResult
+        } catch {
+            throw error
         }
-        
-        if let unwrappedAuthResult = authResult {
-            return unwrappedAuthResult
-        } else {
-            throw PassageError.unknown
-        }
-
     }
     
     /// Private method to instantiate a logger and log the errors we catch
@@ -1070,6 +1129,14 @@ public class PassageAuth {
             throw error
         }
         
+    }
+    
+    private static func setAuthTokenHeader(token: String) {
+        OpenAPIClientAPI.customHeaders["Authorization"] = "Bearer \(token)"
+    }
+    
+    private static func clearAuthTokenHeader() {
+        OpenAPIClientAPI.customHeaders["Authorization"] = ""
     }
     
     // MARK AutoFill Methods - WIP

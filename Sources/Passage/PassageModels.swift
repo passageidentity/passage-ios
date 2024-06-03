@@ -243,41 +243,7 @@ public struct OneTimePasscode {
 }
 
 /// Information about a registered device
-public struct DeviceInfo: Codable {
-    /// When the device was initially registered
-    public let createdAt: String
-    /// The id of the credential this device is registered with
-    public let credId: String
-    /// A friendly name to describe the device
-    public let friendlyName: String
-    /// The device id
-    public let id: String
-    /// Last time the device was used.
-    public let lastLoginAt: String
-    /// When the device was last updated.
-    public let updatedAt: String?
-    /// Number of times the device has been used
-    public let usageCount: Int?
-    /// The user id associated with the device
-    public let userId: String
-    
-    internal enum CodingKeys: String, CodingKey {
-        case createdAt = "created_at"
-        case credId = "cred_id"
-        case friendlyName = "friendly_name"
-        case id
-        case lastLoginAt = "last_login_at"
-        case updatedAt = "updated_at"
-        case usageCount = "usage_count"
-        case userId = "user_id"
-    }
-}
-
-public enum AuthenticatorAttachment: String {
-    case platform = "platform"
-    case crossPlatform = "cross-platform"
-    case any = "any"
-}
+public typealias DeviceInfo = Credential
 
 public struct PasskeyCreationOptions {
     public let authenticatorAttachment: AuthenticatorAttachment
