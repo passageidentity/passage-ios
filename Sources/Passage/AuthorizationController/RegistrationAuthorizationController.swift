@@ -14,14 +14,19 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
     static var shared: RegistrationAuthorizationControllerProtocol = RegistrationAuthorizationController()
     
     func register(
-        from response: WebauthnRegisterStartResponse,
+        from response: RegisterWebAuthnStartResponse,
         identifier: String,
         includeSecurityKeyOption: Bool = false
     ) async throws -> ASAuthorizationPublicKeyCredentialRegistration? {
         PassageAutofillAuthorizationController.shared.cancel()
-        let rpId = response.handshake.challenge.publicKey.rp.id
-        let challenge = response.handshake.challenge.publicKey.challenge
-        let userId = response.user.id
+        guard
+            let publicKey = response.handshake.challenge.publicKey,
+            let challenge = publicKey.challenge,
+            let rpId = publicKey.rp?.id,
+            let userId = response.user?.id
+        else {
+            return nil
+        }
         guard let decodedChallenge = challenge.decodeBase64Url() else {
             return nil
         }

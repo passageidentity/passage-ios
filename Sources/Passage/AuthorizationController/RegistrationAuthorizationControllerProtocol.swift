@@ -4,7 +4,7 @@ import AuthenticationServices
 protocol RegistrationAuthorizationControllerProtocol: NSObject, ASAuthorizationControllerDelegate {
     
     func register(
-        from response: WebauthnRegisterStartResponse,
+        from response: RegisterWebAuthnStartResponse,
         identifier: String,
         includeSecurityKeyOption: Bool
     ) async throws -> ASAuthorizationPublicKeyCredentialRegistration?
