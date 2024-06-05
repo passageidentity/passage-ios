@@ -501,19 +501,13 @@ public class PassageAuth {
     ///
     /// - Returns: ``AppInfo``
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func appInfo() async throws -> AppInfo? {
-        
-        var appInfo: AppInfo?
-        
+    public static func appInfo() async throws -> AppInfo {
         do {
-            appInfo = try await PassageAPIClient.shared.appInfo()
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let appInfoResponse = try await AppsAPI.getApp(appId: appId)
+            return appInfoResponse.app
         } catch {
-            throw PassageError.unknown
+            throw error
         }
-        
-        return appInfo
     }
 
     /// Get the public details about a user.
@@ -526,11 +520,31 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
-            let user = try await PassageAPIClient.shared.getUser(identifier: identifier)
-            return user
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
-            throw error
+            let response = try await UsersAPI
+                .checkUserIdentifier(
+                    appId: appId,
+                    identifier: identifier
+                )
+            guard let user = response.user else {
+                return nil
+            }
+            return PassageUserInfo(
+                createdAt: nil,
+                email: user.email,
+                emailVerified: user.emailVerified,
+                id: user.id,
+                lastLoginAt: nil,
+                loginCount: nil,
+                phone: user.phone,
+                phoneVerified: user.phoneVerified,
+                status: user.status.rawValue,
+                socialConnections: nil,
+                updatedAt: nil,
+                userMetadata: user.userMetadata,
+                webauthn: user.webauthn,
+                webauthnDevices: nil,
+                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+            )
         } catch {
             throw error
         }
@@ -542,17 +556,10 @@ public class PassageAuth {
     /// identifier types (e.g., it will throw an error if a phone number is supplied to an app that only supports emails as an identifier).
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
-    /// - Returns: ``PassageUserInfo`` This contains the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
+    /// - Returns: ``Bool``
     public static func identifierExists(identifier: String) async throws -> Bool {
-        
-        var user: PassageUserInfo?
-        do {
-            user = try await PassageAuth.getUser(identifier: identifier)
-        } catch {
-            user = nil
-        }
-
-        return (user != nil) ? true : false
+        let user = try await getUser(identifier: identifier)
+        return user != nil
     }
     
     /// Creates and send a magic link to register the user. The user will receive an email or text to complete the registration.
@@ -741,13 +748,25 @@ public class PassageAuth {
         let socialAuthController = PassageSocialAuthController(window: window)
         if connection == .apple {
             let (authCode, idToken) = try await socialAuthController.signInWithApple()
-            return try await PassageAPIClient.shared.exchange(code: authCode, idToken: idToken)
+            let request = IdTokenRequest(
+                code: authCode,
+                idToken: idToken,
+                connectionType: .apple
+            )
+            let response = try await OAuth2API
+                .exchangeSocialIdToken(
+                    appId: appId,
+                    idTokenRequest: request
+                )
+            return response.authResult
         } else {
             let queryParams = socialAuthController.getSocialAuthQueryParams(
                 appId: appInfo.id,
                 connection: connection
             )
-            let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
+            guard let authUrl = URL(string: "\(OpenAPIClientAPI.basePath)/apps/\(appId)/\(queryParams)") else {
+                throw PassageError.unknown // TODO: update
+            }
             let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appInfo.id)
             let authCode = try await socialAuthController.openSecureWebView(
                 url: authUrl,
@@ -755,7 +774,13 @@ public class PassageAuth {
                 prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
             )
             let verifier = socialAuthController.verifier
-            return try await PassageAPIClient.shared.exchange(code: authCode, verifier: verifier)
+            let response = try await OAuth2API
+                .exchangeSocialToken(
+                    appId: appId,
+                    code: authCode,
+                    verifier: verifier
+                )
+            return response.authResult
         }
     }
            
@@ -763,16 +788,33 @@ public class PassageAuth {
     /// - Parameter token: an auth token from the AuthResult object
     /// - Returns: ``PassageUserInfo`` the User object that represents an authenticated user
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public static func getCurrentUser(token: String) async throws -> PassageUserInfo? {
-        var user: PassageUserInfo?
+    public static func getCurrentUser(token: String) async throws -> PassageUserInfo {
+        setAuthTokenHeader(token: token)
         do {
-            user = try await PassageAPIClient.shared.currentUser(token: token)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let response = try await CurrentuserAPI.getCurrentuser(appId: appId)
+            clearAuthTokenHeader()
+            let user = response.user
+            return PassageUserInfo(
+                createdAt: user.createdAt,
+                email: user.email,
+                emailVerified: user.emailVerified,
+                id: user.id,
+                lastLoginAt: user.lastLoginAt,
+                loginCount: user.loginCount,
+                phone: user.phone,
+                phoneVerified: user.phoneVerified,
+                status: user.status.rawValue,
+                socialConnections: user.socialConnections,
+                updatedAt: user.updatedAt,
+                userMetadata: user.userMetadata,
+                webauthn: user.webauthn,
+                webauthnDevices: user.webauthnDevices,
+                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+            )
         } catch {
+            clearAuthTokenHeader()
             throw error
         }
-        return user
     }
     
     
@@ -783,18 +825,14 @@ public class PassageAuth {
     /// - Returns: Array of ``DeviceInfo``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func listDevices(token: String) async throws -> [DeviceInfo] {
-        var devices: [DeviceInfo]?
+        setAuthTokenHeader(token: token)
         do {
-            devices = try await PassageAPIClient.shared.listDevices(token: token)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let response = try await CurrentuserAPI.getCurrentuserDevices(appId: appId)
+            clearAuthTokenHeader()
+            return response.devices
         } catch {
+            clearAuthTokenHeader()
             throw error
-        }
-        if let unwrappedDevices = devices {
-            return unwrappedDevices
-        } else {
-            return []
         }
     }
     
@@ -807,19 +845,26 @@ public class PassageAuth {
     ///   - friendlyName: The new friendly name for the device
     /// - Returns: ``DeviceInfo``
     /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
-    public static func editDevice(token: String, deviceId: String, friendlyName: String) async throws -> DeviceInfo? {
-        var deviceInfo: DeviceInfo?
+    public static func editDevice(
+        token: String,
+        deviceId: String,
+        friendlyName: String
+    ) async throws -> DeviceInfo {
+        setAuthTokenHeader(token: token)
         do {
-            deviceInfo = try await PassageAPIClient.shared.updateDevice(token: token, deviceId: deviceId, friendlyName: friendlyName)
-        }
-        catch PassageAPIError.notFound {
-            throw PassageDeviceError.notFound
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
-        } catch  {
+            let request = UpdateDeviceRequest(friendlyName: friendlyName)
+            let response = try await CurrentuserAPI
+                .updateCurrentuserDevice(
+                    appId: appId,
+                    deviceId: deviceId,
+                    updateDeviceRequest: request
+                )
+            clearAuthTokenHeader()
+            return response.device
+        } catch {
+            clearAuthTokenHeader()
             throw error
         }
-        return deviceInfo
     }
     
     /// Adds the current device for the current authenticated user.
@@ -900,13 +945,16 @@ public class PassageAuth {
     /// - Returns: Void
     /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
     public static func revokeDevice(token: String, deviceId: String) async throws -> Void {
+        setAuthTokenHeader(token: token)
         do {
-            try await PassageAPIClient.shared.revokeDevice(token: token, deviceId: deviceId)
-        } catch PassageAPIError.notFound {
-            throw PassageDeviceError.notFound
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            try await CurrentuserAPI
+                .deleteCurrentuserDevice(
+                    appId: appId,
+                    deviceId: deviceId
+                )
+            clearAuthTokenHeader()
         } catch {
+            clearAuthTokenHeader()
             throw error
         }
     }
@@ -917,18 +965,16 @@ public class PassageAuth {
     /// - Returns: ``AuthResult``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func refresh(refreshToken: String) async throws -> AuthResult {
-        var authResult: AuthResult?
         do {
-            authResult = try await PassageAPIClient.shared.refresh(refreshToken: refreshToken)
-        } catch (let error as PassageAPIError) {
-            try PassageAuth.handlePassageAPIError(error: error)
+            let request = RefreshAuthTokenRequest(refreshToken: refreshToken)
+            let response = try await TokensAPI
+                .refreshAuthToken(
+                    appId: appId,
+                    refreshAuthTokenRequest: request
+                )
+            return response.authResult
         } catch {
             throw error
-        }
-        if let unwrappedAuthResult = authResult {
-            return unwrappedAuthResult
-        } else {
-            throw PassageError.unknown
         }
     }
     
@@ -975,14 +1021,18 @@ public class PassageAuth {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func changeEmail(token: String, newEmail: String, language: String? = nil) async throws -> MagicLink {
+        setAuthTokenHeader(token: token)
         do {
-            let magicLink = try await PassageAPIClient.shared
-                .changeEmail(token: token, newEmail: newEmail, magicLinkPath: nil, redirectUrl: nil, language: language)
-            return magicLink
+            let request = UpdateUserEmailRequest(language: language, newEmail: newEmail)
+            let response = try await CurrentuserAPI
+                .updateEmailCurrentuser(
+                    appId: appId,
+                    updateUserEmailRequest: request
+                )
+            clearAuthTokenHeader()
+            return response.magicLink
         } catch {
-            if let apiError = error as? PassageAPIError {
-                try PassageAuth.handlePassageAPIError(error: apiError)
-            }
+            clearAuthTokenHeader()
             throw error
         }
     }
@@ -996,14 +1046,18 @@ public class PassageAuth {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func changePhone(token: String, newPhone: String, language: String? = nil) async throws -> MagicLink {
+        setAuthTokenHeader(token: token)
         do {
-            let magicLink = try await PassageAPIClient.shared
-                .changePhone(token: token, newPhone: newPhone, magicLinkPath: nil, redirectUrl: nil, language: language)
-            return magicLink
+            let request = UpdateUserPhoneRequest(language: language, newPhone: newPhone)
+            let response = try await CurrentuserAPI
+                .updatePhoneCurrentuser(
+                    appId: appId,
+                    updateUserPhoneRequest: request
+                )
+            clearAuthTokenHeader()
+            return response.magicLink
         } catch {
-            if let apiError = error as? PassageAPIError {
-                try PassageAuth.handlePassageAPIError(error: apiError)
-            }
+            clearAuthTokenHeader()
             throw error
         }
     }
