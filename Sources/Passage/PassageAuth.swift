@@ -520,12 +520,31 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
-            let user = try await UsersAPI
+            let response = try await UsersAPI
                 .checkUserIdentifier(
                     appId: appId,
                     identifier: identifier
                 )
-            return user.user // TODO: Convert to PassageUserInfo
+            guard let user = response.user else {
+                return nil
+            }
+            return PassageUserInfo(
+                createdAt: nil,
+                email: user.email,
+                emailVerified: user.emailVerified,
+                id: user.id,
+                lastLoginAt: nil,
+                loginCount: nil,
+                phone: user.phone,
+                phoneVerified: user.phoneVerified,
+                status: user.status.rawValue,
+                socialConnections: nil,
+                updatedAt: nil,
+                userMetadata: user.userMetadata,
+                webauthn: user.webauthn,
+                webauthnDevices: nil,
+                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+            )
         } catch {
             throw error
         }
@@ -537,7 +556,7 @@ public class PassageAuth {
     /// identifier types (e.g., it will throw an error if a phone number is supplied to an app that only supports emails as an identifier).
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
-    /// - Returns: ``PassageUserInfo`` This contains the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
+    /// - Returns: ``Bool``
     public static func identifierExists(identifier: String) async throws -> Bool {
         let user = try await getUser(identifier: identifier)
         return user != nil
@@ -774,7 +793,24 @@ public class PassageAuth {
         do {
             let response = try await CurrentuserAPI.getCurrentuser(appId: appId)
             clearAuthTokenHeader()
-            return response.user
+            let user = response.user
+            return PassageUserInfo(
+                createdAt: user.createdAt,
+                email: user.email,
+                emailVerified: user.emailVerified,
+                id: user.id,
+                lastLoginAt: user.lastLoginAt,
+                loginCount: user.loginCount,
+                phone: user.phone,
+                phoneVerified: user.phoneVerified,
+                status: user.status.rawValue,
+                socialConnections: user.socialConnections,
+                updatedAt: user.updatedAt,
+                userMetadata: user.userMetadata,
+                webauthn: user.webauthn,
+                webauthnDevices: user.webauthnDevices,
+                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+            )
         } catch {
             clearAuthTokenHeader()
             throw error
