@@ -2,42 +2,30 @@ import XCTest
 @testable import Passage
 
 final class GetUserTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
-    }
 
     func testUserFound() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.getUser(identifier: registeredUserEmail)
-            XCTAssertEqual(response.id, currentUser.id)
-            XCTAssertEqual(response.status, currentUser.status)
-            XCTAssertEqual(response.email, currentUser.email)
-            XCTAssertEqual(response.emailVerified, currentUser.emailVerified)
-            XCTAssertEqual(response.phone, currentUser.phone)
-            XCTAssertEqual(response.phoneVerified, currentUser.phoneVerified)
-            XCTAssertEqual(response.webauthn, currentUser.webauthn)
+            let passage = PassageAuth(appId: appInfoValid.id)
+            passage.overrideApiUrl(with: apiUrl)
+            let user = try await passage.getUser(identifier: registeredUserEmail)
+            XCTAssertEqual(user?.id, currentUser.id)
+            XCTAssertEqual(user?.status, currentUser.status)
+            XCTAssertEqual(user?.email, currentUser.email)
+            XCTAssertEqual(user?.emailVerified, currentUser.emailVerified)
+            XCTAssertEqual(user?.phone, currentUser.phone)
+            XCTAssertEqual(user?.phoneVerified, currentUser.phoneVerified)
+            XCTAssertEqual(user?.webauthn, currentUser.webauthn)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
+        
     }
     
     func testUserNotFound() async {
-        do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared.getUser(identifier: unregisteredUserEmail)
-            XCTAssertFalse(true)
-        }
-        catch  {
-            XCTAssertTrue(true)
-        }
+        let passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+        let user = try? await passage.getUser(identifier: unregisteredUserEmail)
+        XCTAssertNil(user)
     }
     
 }

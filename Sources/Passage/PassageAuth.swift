@@ -216,6 +216,9 @@ public class PassageAuth {
         return currentUser
     }
     
+    public func getUser(identifier: String) async throws -> PassageUserInfo? {
+        return try await PassageAuth.getUser(identifier: identifier)
+    }
     
     /// List devices for the current authenticated user. Device information includes the friendly name, ID, when the device was added, and when it was last used.
     ///
@@ -525,10 +528,13 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
+            let safeId = identifier
+                .addingPercentEncoding(
+                    withAllowedCharacters: .alphanumerics) ?? ""
             let response = try await UsersAPI
                 .checkUserIdentifier(
                     appId: appId,
-                    identifier: identifier
+                    identifier: safeId
                 )
             guard let user = response.user else {
                 return nil
