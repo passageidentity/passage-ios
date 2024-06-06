@@ -10,12 +10,15 @@ public class PassageAuth {
     /// Used by class methods to manage the tokens when logging in, registering, etc
     public var tokenStore: PassageTokenStore;
     
+    private static var appId: String = ""
+    
     // MARK: Instance Initializers
     
     
     /// Initialize PassageAuth with the ``PassageStore`` token store that implements ``PassageTokenStore``
     public init() {
         self.tokenStore = PassageStore.shared
+        PassageAuth.appId = (try? PassageAuth.getValueFromPlist(value: "appId")) ?? ""
     }
     
     
@@ -23,22 +26,20 @@ public class PassageAuth {
     /// - Parameter tokenStore: token store class that implements ``PassageTokenStore``
     public init(tokenStore: PassageTokenStore) {
         self.tokenStore = tokenStore
+        PassageAuth.appId = (try? PassageAuth.getValueFromPlist(value: "appId")) ?? ""
     }
     
     public init(appId: String) {
         self.tokenStore = PassageStore.shared
-        PassageSettings.shared.appId = appId
+        PassageAuth.appId = appId
     }
     
     public init(appId: String, tokenStore: PassageTokenStore) {
         self.tokenStore = tokenStore
-        PassageSettings.shared.appId = appId
+        PassageAuth.appId = appId
     }
     
     // MARK: - Static Properties
-    static var appId = {
-        return PassageSettings.shared.appId ?? ""
-    }()
     
     // MARK: Instance Public Methods
     
@@ -66,6 +67,10 @@ public class PassageAuth {
         }
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onAutofillSuccess, onError: onError, onCancel: onCancel)
 
+    }
+    
+    public func appInfo() async throws -> AppInfo {
+        return try await PassageAuth.appInfo()
     }
     
     /// Login a user using a Passkey
@@ -317,7 +322,7 @@ public class PassageAuth {
     }
     
     public func overrideApiUrl(with newUrl: String) {
-        PassageSettings.shared.apiUrl = newUrl
+        OpenAPIClientAPI.basePath = newUrl
     }
     
     // MARK: Instance Private Methods
@@ -537,8 +542,8 @@ public class PassageAuth {
                 loginCount: nil,
                 phone: user.phone,
                 phoneVerified: user.phoneVerified,
-                status: user.status.rawValue,
                 socialConnections: nil,
+                status: user.status.rawValue,
                 updatedAt: nil,
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
@@ -803,8 +808,8 @@ public class PassageAuth {
                 loginCount: user.loginCount,
                 phone: user.phone,
                 phoneVerified: user.phoneVerified,
-                status: user.status.rawValue,
                 socialConnections: user.socialConnections,
+                status: user.status.rawValue,
                 updatedAt: user.updatedAt,
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
@@ -1266,6 +1271,23 @@ public class PassageAuth {
     @available(iOS 16.0, *)
     public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
+    }
+    
+    private static func getValueFromPlist(value: String) throws -> String {
+        guard
+            let plistPath = Bundle.main.path(forResource: "Passage", ofType: "plist"),
+            let plistData = FileManager.default.contents(atPath: plistPath)
+        else {
+            throw PassageConfigurationError.cannotFindPassagePlist
+        }
+        guard
+            let plistContent = try? PropertyListSerialization
+                .propertyList(from: plistData, format: nil) as? [String: Any],
+            let appId = plistContent[value] as? String
+        else {
+            throw PassageConfigurationError.cannotFindAppId
+        }
+        return appId
     }
 
 }
