@@ -1,7 +1,7 @@
 import AuthenticationServices
 @testable import Passage
 
-let apiUrl = "https://auth-uat.passage.dev"
+let apiUrl = "https://auth-uat.passage.dev/v1"
 
 let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
 let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
@@ -23,14 +23,43 @@ let currentUser = PassageUserInfo(
     loginCount: 2,
     phone: "",
     phoneVerified: false,
+    socialConnections: nil,
     status: "active",
     updatedAt: "",
+    userMetadata: nil,
     webauthn: true,
     webauthnDevices: [],
-    webauthnTypes: [],
-    codableUserMetadata: nil
+    webauthnTypes: []
 )
 
+let appInfoValid = AppInfo(
+    allowedIdentifier: "both",
+    authFallbackMethod: .otp,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
+    authOrigin: "https://try-uat.passage.dev",
+    defaultLanguage: "en",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
+    id: "jlSg3Vr4MyKi1dcl3otVz9xa",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "/",
+    name: "iOS Integration Test App",
+    passageBranding: true,
+    publicSignup: true,
+    profileManagement: false,
+    redirectUrl: "/",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
+)
+
+/*
 let appInfoValid = AppInfo(
     allowedIdentifier: "both",
     authFallbackMethodString: "otp",
@@ -54,6 +83,7 @@ let appInfoValid = AppInfo(
         magicLink: nil
     )
 )
+ 
 
 let appInfoInvalid = AppInfo(
     allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
@@ -78,7 +108,36 @@ let appInfoInvalid = AppInfo(
         )
     )
 )
+ */
 
+let appInfoInvalid = AppInfo(
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethod: .magicLink,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
+    authOrigin: "TEST_AUTH_ORIGIN",
+    defaultLanguage: "TEST_LANG",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
+    id: "TEST_APP_ID",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "TEST_LOGIN_URL",
+    name: "TEST_APP",
+    passageBranding: true,
+    publicSignup: true,
+    profileManagement: false,
+    redirectUrl: "/",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
+)
+
+/*
 let appInfoRefreshToken = AppInfo(
     allowedIdentifier: "both",
     authFallbackMethodString: "magic_link",
@@ -102,7 +161,37 @@ let appInfoRefreshToken = AppInfo(
         )
     )
 )
+ */
 
+// TODO: UPDATE
+let appInfoRefreshToken = AppInfo(
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethod: .magicLink,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
+    authOrigin: "TEST_AUTH_ORIGIN",
+    defaultLanguage: "TEST_LANG",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
+    id: "TEST_APP_ID",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "TEST_LOGIN_URL",
+    name: "TEST_APP",
+    passageBranding: true,
+    publicSignup: true,
+    profileManagement: false,
+    redirectUrl: "/",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
+)
+
+/*
 let appInfoTest = AppInfo(
     allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
     authFallbackMethodString: "magic_link",
@@ -126,7 +215,37 @@ let appInfoTest = AppInfo(
         )
     )
 )
+ */
 
+// TODO: UPDATE
+let appInfoTest = AppInfo(
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethod: .magicLink,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
+    authOrigin: "TEST_AUTH_ORIGIN",
+    defaultLanguage: "TEST_LANG",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
+    id: "TEST_APP_ID",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "TEST_LOGIN_URL",
+    name: "TEST_APP",
+    passageBranding: true,
+    publicSignup: true,
+    profileManagement: false,
+    redirectUrl: "/",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
+)
+
+/*
 let otpAppInfoValid = AppInfo(
     allowedIdentifier: "both",
     authFallbackMethodString: "otp",
@@ -150,6 +269,36 @@ let otpAppInfoValid = AppInfo(
         magicLink: nil
     )
 )
+ */
+
+// TODO: UPDATE
+let otpAppInfoValid = AppInfo(
+    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
+    authFallbackMethod: .magicLink,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
+    authOrigin: "TEST_AUTH_ORIGIN",
+    defaultLanguage: "TEST_LANG",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
+    id: "TEST_APP_ID",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "TEST_LOGIN_URL",
+    name: "TEST_APP",
+    passageBranding: true,
+    publicSignup: true,
+    profileManagement: false,
+    redirectUrl: "/",
+    requireEmailVerification: false,
+    requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
+)
+
 
 let otpRegisteredUser = PassageUserInfo(
     createdAt: "",
@@ -160,10 +309,11 @@ let otpRegisteredUser = PassageUserInfo(
     loginCount: 1,
     phone: "",
     phoneVerified: false,
+    socialConnections: nil,
     status: "active",
     updatedAt: "",
+    userMetadata: nil,
     webauthn: false,
     webauthnDevices: [],
-    webauthnTypes: [],
-    codableUserMetadata: nil
+    webauthnTypes: []
 )
