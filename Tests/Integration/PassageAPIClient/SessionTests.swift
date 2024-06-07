@@ -5,7 +5,7 @@ final class SessionTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        let passage = PassageAuth(appId: appInfoRefreshToken.id)
+        let passage = PassageAuth(appId: refreshTestAppId)
         passage.overrideApiUrl(with: apiUrl)
         // NOTE: These tests use static PassageAuth methods instead the passage instance.
         // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
@@ -41,7 +41,7 @@ final class SessionTests: XCTestCase {
             
             // Sign out the session
             try await PassageAuth.signOut(refreshToken: newAuthResult?.refreshToken ?? "")
-            let nanoseconds = Double(appInfoRefreshToken.sessionTimeoutLength) * Double(NSEC_PER_SEC)
+            let nanoseconds = Double(refreshTestSessionTimeout) * Double(NSEC_PER_SEC)
             try await Task.sleep(nanoseconds: UInt64(nanoseconds))
             do {
                 _ = try await PassageAuth.getCurrentUser(token: newAuthResult?.authToken ?? "")

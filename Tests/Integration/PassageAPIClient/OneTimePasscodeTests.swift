@@ -7,7 +7,7 @@ final class OneTimePasscodeTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        passage = PassageAuth(appId: otpAppInfoValid.id)
+        passage = PassageAuth(appId: otpAppId)
         passage.overrideApiUrl(with: apiUrl)
     }
     

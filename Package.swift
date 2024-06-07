@@ -24,9 +24,6 @@ let package = Package(
             name: "Passage",
             dependencies: ["AnyCodable", "SwiftKeychainWrapper"], resources: [.copy("Resources/settings.json")]),
         .testTarget(
-            name: "PassageTests",
-            dependencies: ["Passage"]),
-        .testTarget(
             name: "Integration",
             dependencies: ["Passage"]),
     ],

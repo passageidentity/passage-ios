@@ -11,9 +11,16 @@ let checkEmailTryCount = 6
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"
+
 let magicLinkAppId = "czLTOVFIytGqrhRVoHV9o8Wo"
 let magicLinkRegisteredUserEmail = "blayne.bayer@passage.id"
 let magicLinkUnactivatedId = "ioM1TTG0eiWMrOq9FA7X5zMN"
+
+let otpAppId = "pTBeTnbvm1z3U6hznMTD33Es"
+
+let refreshTestAppId = "uFZlFit7nglPuzcYRVesCUBZ"
+let refreshTestSessionTimeout = 5
+
 let existingDeviceId = "c70NVyTQGj7EXjTagAmkK0we"
 
 let currentUser = PassageUserInfo(
@@ -87,61 +94,6 @@ let appInfoInvalid = AppInfo(
     socialConnections: SocialConnections(),
     userMetadataSchema: []
 )
-
-let appInfoRefreshToken = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethod: .magicLink,
-    authFallbackMethodTtl: 0,
-    authMethods: AuthMethods(),
-    authOrigin: "http://localhost:4173",
-    defaultLanguage: "en",
-    elementCustomization: ElementCustomization(),
-    elementCustomizationDark: ElementCustomization(),
-    ephemeral: false,
-    id: "uFZlFit7nglPuzcYRVesCUBZ",
-    layouts: Layouts(profile: [], registration: []),
-    loginUrl: "/",
-    name: "passage-ios uat refresh tokens",
-    passageBranding: true,
-    publicSignup: true,
-    profileManagement: false,
-    redirectUrl: "/dashboard",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    requiredIdentifier: "",
-    rsaPublicKey: "",
-    sessionTimeoutLength: 5,
-    socialConnections: SocialConnections(),
-    userMetadataSchema: []
-)
-
-let otpAppInfoValid = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethod: .otp,
-    authFallbackMethodTtl: 0,
-    authMethods: AuthMethods(),
-    authOrigin: "http://localhost:4173",
-    defaultLanguage: "en",
-    elementCustomization: ElementCustomization(),
-    elementCustomizationDark: ElementCustomization(),
-    ephemeral: false,
-    id: "pTBeTnbvm1z3U6hznMTD33Es",
-    layouts: Layouts(profile: [], registration: []),
-    loginUrl: "/",
-    name: "UAT OTP App",
-    passageBranding: true,
-    publicSignup: true,
-    profileManagement: false,
-    redirectUrl: "/dashboard",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    requiredIdentifier: "",
-    rsaPublicKey: "",
-    sessionTimeoutLength: 1000000,
-    socialConnections: SocialConnections(),
-    userMetadataSchema: []
-)
-
 
 let otpRegisteredUser = PassageUserInfo(
     createdAt: "",
