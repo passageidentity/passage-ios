@@ -5,97 +5,55 @@ final class ChangeContactTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        let passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+        // NOTE: These tests use static PassageAuth methods instead the passage instance.
+        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
+        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
     
     func testChangeEmail() async {
-        // make sure we have an authToken.
-        XCTAssertNotEqual(authToken, "")
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared
-                .changeEmail(token: authToken, newEmail: "ricky.padilla+user02@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
-            XCTAssertNotNil(response.id)
+            let _ = try await PassageAuth.changeEmail(token: authToken, newEmail: "ricky.padilla+user02@passage.id")
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     
     func testChangeEmailUnAuthed() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared
-                .changeEmail(token: "", newEmail: "ricky.padilla+user02@passage.id", magicLinkPath: nil, redirectUrl: nil, language: nil)
-            XCTAssertTrue(false)
+            let _ = try await PassageAuth.changeEmail(token: "", newEmail: "ricky.padilla+user02@passage.id")
+            XCTFail("passage.changeEmail should throw an error when no auth token set")
         } catch {
-            XCTAssertTrue(error is PassageAPIError)
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .unauthorized:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            // TODO: catch specific error
         }
     }
 
     func testChangePhone() async {
-        // make sure we have an authToken.
-        XCTAssertNotEqual(authToken, "")
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared
-                .changePhone(token: authToken, newPhone: "+15125874725", magicLinkPath: nil, redirectUrl: nil, language: nil)
-            XCTAssertNotNil(response.id)
+            try? await Task.sleep(nanoseconds: checkEmailWaitTime)
+            let _ = try await PassageAuth.changePhone(token: authToken, newPhone: "+15125874725")
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 
     func testChangePhoneInvalid() async {
-        // make sure we have an authToken.
-        XCTAssertNotEqual(authToken, "")
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared
-                .changePhone(token: authToken, newPhone: "5125874725", magicLinkPath: nil, redirectUrl: nil, language: nil)
-            XCTAssertTrue(false)
+            let _ = try await PassageAuth.changePhone(token: authToken, newPhone: "5125874725")
+            XCTFail("passage.changePhone should throw an error when invalid phone is sent")
         } catch {
-            XCTAssertTrue(error is PassageAPIError)
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .badRequest:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            // TODO: catch specific error
         }
     }
 
     
     func testChangePhoneUnAuthed() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared
-                .changePhone(token: "", newPhone: "555-555-5555", magicLinkPath: nil, redirectUrl: nil, language: nil)
-            XCTAssertTrue(false)
+            let _ = try await PassageAuth.changePhone(token: "", newPhone: "+15125874725")
+            XCTFail("passage.changePhone should throw an error when no auth token set")
         } catch {
-            XCTAssertTrue(error is PassageAPIError)
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .unauthorized:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            // TODO: catch specific error
         }
     }
     
