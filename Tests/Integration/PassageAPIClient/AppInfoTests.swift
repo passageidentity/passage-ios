@@ -18,7 +18,7 @@ final class AppInfoTests: XCTestCase {
         do {
             let passage = PassageAuth(appId: appInfoInvalid.id)
             passage.overrideApiUrl(with: apiUrl)
-            let appInfo = try await passage.appInfo()
+            let _ = try await passage.appInfo()
             XCTFail("passage.appInfo should have thrown an error.")
         } catch {
             // TODO: Catch error type

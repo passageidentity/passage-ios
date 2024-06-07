@@ -133,8 +133,8 @@ public class PassageAuth {
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
     /// - Throws: ``PassageAPIError``, ``PassageError``
-    public func newRegisterMagicLink(identifier: String) async throws -> MagicLink {
-        return try await PassageAuth.newRegisterMagicLink(identifier: identifier)
+    public func newRegisterMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
+        return try await PassageAuth.newRegisterMagicLink(identifier: identifier, language: language)
     }
     
     /// Creates and send a magic link to login the user. The user will receive an email or text to complete the login.

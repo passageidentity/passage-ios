@@ -13,6 +13,7 @@ let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"
 let magicLinkAppId = "czLTOVFIytGqrhRVoHV9o8Wo"
 let magicLinkRegisteredUserEmail = "blayne.bayer@passage.id"
+let magicLinkUnactivatedId = "ioM1TTG0eiWMrOq9FA7X5zMN"
 
 let currentUser = PassageUserInfo(
     createdAt: "2023-07-17T17:45:41.807075Z",

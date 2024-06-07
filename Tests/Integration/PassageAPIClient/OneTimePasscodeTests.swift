@@ -3,11 +3,17 @@ import XCTest
 
 final class OneTimePasscodeTests: XCTestCase {
     
+    var passage: PassageAuth!
+    
+    override func setUp() {
+        super.setUp()
+        passage = PassageAuth(appId: otpAppInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+    }
+    
     @available(iOS 15.0, *)
     func testSendRegisterOneTimePasscode() async {
         do {
-            let passage = PassageAuth(appId: otpAppInfoValid.id)
-            passage.overrideApiUrl(with: apiUrl)
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
             let _ = try await passage.newRegisterOneTimePasscode(identifier: identifier)
@@ -18,8 +24,6 @@ final class OneTimePasscodeTests: XCTestCase {
     
     func testSendLoginOneTimePasscode() async {
         do {
-            let passage = PassageAuth(appId: otpAppInfoValid.id)
-            passage.overrideApiUrl(with: apiUrl)
             let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredUser.email!)
         } catch {
             XCTFail("Unexpected error: \(error.localizedDescription)")
@@ -28,8 +32,6 @@ final class OneTimePasscodeTests: XCTestCase {
 
     func testActivateOneTimePasscode() async {
         do {
-            let passage = PassageAuth(appId: otpAppInfoValid.id)
-            passage.overrideApiUrl(with: apiUrl)
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
             let otp = try await passage.newRegisterOneTimePasscode(identifier: identifier)
