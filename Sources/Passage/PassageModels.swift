@@ -23,6 +23,8 @@ public struct PassageUserInfo: Codable {
     public let socialConnections: UserSocialConnections?
     /// status of the user
     public let status: String
+    /// social accounts connected to your user
+    public let socialConnections: UserSocialConnections?
     /// when the user was last update
     public let updatedAt: String?
     /// your Passage app's custom user metadata
