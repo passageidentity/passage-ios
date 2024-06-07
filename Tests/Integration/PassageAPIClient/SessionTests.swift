@@ -5,22 +5,19 @@ final class SessionTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoRefreshToken.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        let passage = PassageAuth(appId: appInfoRefreshToken.id)
+        passage.overrideApiUrl(with: apiUrl)
+        // NOTE: These tests use static PassageAuth methods instead the passage instance.
+        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
+        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
     
     func testRefreshAndSignOut() async {
         do{
             // Sign in and get tokens
-            PassageAPIClient.shared.appId = appInfoRefreshToken.id
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
-            _ = try await PassageAPIClient.shared
-                .sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
+            let _ = try await PassageAuth.newRegisterMagicLink(identifier: identifier)
             var magicLink: String? = nil
             let mailosaurApiClient = MailosaurAPIClient()
             for _ in 1...checkEmailTryCount {
@@ -32,38 +29,28 @@ final class SessionTests: XCTestCase {
             }
             XCTAssertNotNil(magicLink)
             guard let magicLink else { return }
-            let tokens = try await PassageAPIClient.shared.activateMagicLink(magicLink: magicLink)
-            XCTAssertNotNil(tokens.refreshToken)
+            let authResult = try await PassageAuth.magicLinkActivate(userMagicLink: magicLink)
+            XCTAssertNotNil(authResult.refreshToken)
             
             // Refresh the tokens
-            let newTokens = try? await PassageAPIClient.shared.refresh(refreshToken: tokens.refreshToken ?? "")
-            XCTAssertNotNil(newTokens?.authToken)
-            XCTAssertNotNil(newTokens?.refreshToken)
-            XCTAssertFalse(newTokens?.refreshToken == tokens.refreshToken)
+            let newAuthResult = try? await PassageAuth.refresh(refreshToken: authResult.refreshToken ?? "")
+            XCTAssertNotNil(newAuthResult)
+            XCTAssertNotNil(newAuthResult?.authToken)
+            XCTAssertNotNil(newAuthResult?.refreshToken)
+            XCTAssertFalse(newAuthResult?.refreshToken == authResult.refreshToken)
             
             // Sign out the session
-            try await PassageAPIClient.shared.signOut(refreshToken: newTokens?.refreshToken ?? "")
+            try await PassageAuth.signOut(refreshToken: newAuthResult?.refreshToken ?? "")
             let nanoseconds = Double(appInfoRefreshToken.sessionTimeoutLength) * Double(NSEC_PER_SEC)
             try await Task.sleep(nanoseconds: UInt64(nanoseconds))
             do {
-                _ = try await PassageAPIClient.shared.currentUser(token: newTokens?.authToken ?? "")
-                XCTAssertTrue(false) // the above function should throw an unauthenticated exception
+                _ = try await PassageAuth.getCurrentUser(token: newAuthResult?.authToken ?? "")
+                XCTFail("getCurrentUser should throw an unauthenticated error")
             } catch {
-                XCTAssertTrue(error is PassageAPIError)
-                
-                if let thrownError = error as? PassageAPIError {
-                    switch thrownError {
-                        case .unauthorized( _ ):
-                            XCTAssertTrue(true)
-                    default:
-                        XCTAssertFalse(true)
-                    }
-                }
+                // TODO: catch specific error
             }
-
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     

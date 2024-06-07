@@ -88,141 +88,33 @@ let appInfoInvalid = AppInfo(
     userMetadataSchema: []
 )
 
-/*
 let appInfoRefreshToken = AppInfo(
     allowedIdentifier: "both",
-    authFallbackMethodString: "magic_link",
+    authFallbackMethod: .magicLink,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
     authOrigin: "http://localhost:4173",
+    defaultLanguage: "en",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
     id: "uFZlFit7nglPuzcYRVesCUBZ",
-    loginURL: "/",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "/",
     name: "passage-ios uat refresh tokens",
+    passageBranding: true,
     publicSignup: true,
-    redirectURL: "/dashboard",
-    requiredIdentifier: "both",
+    profileManagement: false,
+    redirectUrl: "/dashboard",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
+    requiredIdentifier: "",
+    rsaPublicKey: "",
     sessionTimeoutLength: 5,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
- */
-
-// TODO: UPDATE
-let appInfoRefreshToken = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethod: .magicLink,
-    authFallbackMethodTtl: 0,
-    authMethods: AuthMethods(),
-    authOrigin: "TEST_AUTH_ORIGIN",
-    defaultLanguage: "TEST_LANG",
-    elementCustomization: ElementCustomization(),
-    elementCustomizationDark: ElementCustomization(),
-    ephemeral: false,
-    id: "TEST_APP_ID",
-    layouts: Layouts(profile: [], registration: []),
-    loginUrl: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    passageBranding: true,
-    publicSignup: true,
-    profileManagement: false,
-    redirectUrl: "/",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    requiredIdentifier: "",
-    rsaPublicKey: "",
-    sessionTimeoutLength: 1000000,
     socialConnections: SocialConnections(),
     userMetadataSchema: []
 )
 
-/*
-let appInfoTest = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "TEST_AUTH_ORIGIN",
-    id: "TEST_APP_ID",
-    loginURL: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    publicSignup: true,
-    redirectURL: "TEST_APP_URL",
-    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
- */
-
-// TODO: UPDATE
-let appInfoTest = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethod: .magicLink,
-    authFallbackMethodTtl: 0,
-    authMethods: AuthMethods(),
-    authOrigin: "TEST_AUTH_ORIGIN",
-    defaultLanguage: "TEST_LANG",
-    elementCustomization: ElementCustomization(),
-    elementCustomizationDark: ElementCustomization(),
-    ephemeral: false,
-    id: "TEST_APP_ID",
-    layouts: Layouts(profile: [], registration: []),
-    loginUrl: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    passageBranding: true,
-    publicSignup: true,
-    profileManagement: false,
-    redirectUrl: "/",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    requiredIdentifier: "",
-    rsaPublicKey: "",
-    sessionTimeoutLength: 1000000,
-    socialConnections: SocialConnections(),
-    userMetadataSchema: []
-)
-
-/*
-let otpAppInfoValid = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethodString: "otp",
-    authOrigin: "http://localhost:4173",
-    id: "pTBeTnbvm1z3U6hznMTD33Es",
-    loginURL: "/",
-    name: "UAT OTP App",
-    publicSignup: true,
-    redirectURL: "/dashboard",
-    requiredIdentifier: "both",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        ),
-        magicLink: nil
-    )
-)
- */
-
-// TODO: UPDATE
 let otpAppInfoValid = AppInfo(
     allowedIdentifier: "both",
     authFallbackMethod: .otp,
