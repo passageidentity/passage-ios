@@ -595,7 +595,7 @@ public class PassageAuth {
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
                 webauthnDevices: nil,
-                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+                webauthnTypes: user.webauthnTypes?.map { $0.rawValue }
             )
         } catch {
             throw error
@@ -861,7 +861,7 @@ public class PassageAuth {
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
                 webauthnDevices: user.webauthnDevices,
-                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+                webauthnTypes: user.webauthnTypes?.map { $0.rawValue }
             )
         } catch {
             clearAuthTokenHeader()
@@ -934,7 +934,7 @@ public class PassageAuth {
         do {
             let authenticatorAttachment = options?.authenticatorAttachment
             let startRequest = CurrentUserDevicesStartRequest(
-                authenticatorAttachment: authenticatorAttachment
+                authenticatorAttachment: authenticatorAttachment ?? .platform
             )
             let startResponse = try await CurrentuserAPI
                 .postCurrentuserAddDeviceStart(

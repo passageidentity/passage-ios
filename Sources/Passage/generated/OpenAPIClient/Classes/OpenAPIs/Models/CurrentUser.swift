@@ -38,7 +38,7 @@ public struct CurrentUser: Codable, JSONEncodable, Hashable {
     /** The list of devices this user has authenticated with via webAuthn */
     public var webauthnDevices: [Credential]
     /** List of credential types that user has created */
-    public var webauthnTypes: [WebAuthnType]
+    public var webauthnTypes: [WebAuthnType]?
 
     public init(createdAt: String, email: String, emailVerified: Bool, id: String, lastLoginAt: String, loginCount: Int, phone: String, phoneVerified: Bool, socialConnections: UserSocialConnections, status: UserStatus, updatedAt: String, userMetadata: AnyCodable?, webauthn: Bool, webauthnDevices: [Credential], webauthnTypes: [WebAuthnType]) {
         self.createdAt = createdAt
