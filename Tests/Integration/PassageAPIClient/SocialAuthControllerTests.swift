@@ -5,21 +5,17 @@ final class SocialAuthControllerTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-        PassageAPIClient.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        let passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+        // NOTE: These tests use static PassageAuth methods instead the passage instance.
+        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
+        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
     
     func testGetSocialAuthQueryParams() async {
         let window = await UIWindow()
         let socialAuthController = PassageSocialAuthController(window: window)
-        guard let appId = PassageSettings.shared.appId else {
-            return XCTFail("App id not found")
-        }
+        let appId = appInfoValid.id
         
         // Verifier should be an empty string before calling getSocialAuthQueryParams
         XCTAssert(socialAuthController.verifier.isEmpty)
@@ -43,23 +39,18 @@ final class SocialAuthControllerTests: XCTestCase {
     }
     
     func testGetAuthUrl() async {
-        do {
-            let window = await UIWindow()
-            let socialAuthController = PassageSocialAuthController(window: window)
-            let connection = PassageSocialConnection.github
-            guard let appId = PassageSettings.shared.appId else {
-                return XCTFail("App id not found")
-            }
-            let queryParams = socialAuthController.getSocialAuthQueryParams(
-                appId: appId,
-                connection: connection
-            )
-            let expectedAuthUrl = URL(string: "\(apiUrl)/v1/apps/\(appId)/social/authorize?\(queryParams)")
-            let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
-            XCTAssertEqual(expectedAuthUrl, authUrl)
-        } catch {
-            XCTFail("Failed to get auth url.")
-        }
+        let window = await UIWindow()
+        let socialAuthController = PassageSocialAuthController(window: window)
+        let connection = PassageSocialConnection.github
+        let appId = appInfoValid.id
+        let queryParams = socialAuthController.getSocialAuthQueryParams(
+            appId: appId,
+            connection: connection
+        )
+        let expectedAuthUrl = URL(string: "\(apiUrl)/apps/\(appId)/social/authorize?\(queryParams)")
+        let authUrl = PassageAuth.getSocialAuthUrl(queryParams: queryParams)
+        XCTAssertNotNil(authUrl)
+        XCTAssertEqual(expectedAuthUrl, authUrl)
     }
     
 }

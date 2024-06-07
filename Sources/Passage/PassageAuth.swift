@@ -794,9 +794,6 @@ public class PassageAuth {
         in window: UIWindow,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> AuthResult {
-        guard let appInfo = try? await PassageAuth.appInfo() else {
-            throw PassageError.invalidAppInfo
-        }
         let socialAuthController = PassageSocialAuthController(window: window)
         if connection == .apple {
             let (authCode, idToken) = try await socialAuthController.signInWithApple()
@@ -813,13 +810,13 @@ public class PassageAuth {
             return response.authResult
         } else {
             let queryParams = socialAuthController.getSocialAuthQueryParams(
-                appId: appInfo.id,
+                appId: appId,
                 connection: connection
             )
-            guard let authUrl = URL(string: "\(OpenAPIClientAPI.basePath)/apps/\(appId)/\(queryParams)") else {
+            guard let authUrl = getSocialAuthUrl(queryParams: queryParams) else {
                 throw PassageError.unknown // TODO: update
             }
-            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appInfo.id)
+            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appId)
             let authCode = try await socialAuthController.openSecureWebView(
                 url: authUrl,
                 callbackURLScheme: urlScheme,
@@ -1243,6 +1240,10 @@ public class PassageAuth {
     
     private static func clearAuthTokenHeader() {
         OpenAPIClientAPI.customHeaders["Authorization"] = ""
+    }
+    
+    internal static func getSocialAuthUrl(queryParams: String) -> URL? {
+        return URL(string: "\(OpenAPIClientAPI.basePath)/apps/\(appId)/social/authorize?\(queryParams)")
     }
     
     // MARK AutoFill Methods - WIP
