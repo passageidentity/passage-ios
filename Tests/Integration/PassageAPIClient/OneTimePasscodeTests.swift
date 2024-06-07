@@ -3,48 +3,36 @@ import XCTest
 
 final class OneTimePasscodeTests: XCTestCase {
     
-    override func setUp() {
-        super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = otpAppInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
-    }
-    
     @available(iOS 15.0, *)
     func testSendRegisterOneTimePasscode() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
+            let passage = PassageAuth(appId: otpAppInfoValid.id)
+            passage.overrideApiUrl(with: apiUrl)
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
-            let _ = try await PassageAPIClient.shared
-                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
-            XCTAssertTrue(true)
+            let _ = try await passage.newRegisterOneTimePasscode(identifier: identifier)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     
     func testSendLoginOneTimePasscode() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
-            let _ = try await PassageAPIClient.shared
-                .sendLoginOneTimePasscode(identifier: otpRegisteredUser.email ?? "", language: nil)
-            XCTAssertTrue(true)
+            let passage = PassageAuth(appId: otpAppInfoValid.id)
+            passage.overrideApiUrl(with: apiUrl)
+            let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredUser.email!)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 
     func testActivateOneTimePasscode() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
+            let passage = PassageAuth(appId: otpAppInfoValid.id)
+            passage.overrideApiUrl(with: apiUrl)
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
-            let response = try await PassageAPIClient.shared
-                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
+            let otp = try await passage.newRegisterOneTimePasscode(identifier: identifier)
             
             var oneTimePasscode: String? = nil
             let mailosaurApiClient = MailosaurAPIClient()
@@ -57,11 +45,9 @@ final class OneTimePasscodeTests: XCTestCase {
             }
             XCTAssertNotNil(oneTimePasscode)
             guard let oneTimePasscode else { return }
-            let token = try await PassageAPIClient.shared.activateOneTimePasscode(otp: oneTimePasscode, otpId: response.id)
-            XCTAssertNotNil(token)
+            let _ = try await passage.oneTimePasscodeActivate(otp: oneTimePasscode, otpId: otp.id)
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 

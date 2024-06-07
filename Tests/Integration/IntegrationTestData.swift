@@ -59,57 +59,6 @@ let appInfoValid = AppInfo(
     userMetadataSchema: []
 )
 
-/*
-let appInfoValid = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethodString: "otp",
-    authOrigin: "https://try-uat.passage.dev",
-    id: "jlSg3Vr4MyKi1dcl3otVz9xa",
-    loginURL: "/",
-    name: "iOS Integration Test App",
-    publicSignup: true,
-    redirectURL: "/",
-    requiredIdentifier: "both",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 0,
-    userMetadataSchema: [],
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: EmailAndSMSAuthMethod(
-            ttl: 30000000,
-            ttlDisplayUnitString: "s"
-        ),
-        magicLink: nil
-    )
-)
- 
-
-let appInfoInvalid = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "TEST_AUTH_ORIGIN",
-    id: "TEST_APP_ID",
-    loginURL: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    publicSignup: true,
-    redirectURL: "TEST_APP_URL",
-    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
- */
-
 let appInfoInvalid = AppInfo(
     allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
     authFallbackMethod: .magicLink,
@@ -273,23 +222,23 @@ let otpAppInfoValid = AppInfo(
 
 // TODO: UPDATE
 let otpAppInfoValid = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethod: .magicLink,
+    allowedIdentifier: "both",
+    authFallbackMethod: .otp,
     authFallbackMethodTtl: 0,
     authMethods: AuthMethods(),
-    authOrigin: "TEST_AUTH_ORIGIN",
-    defaultLanguage: "TEST_LANG",
+    authOrigin: "http://localhost:4173",
+    defaultLanguage: "en",
     elementCustomization: ElementCustomization(),
     elementCustomizationDark: ElementCustomization(),
     ephemeral: false,
-    id: "TEST_APP_ID",
+    id: "pTBeTnbvm1z3U6hznMTD33Es",
     layouts: Layouts(profile: [], registration: []),
-    loginUrl: "TEST_LOGIN_URL",
-    name: "TEST_APP",
+    loginUrl: "/",
+    name: "UAT OTP App",
     passageBranding: true,
     publicSignup: true,
     profileManagement: false,
-    redirectUrl: "/",
+    redirectUrl: "/dashboard",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
     requiredIdentifier: "",

@@ -126,6 +126,26 @@ public class PassageAuth {
         self.clearTokens()
     }
     
+    /// Creates and send a magic link to register the user. The user will receive an email or text to complete the registration.
+    ///
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newRegisterMagicLink(identifier: String) async throws -> MagicLink {
+        return try await PassageAuth.newRegisterMagicLink(identifier: identifier)
+    }
+    
+    /// Creates and send a magic link to login the user. The user will receive an email or text to complete the login.
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
+        return try await PassageAuth.newLoginMagicLink(identifier: identifier)
+    }
     
     /// Completes a magic link login workflow by activating the magic link.
     ///
@@ -141,6 +161,27 @@ public class PassageAuth {
         let authResult = try await PassageAuth.magicLinkActivate(userMagicLink: userMagicLink)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
+    }
+    
+    /// Creates and sends a one time passcode to the user. The user will receive an email or text to complete the registration.
+    ///
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newRegisterOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        return try await PassageAuth.newRegisterOneTimePasscode(identifier: identifier, language: language)
+    }
+    
+    /// Creates and sends a one time passcode to login the user. The user will receive an email or text to complete the login.
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newLoginOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        return try await PassageAuth.newLoginOneTimePasscode(identifier: identifier, language: language)
     }
     
     /// Activates a One-Time Passcode
