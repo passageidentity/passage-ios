@@ -24,7 +24,7 @@ final class OneTimePasscodeTests: XCTestCase {
     
     func testSendLoginOneTimePasscode() async {
         do {
-            let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredUser.email!)
+            let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredEmail)
         } catch {
             XCTFail("Unexpected error: \(error.localizedDescription)")
         }

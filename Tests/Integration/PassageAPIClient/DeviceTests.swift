@@ -44,7 +44,7 @@ final class ListDevicesTests: XCTestCase {
     @available(iOS 16.0, *)
     func testAddDeviceStartUnAuthed() async {
         do {
-            let passage = PassageAuth(appId: appInfoInvalid.id)
+            let passage = PassageAuth(appId: appInfoValid.id)
             passage.overrideApiUrl(with: apiUrl)
             let _ = try await passage.addDevice()
             XCTFail("passage.addDevice should have thrown an error.")
