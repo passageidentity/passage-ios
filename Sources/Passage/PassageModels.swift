@@ -19,10 +19,10 @@ public struct PassageUserInfo: Codable {
     public let phone: String?
     /// has the user's phone number been verified
     public let phoneVerified: Bool
-    /// status of the user
-    public let status: String
     /// social accounts connected to your user
     public let socialConnections: UserSocialConnections?
+    /// status of the user
+    public let status: String
     /// when the user was last update
     public let updatedAt: String?
     /// your Passage app's custom user metadata

@@ -10,12 +10,15 @@ public class PassageAuth {
     /// Used by class methods to manage the tokens when logging in, registering, etc
     public var tokenStore: PassageTokenStore;
     
+    private static var appId: String = ""
+    
     // MARK: Instance Initializers
     
     
     /// Initialize PassageAuth with the ``PassageStore`` token store that implements ``PassageTokenStore``
     public init() {
         self.tokenStore = PassageStore.shared
+        PassageAuth.appId = (try? PassageAuth.getValueFromPlist(value: "appId")) ?? ""
     }
     
     
@@ -23,22 +26,20 @@ public class PassageAuth {
     /// - Parameter tokenStore: token store class that implements ``PassageTokenStore``
     public init(tokenStore: PassageTokenStore) {
         self.tokenStore = tokenStore
+        PassageAuth.appId = (try? PassageAuth.getValueFromPlist(value: "appId")) ?? ""
     }
     
     public init(appId: String) {
         self.tokenStore = PassageStore.shared
-        PassageSettings.shared.appId = appId
+        PassageAuth.appId = appId
     }
     
     public init(appId: String, tokenStore: PassageTokenStore) {
         self.tokenStore = tokenStore
-        PassageSettings.shared.appId = appId
+        PassageAuth.appId = appId
     }
     
     // MARK: - Static Properties
-    static var appId = {
-        return PassageSettings.shared.appId ?? ""
-    }()
     
     // MARK: Instance Public Methods
     
@@ -66,6 +67,10 @@ public class PassageAuth {
         }
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onAutofillSuccess, onError: onError, onCancel: onCancel)
 
+    }
+    
+    public func appInfo() async throws -> AppInfo {
+        return try await PassageAuth.appInfo()
     }
     
     /// Login a user using a Passkey
@@ -121,6 +126,26 @@ public class PassageAuth {
         self.clearTokens()
     }
     
+    /// Creates and send a magic link to register the user. The user will receive an email or text to complete the registration.
+    ///
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newRegisterMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
+        return try await PassageAuth.newRegisterMagicLink(identifier: identifier, language: language)
+    }
+    
+    /// Creates and send a magic link to login the user. The user will receive an email or text to complete the login.
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
+        return try await PassageAuth.newLoginMagicLink(identifier: identifier, language: language)
+    }
     
     /// Completes a magic link login workflow by activating the magic link.
     ///
@@ -136,6 +161,27 @@ public class PassageAuth {
         let authResult = try await PassageAuth.magicLinkActivate(userMagicLink: userMagicLink)
         self.setTokensFromAuthResult(authResult: authResult)
         return authResult
+    }
+    
+    /// Creates and sends a one time passcode to the user. The user will receive an email or text to complete the registration.
+    ///
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newRegisterOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        return try await PassageAuth.newRegisterOneTimePasscode(identifier: identifier, language: language)
+    }
+    
+    /// Creates and sends a one time passcode to login the user. The user will receive an email or text to complete the login.
+    /// - Parameters:
+    ///   - identifier: string - email or phone number, depending on your app settings
+    ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
+    /// - Returns: ``OneTimePasscode``
+    /// - Throws: ``PassageAPIError``, ``PassageError``
+    public func newLoginOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
+        return try await PassageAuth.newLoginOneTimePasscode(identifier: identifier, language: language)
     }
     
     /// Activates a One-Time Passcode
@@ -211,6 +257,9 @@ public class PassageAuth {
         return currentUser
     }
     
+    public func getUser(identifier: String) async throws -> PassageUserInfo? {
+        return try await PassageAuth.getUser(identifier: identifier)
+    }
     
     /// List devices for the current authenticated user. Device information includes the friendly name, ID, when the device was added, and when it was last used.
     ///
@@ -317,7 +366,7 @@ public class PassageAuth {
     }
     
     public func overrideApiUrl(with newUrl: String) {
-        PassageSettings.shared.apiUrl = newUrl
+        OpenAPIClientAPI.basePath = newUrl
     }
     
     // MARK: Instance Private Methods
@@ -520,10 +569,13 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
+            let safeId = identifier
+                .addingPercentEncoding(
+                    withAllowedCharacters: .alphanumerics) ?? ""
             let response = try await UsersAPI
                 .checkUserIdentifier(
                     appId: appId,
-                    identifier: identifier
+                    identifier: safeId
                 )
             guard let user = response.user else {
                 return nil
@@ -537,13 +589,13 @@ public class PassageAuth {
                 loginCount: nil,
                 phone: user.phone,
                 phoneVerified: user.phoneVerified,
-                status: user.status.rawValue,
                 socialConnections: nil,
+                status: user.status.rawValue,
                 updatedAt: nil,
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
                 webauthnDevices: nil,
-                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+                webauthnTypes: user.webauthnTypes?.map { $0.rawValue }
             )
         } catch {
             throw error
@@ -742,9 +794,6 @@ public class PassageAuth {
         in window: UIWindow,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> AuthResult {
-        guard let appInfo = try? await PassageAuth.appInfo() else {
-            throw PassageError.invalidAppInfo
-        }
         let socialAuthController = PassageSocialAuthController(window: window)
         if connection == .apple {
             let (authCode, idToken) = try await socialAuthController.signInWithApple()
@@ -761,13 +810,13 @@ public class PassageAuth {
             return response.authResult
         } else {
             let queryParams = socialAuthController.getSocialAuthQueryParams(
-                appId: appInfo.id,
+                appId: appId,
                 connection: connection
             )
-            guard let authUrl = URL(string: "\(OpenAPIClientAPI.basePath)/apps/\(appId)/\(queryParams)") else {
+            guard let authUrl = getSocialAuthUrl(queryParams: queryParams) else {
                 throw PassageError.unknown // TODO: update
             }
-            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appInfo.id)
+            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appId)
             let authCode = try await socialAuthController.openSecureWebView(
                 url: authUrl,
                 callbackURLScheme: urlScheme,
@@ -803,13 +852,13 @@ public class PassageAuth {
                 loginCount: user.loginCount,
                 phone: user.phone,
                 phoneVerified: user.phoneVerified,
-                status: user.status.rawValue,
                 socialConnections: user.socialConnections,
+                status: user.status.rawValue,
                 updatedAt: user.updatedAt,
                 userMetadata: user.userMetadata,
                 webauthn: user.webauthn,
                 webauthnDevices: user.webauthnDevices,
-                webauthnTypes: user.webauthnTypes.map { $0.rawValue }
+                webauthnTypes: user.webauthnTypes?.map { $0.rawValue }
             )
         } catch {
             clearAuthTokenHeader()
@@ -882,7 +931,7 @@ public class PassageAuth {
         do {
             let authenticatorAttachment = options?.authenticatorAttachment
             let startRequest = CurrentUserDevicesStartRequest(
-                authenticatorAttachment: authenticatorAttachment
+                authenticatorAttachment: authenticatorAttachment ?? .platform
             )
             let startResponse = try await CurrentuserAPI
                 .postCurrentuserAddDeviceStart(
@@ -1193,6 +1242,10 @@ public class PassageAuth {
         OpenAPIClientAPI.customHeaders["Authorization"] = ""
     }
     
+    internal static func getSocialAuthUrl(queryParams: String) -> URL? {
+        return URL(string: "\(OpenAPIClientAPI.basePath)/apps/\(appId)/social/authorize?\(queryParams)")
+    }
+    
     // MARK AutoFill Methods - WIP
     
     /// Start the autofill job
@@ -1266,6 +1319,23 @@ public class PassageAuth {
     @available(iOS 16.0, *)
     public static func beginAutoFill(anchor: ASPresentationAnchor, onSuccess:  ((AuthResult) -> Void)?, onError: ((Error) -> Void)?, onCancel: (() -> Void)?) async throws -> Void {
         try await PassageAutofillAuthorizationController.shared.begin(anchor: anchor, onSuccess: onSuccess, onError: onError, onCancel: onCancel)
+    }
+    
+    private static func getValueFromPlist(value: String) throws -> String {
+        guard
+            let plistPath = Bundle.main.path(forResource: "Passage", ofType: "plist"),
+            let plistData = FileManager.default.contents(atPath: plistPath)
+        else {
+            throw PassageConfigurationError.cannotFindPassagePlist
+        }
+        guard
+            let plistContent = try? PropertyListSerialization
+                .propertyList(from: plistData, format: nil) as? [String: Any],
+            let appId = plistContent[value] as? String
+        else {
+            throw PassageConfigurationError.cannotFindAppId
+        }
+        return appId
     }
 
 }

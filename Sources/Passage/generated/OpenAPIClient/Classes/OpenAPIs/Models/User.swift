@@ -22,7 +22,7 @@ public struct User: Codable, JSONEncodable, Hashable {
     public var status: UserStatus
     public var userMetadata: AnyCodable?
     public var webauthn: Bool
-    public var webauthnTypes: [WebAuthnType]
+    public var webauthnTypes: [WebAuthnType]?
 
     public init(email: String, emailVerified: Bool, id: String, phone: String, phoneVerified: Bool, status: UserStatus, userMetadata: AnyCodable?, webauthn: Bool, webauthnTypes: [WebAuthnType]) {
         self.email = email

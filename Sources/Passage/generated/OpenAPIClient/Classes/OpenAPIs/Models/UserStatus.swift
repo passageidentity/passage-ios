@@ -15,4 +15,5 @@ public enum UserStatus: String, Codable, CaseIterable {
     case active = "active"
     case inactive = "inactive"
     case pending = "pending"
+    case statusUnavailable = ""
 }

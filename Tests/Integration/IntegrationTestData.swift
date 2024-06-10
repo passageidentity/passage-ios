@@ -1,7 +1,7 @@
 import AuthenticationServices
 @testable import Passage
 
-let apiUrl = "https://auth-uat.passage.dev"
+let apiUrl = "https://auth-uat.passage.dev/v1"
 
 let authToken = ProcessInfo.processInfo.environment["PASSAGE_AUTH_TOKEN"]!
 let mailosaurAPIKey = ProcessInfo.processInfo.environment["MAILOSAUR_API_KEY"]!
@@ -11,8 +11,18 @@ let checkEmailTryCount = 6
 
 let unregisteredUserEmail = "unregistered-test-user@passage.id"
 let registeredUserEmail = "ricky.padilla+user01@passage.id"
+
 let magicLinkAppId = "czLTOVFIytGqrhRVoHV9o8Wo"
 let magicLinkRegisteredUserEmail = "blayne.bayer@passage.id"
+let magicLinkUnactivatedId = "ioM1TTG0eiWMrOq9FA7X5zMN"
+
+let otpAppId = "pTBeTnbvm1z3U6hznMTD33Es"
+let otpRegisteredEmail = "authentigator+1681334202.318723@passage.id"
+
+let refreshTestAppId = "uFZlFit7nglPuzcYRVesCUBZ"
+let refreshTestSessionTimeout = 5
+
+let existingDeviceId = "c70NVyTQGj7EXjTagAmkK0we"
 
 let currentUser = PassageUserInfo(
     createdAt: "2023-07-17T17:45:41.807075Z",
@@ -23,147 +33,38 @@ let currentUser = PassageUserInfo(
     loginCount: 2,
     phone: "",
     phoneVerified: false,
+    socialConnections: nil,
     status: "active",
     updatedAt: "",
+    userMetadata: nil,
     webauthn: true,
     webauthnDevices: [],
-    webauthnTypes: [],
-    codableUserMetadata: nil
+    webauthnTypes: []
 )
 
 let appInfoValid = AppInfo(
     allowedIdentifier: "both",
-    authFallbackMethodString: "otp",
+    authFallbackMethod: .otp,
+    authFallbackMethodTtl: 0,
+    authMethods: AuthMethods(),
     authOrigin: "https://try-uat.passage.dev",
+    defaultLanguage: "en",
+    elementCustomization: ElementCustomization(),
+    elementCustomizationDark: ElementCustomization(),
+    ephemeral: false,
     id: "jlSg3Vr4MyKi1dcl3otVz9xa",
-    loginURL: "/",
+    layouts: Layouts(profile: [], registration: []),
+    loginUrl: "/",
     name: "iOS Integration Test App",
+    passageBranding: true,
     publicSignup: true,
-    redirectURL: "/",
-    requiredIdentifier: "both",
+    profileManagement: false,
+    redirectUrl: "/",
     requireEmailVerification: false,
     requireIdentifierVerification: false,
-    sessionTimeoutLength: 0,
-    userMetadataSchema: [],
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: EmailAndSMSAuthMethod(
-            ttl: 30000000,
-            ttlDisplayUnitString: "s"
-        ),
-        magicLink: nil
-    )
-)
-
-let appInfoInvalid = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "TEST_AUTH_ORIGIN",
-    id: "TEST_APP_ID",
-    loginURL: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    publicSignup: true,
-    redirectURL: "TEST_APP_URL",
-    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
-
-let appInfoRefreshToken = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "http://localhost:4173",
-    id: "uFZlFit7nglPuzcYRVesCUBZ",
-    loginURL: "/",
-    name: "passage-ios uat refresh tokens",
-    publicSignup: true,
-    redirectURL: "/dashboard",
-    requiredIdentifier: "both",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 5,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
-
-let appInfoTest = AppInfo(
-    allowedIdentifier: "TEST_ALLOWED_IDENTIFIER",
-    authFallbackMethodString: "magic_link",
-    authOrigin: "TEST_AUTH_ORIGIN",
-    id: "TEST_APP_ID",
-    loginURL: "TEST_LOGIN_URL",
-    name: "TEST_APP",
-    publicSignup: true,
-    redirectURL: "TEST_APP_URL",
-    requiredIdentifier: "TEST_REQUIRED_IDENTIFIER",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: nil,
-        magicLink: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        )
-    )
-)
-
-let otpAppInfoValid = AppInfo(
-    allowedIdentifier: "both",
-    authFallbackMethodString: "otp",
-    authOrigin: "http://localhost:4173",
-    id: "pTBeTnbvm1z3U6hznMTD33Es",
-    loginURL: "/",
-    name: "UAT OTP App",
-    publicSignup: true,
-    redirectURL: "/dashboard",
-    requiredIdentifier: "both",
-    requireEmailVerification: false,
-    requireIdentifierVerification: false,
-    sessionTimeoutLength: 6000,
-    userMetadataSchema: nil,
-    authMethods: AuthMethods(
-        passkeys: PasskeyAuthMethod(),
-        otp: EmailAndSMSAuthMethod(
-            ttl: 300,
-            ttlDisplayUnitString: "s"
-        ),
-        magicLink: nil
-    )
-)
-
-let otpRegisteredUser = PassageUserInfo(
-    createdAt: "",
-    email:"authentigator+1681334202.318723@passage.id",
-    emailVerified: true,
-    id: "oiySQzEcqEpzxX3yu5cKKRKe",
-    lastLoginAt: "",
-    loginCount: 1,
-    phone: "",
-    phoneVerified: false,
-    status: "active",
-    updatedAt: "",
-    webauthn: false,
-    webauthnDevices: [],
-    webauthnTypes: [],
-    codableUserMetadata: nil
+    requiredIdentifier: "",
+    rsaPublicKey: "",
+    sessionTimeoutLength: 1000000,
+    socialConnections: SocialConnections(),
+    userMetadataSchema: []
 )
