@@ -3,13 +3,12 @@ import XCTest
 
 final class SocialAuthControllerTests: XCTestCase {
     
+    var passage: PassageAuth!
+    
     override func setUp() {
         super.setUp()
-        let passage = PassageAuth(appId: appInfoValid.id)
+        passage = PassageAuth(appId: appInfoValid.id)
         passage.overrideApiUrl(with: apiUrl)
-        // NOTE: These tests use static PassageAuth methods instead the passage instance.
-        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
-        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
     
     func testGetSocialAuthQueryParams() async {
@@ -51,6 +50,19 @@ final class SocialAuthControllerTests: XCTestCase {
         let authUrl = PassageAuth.getSocialAuthUrl(queryParams: queryParams)
         XCTAssertNotNil(authUrl)
         XCTAssertEqual(expectedAuthUrl, authUrl)
+    }
+    
+    func testAppleAuthorizationFailure() async {
+        do {
+            // SIWA has not been configured for this iOS app, so iOS will throw an authorization error.
+            let window = await UIWindow()
+            let _ = try await passage.authorize(with: .apple, in: window)
+            XCTFail("passage.appInfo should throw an authorizationFailed error.")
+        } catch let error as SocialAuthError {
+            XCTAssertEqual(error, .authorizationFailed)
+        } catch {
+            XCTFail("passage.appInfo should throw an authorizationFailed error.")
+        }
     }
     
 }

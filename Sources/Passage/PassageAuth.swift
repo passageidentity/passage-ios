@@ -549,13 +549,13 @@ public class PassageAuth {
     /// Fetches data about an application, specifically the settings that would affect the way that users register and login.
     ///
     /// - Returns: ``AppInfo``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``AppInfoError``
     public static func appInfo() async throws -> AppInfo {
         do {
             let appInfoResponse = try await AppsAPI.getApp(appId: appId)
             return appInfoResponse.app
         } catch {
-            throw error
+            throw AppInfoError.convert(error: error)
         }
     }
 
@@ -788,48 +788,52 @@ public class PassageAuth {
     ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
     ///   Defaults to false.
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageSocialError``,  ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``SocialAuthError``
     public static func authorize(
         with connection: PassageSocialConnection,
         in window: UIWindow,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> AuthResult {
-        let socialAuthController = PassageSocialAuthController(window: window)
-        if connection == .apple {
-            let (authCode, idToken) = try await socialAuthController.signInWithApple()
-            let request = IdTokenRequest(
-                code: authCode,
-                idToken: idToken,
-                connectionType: .apple
-            )
-            let response = try await OAuth2API
-                .exchangeSocialIdToken(
-                    appId: appId,
-                    idTokenRequest: request
-                )
-            return response.authResult
-        } else {
-            let queryParams = socialAuthController.getSocialAuthQueryParams(
-                appId: appId,
-                connection: connection
-            )
-            guard let authUrl = getSocialAuthUrl(queryParams: queryParams) else {
-                throw PassageError.unknown // TODO: update
-            }
-            let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appId)
-            let authCode = try await socialAuthController.openSecureWebView(
-                url: authUrl,
-                callbackURLScheme: urlScheme,
-                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
-            )
-            let verifier = socialAuthController.verifier
-            let response = try await OAuth2API
-                .exchangeSocialToken(
-                    appId: appId,
+        do {
+            let socialAuthController = PassageSocialAuthController(window: window)
+            if connection == .apple {
+                let (authCode, idToken) = try await socialAuthController.signInWithApple()
+                let request = IdTokenRequest(
                     code: authCode,
-                    verifier: verifier
+                    idToken: idToken,
+                    connectionType: .apple
                 )
-            return response.authResult
+                let response = try await OAuth2API
+                    .exchangeSocialIdToken(
+                        appId: appId,
+                        idTokenRequest: request
+                    )
+                return response.authResult
+            } else {
+                let queryParams = socialAuthController.getSocialAuthQueryParams(
+                    appId: appId,
+                    connection: connection
+                )
+                guard let authUrl = getSocialAuthUrl(queryParams: queryParams) else {
+                    throw SocialAuthError.invalidUrl
+                }
+                let urlScheme = PassageSocialAuthController.getCallbackUrlScheme(appId: appId)
+                let authCode = try await socialAuthController.openSecureWebView(
+                    url: authUrl,
+                    callbackURLScheme: urlScheme,
+                    prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+                )
+                let verifier = socialAuthController.verifier
+                let response = try await OAuth2API
+                    .exchangeSocialToken(
+                        appId: appId,
+                        code: authCode,
+                        verifier: verifier
+                    )
+                return response.authResult
+            }
+        } catch {
+            throw SocialAuthError.convert(error: error)
         }
     }
            
@@ -1050,7 +1054,7 @@ public class PassageAuth {
         if let unwrappedAuthResult = authResult {
             return (authToken: unwrappedAuthResult.authToken, refreshToken: unwrappedAuthResult.refreshToken)
         } else {
-            throw PassageError.unknown
+            throw PassageErrorX.unknown
         }
     }
     
@@ -1154,7 +1158,7 @@ public class PassageAuth {
                     ),
                   let userId = startResponse.user?.id
             else {
-                throw PassageError.unknown // TODO: update
+                throw PassageErrorX.unknown // TODO: update
             }
             let credentialId = credentialCreation.credentialID.toBase64Url()
             let creationResponse = CredentialCreationResponseResponse(
@@ -1206,9 +1210,9 @@ public class PassageAuth {
                 if let errorMessage = errorResponseBody.error {
                     switch errorMessage {
                     case "user: already exists.":
-                        throw PassageError.userAlreadyExists
+                        throw PassageErrorX.userAlreadyExists
                     case "user does not exist":
-                        throw PassageError.userDoesNotExist
+                        throw PassageErrorX.userDoesNotExist
                     default:
                         throw error
                     }
@@ -1221,7 +1225,7 @@ public class PassageAuth {
                 if let errorMessage = errorResponseBody.error {
                     switch errorMessage {
                     case "user does not exist":
-                        throw PassageError.userDoesNotExist
+                        throw PassageErrorX.userDoesNotExist
                     default:
                         throw error
                     }
