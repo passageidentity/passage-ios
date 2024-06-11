@@ -248,8 +248,8 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func getCurrentUser() async throws -> PassageUserInfo? {
         
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         
         let currentUser = try await PassageAuth.getCurrentUser(token: token)
@@ -269,8 +269,8 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func listDevices() async throws -> [DeviceInfo] {
         
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         
         let devices = try await PassageAuth.listDevices(token: token)
@@ -289,8 +289,8 @@ public class PassageAuth {
     /// - Throws: ``PassageDeviceError``, ``PassageAPIError``, ``PassageError``
     public func editDevice( deviceId: String, friendlyName: String) async throws -> DeviceInfo? {
         
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         
         let deviceInfo = try await PassageAuth.editDevice(token: token, deviceId: deviceId, friendlyName: friendlyName)
@@ -310,8 +310,8 @@ public class PassageAuth {
     @available(iOS 16.0, *)
     public func addDevice(options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         
         let device = try await PassageAuth.addDevice(token: token, options: options)
@@ -328,8 +328,8 @@ public class PassageAuth {
     /// - Returns: Void
     /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
     public func revokeDevice( deviceId: String) async throws -> Void {
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         try await PassageAuth.revokeDevice(token: token, deviceId: deviceId)
     }
@@ -382,8 +382,8 @@ public class PassageAuth {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func changeEmail(newEmail: String, language: String? = nil) async throws -> MagicLink? {
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         let magicLink = try await PassageAuth.changeEmail(token: token, newEmail: newEmail, language: language)
         return magicLink
@@ -399,8 +399,8 @@ public class PassageAuth {
     /// - Returns: ``MagicLink``
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func changePhone(newPhone: String, language: String? = nil) async throws -> MagicLink? {
-        guard let token = self.tokenStore.authToken else {
-            throw PassageError.unauthorized
+        guard let token = tokenStore.authToken else {
+            throw UserError.unauthorized
         }
         let magicLink = try await PassageAuth.changePhone(token: token, newPhone: newPhone, language: language)
         return magicLink
@@ -862,7 +862,7 @@ public class PassageAuth {
             )
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -881,7 +881,7 @@ public class PassageAuth {
             return response.devices
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -924,7 +924,7 @@ public class PassageAuth {
     ///
     /// - Parameter token: The user's auth token
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``AddDeviceError``
     @available(iOS 16.0, *)
     public static func addDevice(token: String, options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         setAuthTokenHeader(token: token)
@@ -954,7 +954,7 @@ public class PassageAuth {
                         includeSecurityKeyOption: includeSecurityKeyOption
                     )
             else {
-                throw PassageError.unknown // TODO: update
+                throw AddDeviceError.credentialChallengeParsingFailed
             }
             let credentialId = credentialCreation.credentialID.toBase64Url()
             let creationResponse = CredentialCreationResponseResponse(
@@ -982,7 +982,7 @@ public class PassageAuth {
             return finishResponse.device
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw AddDeviceError.convert(error: error)
         }
     }
     

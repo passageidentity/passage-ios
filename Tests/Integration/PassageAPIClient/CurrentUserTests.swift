@@ -33,9 +33,11 @@ final class CurrentUserTests: XCTestCase {
     func testCurrentUserNotAuthorized() async {
         do {
             let _ = try await PassageAuth.getCurrentUser(token: "")
-            XCTFail("passage.getCurrentUser should throw an error when no auth token set")
+            XCTFail("passage.getCurrentUser should throw an unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.getCurrentUser should throw an unauthorized error when no auth token set")
         }
     }
 
