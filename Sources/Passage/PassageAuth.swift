@@ -144,7 +144,7 @@ public class PassageAuth {
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
-        return try await PassageAuth.newLoginMagicLink(identifier: identifier)
+        return try await PassageAuth.newLoginMagicLink(identifier: identifier, language: language)
     }
     
     /// Completes a magic link login workflow by activating the magic link.
