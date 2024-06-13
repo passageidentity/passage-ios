@@ -25,9 +25,11 @@ final class ListDevicesTests: XCTestCase {
     func testListDevicesUnAuthed() async {
         do {
             let _ = try await PassageAuth.listDevices(token: "")
-            XCTFail("passage.listDevices should throw an error when no auth token set")
+            XCTFail("passage.listDevices should throw an unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.listDevices should throw an unauthorized error when no auth token set")
         }
     }
     
@@ -35,21 +37,23 @@ final class ListDevicesTests: XCTestCase {
     func testAddDeviceStart() async {
         do {
             let _ = try await PassageAuth.addDevice(token: authToken)
-            XCTFail("passage.addDevice should throw an authorization error in this test environment")
+            XCTFail("passage.addDevice should throw an authorizationFailed error in this test environment")
+        } catch let error as AddDeviceError {
+            XCTAssertEqual(error, .authorizationFailed)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.addDevice should throw an authorizationFailed error in this test environment")
         }
     }
 
     @available(iOS 16.0, *)
     func testAddDeviceStartUnAuthed() async {
         do {
-            let passage = PassageAuth(appId: appInfoValid.id)
-            passage.overrideApiUrl(with: apiUrl)
-            let _ = try await passage.addDevice()
-            XCTFail("passage.addDevice should have thrown an error.")
+            let _ = try await PassageAuth.addDevice(token: "")
+            XCTFail("passage.addDevice should throw an unauthorized error")
+        } catch let error as AddDeviceError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.addDevice should throw an unauthorized error")
         }
     }
 

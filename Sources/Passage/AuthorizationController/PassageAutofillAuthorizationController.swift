@@ -69,7 +69,7 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         case let credentialAssertion as ASAuthorizationPlatformPublicKeyCredentialAssertion:
             Task {
                 guard startResponse != nil else {
-                    throw PassageASAuthorizationError.invalidStartResponse
+                    throw ASAuthorizationError.init(.invalidResponse)
                 }
                 let loginResult = try await PassageAuth.autoFillFinish(startResponse: startResponse!, credentialAssertion: credentialAssertion)
                 isPerformingModalRequest = false
@@ -80,7 +80,7 @@ public class PassageAutofillAuthorizationController : NSObject, ASAuthorizationC
         default:
             isPerformingModalRequest = false
             if let onError = onError {
-                onError(PassageASAuthorizationError.authorizationTypeUnknown)
+                onError(ASAuthorizationError.init(.invalidResponse))
             }
         }
         isPerformingModalRequest = false

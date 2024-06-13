@@ -82,32 +82,13 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
             credentialRegistrationCheckedThrowingContinuation?.resume(returning: credentialRegistration)
             credentialRegistrationCheckedThrowingContinuation = nil
         default:
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.credentialRegistration)
+            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: ASAuthorizationError.init(.invalidResponse))
         }
     }
     
-    
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        
-        // TODO: Implement better error handling below
-        guard let authorizationError = error as? ASAuthorizationError else {
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknown)
-            credentialRegistrationCheckedThrowingContinuation = nil
-            return
-        }
-
-
-        if authorizationError.code == .canceled {
-            // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
-            // This is a good time to show a traditional login form, or ask the user to create an account.
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.canceled)
-            credentialRegistrationCheckedThrowingContinuation = nil
-        } else {
-            // Another ASAuthorization error.
-            // Note: The userInfo dictionary contains useful information.
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknownAuthorizationType)
-            credentialRegistrationCheckedThrowingContinuation = nil
-        }
+        credentialRegistrationCheckedThrowingContinuation?.resume(throwing: error)
+        credentialRegistrationCheckedThrowingContinuation = nil
     }
     
 

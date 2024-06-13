@@ -52,12 +52,12 @@ final internal class PassageSocialAuthController:
                 let idTokenData = appleIDCredential.identityToken,
                 let idToken = String(data: idTokenData, encoding: .utf8) else
             {
-                siwaContinuation?.resume(throwing: PassageSocialError.missingAppleCredentials)
+                siwaContinuation?.resume(throwing: SocialAuthError.missingAppleCredentials)
                 return
             }
             siwaContinuation?.resume(returning: (authCode, idToken))
         } else {
-            siwaContinuation?.resume(throwing: PassageSocialError.missingAppleCredentials)
+            siwaContinuation?.resume(throwing: SocialAuthError.missingAppleCredentials)
         }
     }
     
@@ -161,7 +161,7 @@ final internal class PassageSocialAuthController:
                 let components = NSURLComponents(url: callbackURL, resolvingAgainstBaseURL: true),
                 let authCode = components.queryItems?.filter({$0.name == "code"}).first?.value
             else {
-                continuation.resume(throwing: PassageSocialError.missingAuthCode)
+                continuation.resume(throwing: SocialAuthError.missingAuthCode)
                 return
             }
             continuation.resume(returning: authCode)
