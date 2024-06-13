@@ -90,7 +90,7 @@ public class PassageAuth {
     /// for a new account.
     /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
+    /// - Throws: ``LoginWithPasskeyError``
     @available(iOS 16.0, *)
     public func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         self.clearTokens()
@@ -232,7 +232,7 @@ public class PassageAuth {
     ///
     /// - Parameter id: string - ID of the magic link (from response body of login or register with magic link)
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``GetMagicLinkStatusError``
     public func getMagicLinkStatus(id: String) async throws -> AuthResult {
         clearTokens()
         let authResult = try await PassageAuth.getMagicLinkStatus(id: id)
@@ -343,7 +343,7 @@ public class PassageAuth {
     /// - Throws: ``PassageAPIError``, ``PassageError``
     public func refresh() async throws -> AuthResult  {
         guard let refreshToken = self.tokenStore.refreshToken else {
-            throw PassageError.unauthorized
+            throw PassageErrorX.unauthorized
         }
         let authResult = try await PassageAuth.refresh(refreshToken: refreshToken)
         self.setTokensFromAuthResult(authResult: authResult)
@@ -417,7 +417,7 @@ public class PassageAuth {
     /// - Parameter identifier: The users email or phone number
     /// - Parameter options: Optional configuration for passkey creation
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
+    /// - Throws: ``RegisterWithPasskeyError``
     @available(iOS 16.0, *)
     public func registerWithPasskey(
         identifier: String,
@@ -459,7 +459,7 @@ public class PassageAuth {
     ///
     /// - Parameter identifier: The user's email, phone number, or other unique id
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,``PassageASAuthorizationError``, ``PassageError``
+    /// - Throws: ``LoginWithPasskeyError``
     @available(iOS 16.0, *)
     public static func loginWithPasskey(identifier: String? = nil) async throws -> AuthResult {
         do {
@@ -473,7 +473,7 @@ public class PassageAuth {
                 .shared
                 .login(from: startResponse)
             else {
-                throw PassageASAuthorizationError.credentialRegistration
+                throw LoginWithPasskeyError.authorizationFailed
             }
             let assertionResponse = CredentialAssertionResponseResponse(
                 authenticatorData: credentialAssertion.rawAuthenticatorData.toBase64Url(),
@@ -500,7 +500,7 @@ public class PassageAuth {
                 )
             return finishResponse.authResult
         } catch {
-            throw error
+            throw LoginWithPasskeyError.convert(error: error)
         }
     }
     
@@ -688,7 +688,7 @@ public class PassageAuth {
     ///
     /// - Parameter id: string - ID of the magic link (from response body of login or register with magic link)
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``GetMagicLinkStatusError``
     public static func getMagicLinkStatus(id: String) async throws -> AuthResult {
         do {
             let request = GetMagicLinkStatusRequest(id: id)
@@ -1129,7 +1129,7 @@ public class PassageAuth {
     ///
     /// - Parameter identifier: The users email or phone number
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``,  ``PassageASAuthorizationError``
+    /// - Throws: ``RegisterWithPasskeyError``
     @available(iOS 16.0, *)
     public static func registerWithPasskey(
         identifier: String,
@@ -1158,7 +1158,7 @@ public class PassageAuth {
                     ),
                   let userId = startResponse.user?.id
             else {
-                throw PassageErrorX.unknown // TODO: update
+                throw RegisterWithPasskeyError.authorizationFailed
             }
             let credentialId = credentialCreation.credentialID.toBase64Url()
             let creationResponse = CredentialCreationResponseResponse(
@@ -1184,7 +1184,7 @@ public class PassageAuth {
                 )
             return finishResponse.authResult
         } catch {
-            throw error
+            throw RegisterWithPasskeyError.convert(error: error)
         }
     }
     

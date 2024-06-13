@@ -8,8 +8,8 @@ public enum GetMagicLinkStatusError: PassageError {
     
     public static func convert(error: Error) -> GetMagicLinkStatusError {
         // Check if error is already proper
-        if let appInfoError = error as? GetMagicLinkStatusError {
-            return appInfoError
+        if let error = error as? GetMagicLinkStatusError {
+            return error
         }
         // Handle client error
         if let errorResponse = error as? ErrorResponse {
