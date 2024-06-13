@@ -132,7 +132,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewRegisterMagicLinkError``
     public func newRegisterMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         return try await PassageAuth.newRegisterMagicLink(identifier: identifier, language: language)
     }
@@ -142,7 +142,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginMagicLinkError``
     public func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         return try await PassageAuth.newLoginMagicLink(identifier: identifier, language: language)
     }
@@ -169,7 +169,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``OneTimePasscode``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewRegisterOneTimePasscodeError``
     public func newRegisterOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
         return try await PassageAuth.newRegisterOneTimePasscode(identifier: identifier, language: language)
     }
@@ -179,7 +179,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``OneTimePasscode``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginOneTimePasscodeError``
     public func newLoginOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
         return try await PassageAuth.newLoginOneTimePasscode(identifier: identifier, language: language)
     }
@@ -191,7 +191,7 @@ public class PassageAuth {
     /// - Parameter otp: string - The OTP provided by your user
     /// - Parameter otpId: string - The OTP id returned from login or register method
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``OneTimePasscodeActivateError``
     public func oneTimePasscodeActivate(otp: String, otpId: String) async throws -> AuthResult {
         clearTokens()
         let authResult = try await PassageAuth.oneTimePasscodeActivate(otp: otp, otpId: otpId)
@@ -620,7 +620,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewRegisterMagicLinkError``
     public static func newRegisterMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         do {
             let request = RegisterMagicLinkRequest(
@@ -634,7 +634,7 @@ public class PassageAuth {
                 )
             return response.magicLink
         } catch {
-            throw error
+            throw NewRegisterMagicLinkError.convert(error: error)
         }
     }
     
@@ -657,7 +657,7 @@ public class PassageAuth {
                 )
             return response.magicLink
         } catch {
-            throw error
+            throw NewLoginMagicLinkError.convert(error: error)
         }
     }
     
@@ -667,7 +667,7 @@ public class PassageAuth {
     ///
     /// - Parameter userMagicLink: string - full magic link that starts with "ml" (sent via email or text to the user)
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``MagicLinkActivateError``
     public static func magicLinkActivate(userMagicLink: String) async throws -> AuthResult {
         do {
             let request = ActivateMagicLinkRequest(magicLink: userMagicLink)
@@ -678,7 +678,7 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            throw error
+            throw MagicLinkActivateError.convert(error: error)
         }
     }
     
@@ -709,7 +709,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``OneTimePasscode``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewRegisterOneTimePasscodeError``
     public static func newRegisterOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
         do {
             let request = RegisterOneTimePasscodeRequest(
@@ -723,7 +723,7 @@ public class PassageAuth {
                 )
             return OneTimePasscode(id: response.otpId)
         } catch {
-            throw error
+            throw NewRegisterOneTimePasscodeError.convert(error: error)
         }
     }
     
@@ -732,7 +732,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``OneTimePasscode``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginOneTimePasscodeError``
     public static func newLoginOneTimePasscode(identifier: String, language: String? = nil) async throws -> OneTimePasscode {
         do {
             let request = LoginOneTimePasscodeRequest(
@@ -746,7 +746,7 @@ public class PassageAuth {
                 )
             return OneTimePasscode(id: response.otpId)
         } catch {
-            throw error
+            throw NewLoginOneTimePasscodeError.convert(error: error)
         }
     }
     
@@ -758,7 +758,7 @@ public class PassageAuth {
     ///   - otp: The user's one time passcode
     ///   - otpId: The one time passcode id
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``OneTimePasscodeActivateError``
     public static func oneTimePasscodeActivate(otp: String, otpId: String) async throws -> AuthResult {
         do {
             let request = ActivateOneTimePasscodeRequest(
@@ -772,8 +772,7 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            // TODO: handle exceededAttempts error
-            throw error
+            throw OneTimePasscodeActivateError.convert(error: error)
         }
     }
     

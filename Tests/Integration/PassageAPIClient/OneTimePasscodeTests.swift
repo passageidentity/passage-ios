@@ -11,8 +11,7 @@ final class OneTimePasscodeTests: XCTestCase {
         passage.overrideApiUrl(with: apiUrl)
     }
     
-    @available(iOS 15.0, *)
-    func testSendRegisterOneTimePasscode() async {
+    func testSendRegisterOneTimePasscodeValid() async {
         do {
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
@@ -22,11 +21,33 @@ final class OneTimePasscodeTests: XCTestCase {
         }
     }
     
-    func testSendLoginOneTimePasscode() async {
+    func testSendRegisterOneTimePasscodeInvalid() async {
+        do {
+            let _ = try await passage.newRegisterOneTimePasscode(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newRegisterOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewRegisterOneTimePasscodeError {
+            XCTAssertEqual(error, .invalidIdentifier)
+        } catch {
+            XCTFail("passage.newRegisterOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        }
+    }
+    
+    func testSendLoginOneTimePasscodeValid() async {
         do {
             let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredEmail)
         } catch {
             XCTFail("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+    
+    func testSendLoginOneTimePasscodeInvalid() async {
+        do {
+            let _ = try await passage.newLoginOneTimePasscode(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newLoginOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewLoginOneTimePasscodeError {
+            XCTAssertEqual(error, .invalidIdentifier)
+        } catch {
+            XCTFail("passage.newLoginOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
         }
     }
 
