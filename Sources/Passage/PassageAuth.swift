@@ -106,7 +106,7 @@ public class PassageAuth {
     /// - Parameters:
     ///   - identifier: string - email or phone number, depending on your app settings
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginMagicLinkError``
     public func loginWithMagicLink(identifier: String) async throws -> MagicLink? {
         self.clearTokens()
         let magicLink = try await PassageAuth.loginWithMagicLink(identifier: identifier)
@@ -155,7 +155,7 @@ public class PassageAuth {
     ///
     /// - Parameter userMagicLink: string - full magic link that starts with "ml" (sent via email or text to the user)
     /// - Returns: ``AuthResult`` The AuthResult object contains an authentication token (JWT) and redirect URL. The auth token should be used on all subsequent authenticated requests to the app. The redirect URL specifies the route that users should be redirected to after completed registration or login
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``MagicLinkActivateError``
     public func magicLinkActivate(userMagicLink: String) async throws -> AuthResult {
         self.clearTokens()
         let authResult = try await PassageAuth.magicLinkActivate(userMagicLink: userMagicLink)
@@ -210,7 +210,7 @@ public class PassageAuth {
     ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
     ///   Defaults to false.
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageSocialError``,  ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``SocialAuthError``
     public func authorize(
         with connection: PassageSocialConnection,
         in window: UIWindow,
@@ -245,7 +245,7 @@ public class PassageAuth {
     /// Will use the authToken from the tokenStore on the instance.
     ///
     /// - Returns: ``PassageUserInfo`` the User object that represents an authenticated user
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public func getCurrentUser() async throws -> PassageUserInfo? {
         
         guard let token = tokenStore.authToken else {
@@ -266,7 +266,7 @@ public class PassageAuth {
     /// Auth Token from the instance tokenStore will be used.
     ///
     /// - Returns: Array of ``DeviceInfo``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public func listDevices() async throws -> [DeviceInfo] {
         
         guard let token = tokenStore.authToken else {
@@ -286,7 +286,7 @@ public class PassageAuth {
     ///   - deviceId: The id of the device to update
     ///   - friendlyName: The new friendly name for the device
     /// - Returns: ``DeviceInfo``
-    /// - Throws: ``PassageDeviceError``, ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public func editDevice( deviceId: String, friendlyName: String) async throws -> DeviceInfo? {
         
         guard let token = tokenStore.authToken else {
@@ -306,7 +306,7 @@ public class PassageAuth {
     /// Auth Token from the instance tokenStore will be used.
     ///
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``AddDeviceError``
     @available(iOS 16.0, *)
     public func addDevice(options: PasskeyCreationOptions? = nil) async throws -> DeviceInfo {
         
@@ -326,7 +326,7 @@ public class PassageAuth {
     /// - Parameters:
     ///   - deviceId: Id of the device to revoke access
     /// - Returns: Void
-    /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
+    /// - Throws: ``UserError``
     public func revokeDevice( deviceId: String) async throws -> Void {
         guard let token = tokenStore.authToken else {
             throw UserError.unauthorized
@@ -340,10 +340,10 @@ public class PassageAuth {
     /// Refresh Token from the instance tokenStore will be used.
     ///
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``PassageTokenError``
     public func refresh() async throws -> AuthResult  {
         guard let refreshToken = self.tokenStore.refreshToken else {
-            throw PassageErrorX.unauthorized
+            throw PassageTokenError.unauthorized
         }
         let authResult = try await PassageAuth.refresh(refreshToken: refreshToken)
         self.setTokensFromAuthResult(authResult: authResult)
@@ -353,10 +353,10 @@ public class PassageAuth {
     /// Checks validity of the auth token and refreshes the session, if required.
     ///
     /// - Returns: Current authToken
-    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    /// - Throws: ``PassageTokenError``
     public func getAuthToken() async throws -> String {
         guard let authToken = self.tokenStore.authToken else {
-            throw PassageSessionError.loginRequired
+            throw PassageTokenError.loginRequired
         }
         let refreshToken = self.tokenStore.refreshToken
         let tokens = try await PassageAuth.getAuthToken(authToken: authToken, refreshToken: refreshToken)
@@ -380,7 +380,7 @@ public class PassageAuth {
     ///   - newEmail: string - valid email address
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public func changeEmail(newEmail: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = tokenStore.authToken else {
             throw UserError.unauthorized
@@ -397,7 +397,7 @@ public class PassageAuth {
     ///   - newPhone: string - valid E164 formatted phone number.
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public func changePhone(newPhone: String, language: String? = nil) async throws -> MagicLink? {
         guard let token = tokenStore.authToken else {
             throw UserError.unauthorized
@@ -510,7 +510,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginMagicLinkError``
     public static func loginWithMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         do {
             let request = LoginMagicLinkRequest(
@@ -532,7 +532,7 @@ public class PassageAuth {
     ///
     /// - Parameter The user's refresh token
     /// - Returns: Void
-    /// - Throws: ``PassageAPIError``
+    /// - Throws: ``PassageTokenError``
     public static func signOut(refreshToken: String) async throws -> Void {
         do {
             try await TokensAPI
@@ -541,7 +541,7 @@ public class PassageAuth {
                     refreshToken: refreshToken
                 )
         } catch {
-            
+            throw PassageTokenError.convert(error: error)
         }
     }
     
@@ -566,7 +566,7 @@ public class PassageAuth {
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
     /// - Returns: ``PassageUserInfo`` the unauthenticated information about a user, including their status, user ID, and whether or not they have previously signed in with WebAuthn.
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public static func getUser(identifier: String) async throws -> PassageUserInfo? {
         do {
             let safeId = identifier
@@ -598,7 +598,7 @@ public class PassageAuth {
                 webauthnTypes: user.webauthnTypes?.map { $0.rawValue }
             )
         } catch {
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -643,7 +643,7 @@ public class PassageAuth {
     ///   - identifier: string - email or phone number, depending on your app settings
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink`` This type include the magic link ID, which can be used to check if the magic link has been activate or not, using the getMagicLinkStatus() method.
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``NewLoginMagicLinkError``
     public static func newLoginMagicLink(identifier: String, language: String? = nil) async throws -> MagicLink {
         do {
             let request = LoginMagicLinkRequest(
@@ -839,7 +839,7 @@ public class PassageAuth {
     /// This method fetches the user by the specified token.
     /// - Parameter token: an auth token from the AuthResult object
     /// - Returns: ``PassageUserInfo`` the User object that represents an authenticated user
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public static func getCurrentUser(token: String) async throws -> PassageUserInfo {
         setAuthTokenHeader(token: token)
         do {
@@ -875,7 +875,7 @@ public class PassageAuth {
     ///  User must be authenticated or the call will throw an error.
     ///
     /// - Returns: Array of ``DeviceInfo``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public static func listDevices(token: String) async throws -> [DeviceInfo] {
         setAuthTokenHeader(token: token)
         do {
@@ -896,7 +896,7 @@ public class PassageAuth {
     ///   - deviceId: The id of the device to update
     ///   - friendlyName: The new friendly name for the device
     /// - Returns: ``DeviceInfo``
-    /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
+    /// - Throws: ``UserError``
     public static func editDevice(
         token: String,
         deviceId: String,
@@ -915,7 +915,7 @@ public class PassageAuth {
             return response.device
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -995,7 +995,7 @@ public class PassageAuth {
     ///   - token: Users auth token
     ///   - deviceId: Id of the device to revoke access
     /// - Returns: Void
-    /// - Throws: ``PassageDeviceError``, ``PassageAPIError``
+    /// - Throws: ``UserError``
     public static func revokeDevice(token: String, deviceId: String) async throws -> Void {
         setAuthTokenHeader(token: token)
         do {
@@ -1007,7 +1007,7 @@ public class PassageAuth {
             clearAuthTokenHeader()
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -1015,7 +1015,7 @@ public class PassageAuth {
     /// Refresh tokens must be enabled on the current application.
     ///
     /// - Returns: ``AuthResult``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``PassageTokenError``
     public static func refresh(refreshToken: String) async throws -> AuthResult {
         do {
             let request = RefreshAuthTokenRequest(refreshToken: refreshToken)
@@ -1026,34 +1026,34 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            throw error
+            throw PassageTokenError.convert(error: error)
         }
     }
     
     /// Checks validity of the auth token and refreshes the session, if required.
     ///
     /// - Returns: Current authToken and an optional refresh token, if being used
-    /// - Throws: ``PassageAPIError``, ``PassageSessionError``
+    /// - Throws: ``NewLoginMagicLinkError``
     public static func getAuthToken(authToken: String, refreshToken: String?) async throws -> (authToken: String, refreshToken: String?){
         let isTokenExpired = PassageTokenUtils(token: authToken).isExpired
         if(!isTokenExpired){
             return (authToken, refreshToken)
         }
         guard let unwrappedRefreshToken = refreshToken else {
-            throw PassageSessionError.loginRequired
+            throw PassageTokenError.loginRequired
         }
         var authResult: AuthResult?
         do {
             authResult = try await PassageAuth.refresh(refreshToken: unwrappedRefreshToken)
         } catch PassageAPIError.unauthorized {
-            throw PassageSessionError.loginRequired
+            throw PassageTokenError.loginRequired
         } catch {
             throw error
         }
         if let unwrappedAuthResult = authResult {
             return (authToken: unwrappedAuthResult.authToken, refreshToken: unwrappedAuthResult.refreshToken)
         } else {
-            throw PassageErrorX.unknown
+            throw PassageTokenError.unspecified
         }
     }
     
@@ -1071,7 +1071,7 @@ public class PassageAuth {
     ///   - newEmail: string - valid email address
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public static func changeEmail(token: String, newEmail: String, language: String? = nil) async throws -> MagicLink {
         setAuthTokenHeader(token: token)
         do {
@@ -1085,7 +1085,7 @@ public class PassageAuth {
             return response.magicLink
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -1096,7 +1096,7 @@ public class PassageAuth {
     ///   - newPhone: string - valid E164 formatted phone number.
     ///   - language: optional language string for localizing emails, if no lanuage or an invalid language is provided the application default lanuage will be used
     /// - Returns: ``MagicLink``
-    /// - Throws: ``PassageAPIError``, ``PassageError``
+    /// - Throws: ``UserError``
     public static func changePhone(token: String, newPhone: String, language: String? = nil) async throws -> MagicLink {
         setAuthTokenHeader(token: token)
         do {
@@ -1110,7 +1110,7 @@ public class PassageAuth {
             return response.magicLink
         } catch {
             clearAuthTokenHeader()
-            throw error
+            throw UserError.convert(error: error)
         }
     }
     
@@ -1199,42 +1199,6 @@ public class PassageAuth {
             logger.error("Error: \(message)")
         }
         logger.error("Error: \(error)")
-    }
-
-    
-    private static func handlePassageAPIError(error: PassageAPIError) throws -> Void {
-        switch error {
-        case .badRequest(let errorResponse):
-            if let errorResponseBody = errorResponse.body {
-                if let errorMessage = errorResponseBody.error {
-                    switch errorMessage {
-                    case "user: already exists.":
-                        throw PassageErrorX.userAlreadyExists
-                    case "user does not exist":
-                        throw PassageErrorX.userDoesNotExist
-                    default:
-                        throw error
-                    }
-
-                }
-            }
-            throw error
-        case .notFound(let errorResponse):
-            if let errorResponseBody = errorResponse.body {
-                if let errorMessage = errorResponseBody.error {
-                    switch errorMessage {
-                    case "user does not exist":
-                        throw PassageErrorX.userDoesNotExist
-                    default:
-                        throw error
-                    }
-                }
-            }
-            throw error
-        default:
-            throw error
-        }
-        
     }
     
     private static func setAuthTokenHeader(token: String) {
