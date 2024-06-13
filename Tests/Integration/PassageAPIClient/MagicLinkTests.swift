@@ -33,9 +33,11 @@ final class MagicLinkTests: XCTestCase {
     func testGetMagicLinkStatus() async {
         do {
             let _ = try await passage.getMagicLinkStatus(id: magicLinkUnactivatedId)
-            XCTFail("passage.getMagicLinkStatus should throw an error when given an unactived magic link id")
+            XCTFail("passage.getMagicLinkStatus should throw magicLinkNotFound error when given an unactived magic link id")
+        } catch let error as GetMagicLinkStatusError {
+            XCTAssertEqual(error, .magicLinkNotFound)
         } catch {
-            // TODO: catch specific "unactivated" error
+            XCTFail("passage.getMagicLinkStatus should throw magicLinkNotFound error when given an unactived magic link id")
         }
     }
 

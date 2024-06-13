@@ -699,7 +699,7 @@ public class PassageAuth {
                 )
             return response.authResult
         } catch {
-            throw error
+            throw GetMagicLinkStatusError.convert(error: error)
         }
     }
     
