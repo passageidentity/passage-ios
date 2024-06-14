@@ -491,7 +491,7 @@ public class PassageAuth {
             let finishRequest = LoginWebAuthnFinishRequest(
                 handshakeId: startResponse.handshake.id,
                 handshakeResponse: handshakeResponse,
-                userId: identifier
+                userId: startResponse.user?.id
             )
             let finishResponse = try await LoginAPI
                 .loginWebauthnFinish(
