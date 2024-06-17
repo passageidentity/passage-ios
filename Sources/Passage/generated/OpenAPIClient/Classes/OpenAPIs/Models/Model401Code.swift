@@ -15,5 +15,6 @@ public enum Model401Code: String, Codable, CaseIterable {
     case webauthnLoginFailed = "webauthn_login_failed"
     case invalidMagicLink = "invalid_magic_link"
     case invalidAccessToken = "invalid_access_token"
+    case invalidRefreshToken = "invalid_refresh_token"
     case exceededAttempts = "exceeded_attempts"
 }
