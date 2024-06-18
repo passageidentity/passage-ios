@@ -609,8 +609,8 @@ public class PassageAuth {
     ///
     /// - Parameter identifier: string - email or phone number, depending on your app settings
     /// - Returns: ``Bool``
-    public static func identifierExists(identifier: String) async throws -> Bool {
-        let user = try await getUser(identifier: identifier)
+    public static func identifierExists(identifier: String) async -> Bool {
+        let user = try? await getUser(identifier: identifier)
         return user != nil
     }
     
