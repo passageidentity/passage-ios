@@ -32,10 +32,7 @@ public enum AddDeviceError: PassageError {
         }
         // Handle authorization error
         if let authError = error as? ASAuthorizationError {
-            switch authError.code {
-            case .canceled: return .canceled
-            default: return .authorizationFailed
-            }
+            return authError.code == .canceled ? .canceled : .authorizationFailed
         }
         return .unspecified
     }

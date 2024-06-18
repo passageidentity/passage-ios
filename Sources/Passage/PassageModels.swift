@@ -57,3 +57,8 @@ public struct PasskeyCreationOptions {
         self.authenticatorAttachment = authenticatorAttachment
     }
 }
+
+internal struct Constants {
+    static let publicKeyValue = "public-key"
+}
+

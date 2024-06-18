@@ -16,9 +16,8 @@ public enum PassageTokenError: PassageError {
             guard let (statusCode, _) = PassageErrorData.getData(from: errorResponse) else {
                 return .unspecified
             }
-            switch statusCode {
-            case 401: return .unauthorized
-            default: ()
+            if statusCode == 401 {
+                return .unauthorized
             }
             return .unspecified
         }

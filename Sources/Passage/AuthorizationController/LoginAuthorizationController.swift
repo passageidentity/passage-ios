@@ -13,7 +13,6 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
     
     func login(from response: LoginWebAuthnStartResponse) async throws -> ASAuthorizationPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
-        let rpId = response.handshake.challenge.publicKey.rpId
         let challenge = response.handshake.challenge.publicKey.challenge
         guard
             let rpId = response.handshake.challenge.publicKey.rpId,

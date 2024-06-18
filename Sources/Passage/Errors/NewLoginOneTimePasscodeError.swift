@@ -15,9 +15,8 @@ public enum NewLoginOneTimePasscodeError: PassageError {
             guard let (_, errorData) = PassageErrorData.getData(from: errorResponse) else {
                 return .unspecified
             }
-            switch errorData.code {
-            case Model400Code.request.rawValue: return .invalidIdentifier
-            default: ()
+            if errorData.code == Model400Code.request.rawValue {
+                return .invalidIdentifier
             }
             return .unspecified
         }

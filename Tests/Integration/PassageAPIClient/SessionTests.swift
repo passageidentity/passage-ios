@@ -45,9 +45,11 @@ final class SessionTests: XCTestCase {
             try await Task.sleep(nanoseconds: UInt64(nanoseconds))
             do {
                 _ = try await PassageAuth.getCurrentUser(token: newAuthResult?.authToken ?? "")
-                XCTFail("getCurrentUser should throw an unauthenticated error")
+                XCTFail("getCurrentUser should throw unauthorized error when no auth token set")
+            } catch let error as UserError {
+                XCTAssertEqual(error, .unauthorized)
             } catch {
-                // TODO: catch specific error
+                XCTFail("getCurrentUser should throw unauthorized error when no auth token set")
             }
         } catch {
             XCTFail("Unexpected error: \(error.localizedDescription)")

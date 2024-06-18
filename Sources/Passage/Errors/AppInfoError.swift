@@ -15,9 +15,8 @@ public enum AppInfoError: PassageError {
             guard let (_, errorData) = PassageErrorData.getData(from: errorResponse) else {
                 return .unspecified
             }
-            switch errorData.code {
-            case Model404Code.appNotFound.rawValue: return .appNotFound
-            default: ()
+            if errorData.code == Model404Code.appNotFound.rawValue {
+                return .appNotFound
             }
             return .unspecified
         }

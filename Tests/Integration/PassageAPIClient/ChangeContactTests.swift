@@ -23,9 +23,11 @@ final class ChangeContactTests: XCTestCase {
     func testChangeEmailUnAuthed() async {
         do {
             let _ = try await PassageAuth.changeEmail(token: "", newEmail: "ricky.padilla+user02@passage.id")
-            XCTFail("passage.changeEmail should throw an error when no auth token set")
+            XCTFail("passage.changeEmail should throw unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.changeEmail should throw unauthorized error when no auth token set")
         }
     }
 
@@ -41,9 +43,11 @@ final class ChangeContactTests: XCTestCase {
     func testChangePhoneInvalid() async {
         do {
             let _ = try await PassageAuth.changePhone(token: authToken, newPhone: "5125874725")
-            XCTFail("passage.changePhone should throw an error when invalid phone is sent")
+            XCTFail("passage.changePhone should throw invalidRequest error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .invalidRequest)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.changePhone should throw invalidRequest error when no auth token set")
         }
     }
 
@@ -51,9 +55,11 @@ final class ChangeContactTests: XCTestCase {
     func testChangePhoneUnAuthed() async {
         do {
             let _ = try await PassageAuth.changePhone(token: "", newPhone: "+15125874725")
-            XCTFail("passage.changePhone should throw an error when no auth token set")
+            XCTFail("passage.changePhone should throw unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            // TODO: catch specific error
+            XCTFail("passage.changePhone should throw unauthorized error when no auth token set")
         }
     }
     

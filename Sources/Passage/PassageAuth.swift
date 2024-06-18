@@ -486,7 +486,7 @@ public class PassageAuth {
                 id: credentialId,
                 rawId: credentialId,
                 response: assertionResponse,
-                type: "public-key"
+                type: Constants.publicKeyValue
             )
             let finishRequest = LoginWebAuthnFinishRequest(
                 handshakeId: startResponse.handshake.id,
@@ -969,7 +969,7 @@ public class PassageAuth {
                 id: credentialId,
                 rawId: credentialId,
                 response: creationResponse,
-                type: "public-key"
+                type: Constants.publicKeyValue
                 )
             let finishRequest = AddDeviceFinishRequest(
                 handshakeId: startResponse.handshake.id,
@@ -1169,7 +1169,7 @@ public class PassageAuth {
                 id: credentialId,
                 rawId: credentialId,
                 response: creationResponse,
-                type: "public-key"
+                type: Constants.publicKeyValue
                 )
             let finishRequest = RegisterWebAuthnFinishRequest(
                 handshakeId: startResponse.handshake.id,
@@ -1255,7 +1255,7 @@ public class PassageAuth {
                 id: credentialId,
                 rawId: credentialId,
                 response: assertionResponse,
-                type: "public-key"
+                type: Constants.publicKeyValue
             )
             let request = LoginWebAuthnFinishRequest(
                 handshakeId: startResponse.handshake.id,
