@@ -14,6 +14,8 @@ public enum LoginWithPasskeyError: PassageError {
     case webauthnLoginFailed
     
     case unspecified
+    /// Thrown when a user with provided identifier does not exist.
+    case userDoesNotExist
     /// Thrown when the user is not active.
     case userNotActive
     
@@ -33,6 +35,9 @@ public enum LoginWithPasskeyError: PassageError {
             case Model401Code.webauthnLoginFailed.rawValue: return .webauthnLoginFailed
             case Model403Code.userNotActive.rawValue: return .userNotActive
             default: ()
+            }
+            if errorData.error == "user does not exist" {
+                return .userDoesNotExist
             }
             return .unspecified
         }

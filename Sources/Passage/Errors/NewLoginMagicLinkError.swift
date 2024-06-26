@@ -4,6 +4,8 @@ public enum NewLoginMagicLinkError: PassageError {
     
     case invalidIdentifier
     case unspecified
+    /// Thrown when a user with provided identifier does not exist.
+    case userDoesNotExist
     
     public static func convert(error: Error) -> NewLoginMagicLinkError {
         // Check if error is already proper
@@ -17,6 +19,9 @@ public enum NewLoginMagicLinkError: PassageError {
             }
             if errorData.code == Model400Code.request.rawValue {
                 return .invalidIdentifier
+            }
+            if errorData.error == "user does not exist" {
+                return .userDoesNotExist
             }
             return .unspecified
         }

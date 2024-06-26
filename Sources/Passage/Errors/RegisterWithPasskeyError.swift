@@ -12,6 +12,8 @@ public enum RegisterWithPasskeyError: PassageError {
     case webauthnLoginFailed
     
     case unspecified
+    /// Thrown when a user with provided identifier already exists.
+    case userAlreadyExists
     
     public static func convert(error: Error) -> RegisterWithPasskeyError {
         // Check if error is already proper
@@ -27,6 +29,9 @@ public enum RegisterWithPasskeyError: PassageError {
             case Model400Code.request.rawValue: return .invalidRequest
             case Model401Code.webauthnLoginFailed.rawValue: return .webauthnLoginFailed
             default: ()
+            }
+            if errorData.error == "user: already exists." {
+                return .userAlreadyExists
             }
             return .unspecified
         }

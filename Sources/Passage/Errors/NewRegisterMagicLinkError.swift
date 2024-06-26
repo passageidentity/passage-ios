@@ -4,6 +4,8 @@ public enum NewRegisterMagicLinkError: PassageError {
     
     case invalidIdentifier
     case unspecified
+    /// Thrown when a user with provided identifier already exists.
+    case userAlreadyExists
     
     public static func convert(error: Error) -> NewRegisterMagicLinkError {
         // Check if error is already proper
@@ -17,6 +19,9 @@ public enum NewRegisterMagicLinkError: PassageError {
             }
             if errorData.code == Model400Code.request.rawValue {
                 return .invalidIdentifier
+            }
+            if errorData.error == "user: already exists." {
+                return .userAlreadyExists
             }
             return .unspecified
         }
