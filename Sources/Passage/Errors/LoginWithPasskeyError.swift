@@ -34,10 +34,8 @@ public enum LoginWithPasskeyError: PassageError {
             case Model401Code.discoverableLoginFailed.rawValue: return .discoverableLoginFailed
             case Model401Code.webauthnLoginFailed.rawValue: return .webauthnLoginFailed
             case Model403Code.userNotActive.rawValue: return .userNotActive
+            case Model404Code.userNotFound.rawValue: return .userDoesNotExist
             default: ()
-            }
-            if errorData.error == "user does not exist" {
-                return .userDoesNotExist
             }
             return .unspecified
         }

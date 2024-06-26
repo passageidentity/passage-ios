@@ -26,13 +26,16 @@ public enum RegisterWithPasskeyError: PassageError {
                 return .unspecified
             }
             switch errorData.code {
-            case Model400Code.request.rawValue: return .invalidRequest
+            case Model400Code.request.rawValue:
+                if errorData.error == "user: already exists." {
+                    return .userAlreadyExists
+                } else {
+                    return .invalidRequest
+                }
             case Model401Code.webauthnLoginFailed.rawValue: return .webauthnLoginFailed
             default: ()
             }
-            if errorData.error == "user: already exists." {
-                return .userAlreadyExists
-            }
+            
             return .unspecified
         }
         // Handle authorization error

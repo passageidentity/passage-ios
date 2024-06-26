@@ -18,10 +18,11 @@ public enum NewRegisterMagicLinkError: PassageError {
                 return .unspecified
             }
             if errorData.code == Model400Code.request.rawValue {
-                return .invalidIdentifier
-            }
-            if errorData.error == "user: already exists." {
-                return .userAlreadyExists
+                if errorData.error == "user: already exists." {
+                    return .userAlreadyExists
+                } else {
+                    return .invalidIdentifier
+                }
             }
             return .unspecified
         }

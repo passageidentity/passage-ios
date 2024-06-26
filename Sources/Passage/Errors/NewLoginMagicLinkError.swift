@@ -17,11 +17,10 @@ public enum NewLoginMagicLinkError: PassageError {
             guard let (_, errorData) = PassageErrorData.getData(from: errorResponse) else {
                 return .unspecified
             }
-            if errorData.code == Model400Code.request.rawValue {
-                return .invalidIdentifier
-            }
-            if errorData.error == "user does not exist" {
-                return .userDoesNotExist
+            switch errorData.code {
+            case Model400Code.request.rawValue: return .invalidIdentifier
+            case Model404Code.userNotFound.rawValue: return .userDoesNotExist
+            default: ()
             }
             return .unspecified
         }
