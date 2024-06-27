@@ -5,91 +5,70 @@ final class ListDevicesTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        let passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+        // NOTE: These tests use static PassageAuth methods instead the passage instance.
+        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
+        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
     
     func testListDevices() async {
-        // make sure we have an authToken.
-        XCTAssertNotEqual(authToken, "")
-        
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.listDevices(token: authToken)
-            XCTAssertEqual(response.count, 1)
-            XCTAssertEqual(response[0].userId, currentUser.id)
+            let devices = try await PassageAuth.listDevices(token: authToken)
+            XCTAssertEqual(devices.count, 1)
+            XCTAssertEqual(devices[0].userId, currentUser.id)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     
     func testListDevicesUnAuthed() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared.listDevices(token: "")
-            XCTAssertTrue(false)
+            let _ = try await PassageAuth.listDevices(token: "")
+            XCTFail("passage.listDevices should throw an unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            XCTAssertTrue(error is PassageAPIError)
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .unauthorized:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            XCTFail("passage.listDevices should throw an unauthorized error when no auth token set")
         }
     }
     
     @available(iOS 16.0, *)
     func testAddDeviceStart() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared.addDeviceStart(token: authToken)
-            // ensure we got a response. Pretty much all we can test for now.
-            // If the response changes it should throw a swiftdecode error, which would fail the test
-            XCTAssertTrue(true)
+            let _ = try await PassageAuth.addDevice(token: authToken)
+            XCTFail("passage.addDevice should throw an authorizationFailed error in this test environment")
+        } catch let error as AddDeviceError {
+            XCTAssertEqual(error, .authorizationFailed)
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("passage.addDevice should throw an authorizationFailed error in this test environment")
         }
     }
 
     @available(iOS 16.0, *)
     func testAddDeviceStartUnAuthed() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared.addDeviceStart(token: "")
-            XCTAssertTrue(false)
+            let _ = try await PassageAuth.addDevice(token: "")
+            XCTFail("passage.addDevice should throw an unauthorized error")
+        } catch let error as AddDeviceError {
+            XCTAssertEqual(error, .unauthorized)
         } catch {
-            XCTAssertTrue(error is PassageAPIError)
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .unauthorized:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            XCTFail("passage.addDevice should throw an unauthorized error")
         }
     }
 
-    @available(iOS 16.0, *)
     func testUpdateDevice() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let listDevicesResponse = try await PassageAPIClient.shared.listDevices(token: authToken)
-            let _ = try await PassageAPIClient.shared
-                .updateDevice(token: authToken, deviceId: listDevicesResponse[0].id, friendlyName: "integration test device" )
-            // ensure we got a response. Pretty much all we can test for now.
-            // If the response changes it should throw a swiftdecode error, which would fail the test
-            XCTAssertTrue(true)
+            let date = Date().timeIntervalSince1970
+            let newName = "device \(date)"
+            let device = try await PassageAuth.editDevice(
+                token: authToken,
+                deviceId: existingDeviceId,
+                friendlyName: newName
+            )
+            XCTAssertEqual(device.friendlyName, newName)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 

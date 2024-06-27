@@ -3,59 +3,71 @@ import XCTest
 
 final class MagicLinkTests: XCTestCase {
     
+    var passage: PassageAuth!
+    
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = magicLinkAppId
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        passage = PassageAuth(appId: magicLinkAppId)
+        passage.overrideApiUrl(with: apiUrl)
     }
     
     @available(iOS 15.0, *)
-    func testSendRegisterMagicLink() async {
+    func testSendRegisterMagicLinkValid() async {
         do {
-            PassageAPIClient.shared.appId = magicLinkAppId
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
-            let response = try await PassageAPIClient.shared
-                .sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
-            do {
-                _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
-                XCTAssertTrue(false) // the status should error as it is unactivated
-            } catch {
-                XCTAssertTrue(true)
-            }
+            let _ = try await passage.newRegisterMagicLink(identifier: identifier)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     
-    func testSendLoginMagicLink() async {
+    func testSendRegisterMagicLinkInvalid() async {
         do {
-            PassageAPIClient.shared.appId = magicLinkAppId
-            let response = try await PassageAPIClient.shared
-                .sendLoginMagicLink(identifier: magicLinkRegisteredUserEmail, path: nil, language: nil)
-            do {
-                _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
-                XCTAssertTrue(false) // the status should error as it is unactivated
-            } catch {
-                XCTAssertTrue(true)
-            }
+            let _ = try await passage.newRegisterMagicLink(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newRegisterMagicLink should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewRegisterMagicLinkError {
+            XCTAssertEqual(error, .invalidIdentifier)
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("passage.newRegisterMagicLink should throw invalidIdentifier error when given an unactived magic link id")
+        }
+    }
+    
+    func testSendLoginMagicLinkValid() async {
+        do {
+            let _ = try await passage.newLoginMagicLink(identifier: magicLinkRegisteredUserEmail)
+        } catch {
+            XCTFail("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+    
+    func testSendLoginMagicLinkInvalid() async {
+        do {
+            let _ = try await passage.newLoginMagicLink(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newLoginMagicLink should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewLoginMagicLinkError {
+            XCTAssertEqual(error, .invalidIdentifier)
+        } catch {
+            XCTFail("passage.newLoginMagicLink should throw invalidIdentifier error when given an unactived magic link id")
+        }
+    }
+    
+    func testGetMagicLinkStatus() async {
+        do {
+            let _ = try await passage.getMagicLinkStatus(id: magicLinkUnactivatedId)
+            XCTFail("passage.getMagicLinkStatus should throw magicLinkNotFound error when given an unactived magic link id")
+        } catch let error as GetMagicLinkStatusError {
+            XCTAssertEqual(error, .magicLinkNotFound)
+        } catch {
+            XCTFail("passage.getMagicLinkStatus should throw magicLinkNotFound error when given an unactived magic link id")
         }
     }
 
-    func testActivateMagicLink() async {
+    func testActivateMagicLinkValid() async {
         do {
-            PassageAPIClient.shared.appId = magicLinkAppId
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
-            let response = try await PassageAPIClient.shared
-                .sendRegisterMagicLink(identifier: identifier, path: nil, language: nil)
+            let response = try await passage.newRegisterMagicLink(identifier: identifier)
             var magicLink: String? = nil
             let mailosaurApiClient = MailosaurAPIClient()
             for _ in 1...checkEmailTryCount {
@@ -67,19 +79,24 @@ final class MagicLinkTests: XCTestCase {
             }
             XCTAssertNotNil(magicLink)
             guard let magicLink else { return }
-            let token = try await PassageAPIClient.shared.activateMagicLink(magicLink: magicLink)
-            XCTAssertNotNil(token)
-            do {
-                _ = try await PassageAPIClient.shared.magicLinkStatus(id: response.id)
-                XCTAssertTrue(true)
-            } catch {
-                XCTAssertTrue(false)
-            }
+            // Should be able to exchange magic link for auth result
+            let _ = try await passage.magicLinkActivate(userMagicLink: magicLink)
+            // After activation, getMagicLinkStatus should return auth result, too.
+            let _ = try await passage.getMagicLinkStatus(id: response.id)
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+    
+    func testActivateMagicLinkInvalid() async {
+        do {
+            let _ = try await passage.magicLinkActivate(userMagicLink: "INVALID_MAGIC_LINK")
+            XCTFail("passage.magicLinkActivate should throw magicLinkNotFound error when given an unactived magic link id")
+        } catch let error as MagicLinkActivateError {
+            XCTAssertEqual(error, .magicLinkNotFound)
+        } catch {
+            XCTFail("passage.magicLinkActivate should throw magicLinkNotFound error when given an unactived magic link id")
         }
     }
 
 }
-

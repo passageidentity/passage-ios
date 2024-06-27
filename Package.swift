@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/Flight-School/AnyCodable", .upToNextMajor(from: "0.6.1")),
         .package(url: "https://github.com/jrendel/SwiftKeychainWrapper", from: "4.0.1")
     ],
     targets: [
@@ -22,10 +22,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "Passage",
-            dependencies: ["SwiftKeychainWrapper"], resources: [.copy("Resources/settings.json")]),
-        .testTarget(
-            name: "PassageTests",
-            dependencies: ["Passage"]),
+            dependencies: ["AnyCodable", "SwiftKeychainWrapper"], resources: [.copy("Resources/settings.json")]),
         .testTarget(
             name: "Integration",
             dependencies: ["Passage"]),

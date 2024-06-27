@@ -5,54 +5,39 @@ final class CurrentUserTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        let passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
+        // NOTE: These tests use static PassageAuth methods instead the passage instance.
+        // * The passage instance utilizes keychain for token management, which is not supported in this kind of test environment.
+        // * We still have to create this instance to override appId and ApiUrl (this will change in next major version).
     }
 
     
     func testCurrentUser() async {
-        // make sure we have an authToken.
-        XCTAssertNotEqual(authToken, "")
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let response = try await PassageAPIClient.shared.currentUser(token: authToken)
-            XCTAssertEqual(response.id, currentUser.id)
-            XCTAssertEqual(response.createdAt, currentUser.createdAt)
-            XCTAssertEqual(response.status, currentUser.status)
-            XCTAssertEqual(response.email, currentUser.email)
-            XCTAssertEqual(response.emailVerified, currentUser.emailVerified)
-            XCTAssertEqual(response.phone, currentUser.phone)
-            XCTAssertEqual(response.phoneVerified, currentUser.phoneVerified)
-            XCTAssertEqual(response.webauthn, currentUser.webauthn)
-            XCTAssertNil(response.userMetadata)
+            let user = try await PassageAuth.getCurrentUser(token: authToken)
+            XCTAssertEqual(user.id, currentUser.id)
+            XCTAssertEqual(user.createdAt, currentUser.createdAt)
+            XCTAssertEqual(user.status, currentUser.status)
+            XCTAssertEqual(user.email, currentUser.email)
+            XCTAssertEqual(user.emailVerified, currentUser.emailVerified)
+            XCTAssertEqual(user.phone, currentUser.phone)
+            XCTAssertEqual(user.phoneVerified, currentUser.phoneVerified)
+            XCTAssertEqual(user.webauthn, currentUser.webauthn)
+            XCTAssertNil(user.userMetadata)
         } catch {
-            // fail the test if we catch an error
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 
     func testCurrentUserNotAuthorized() async {
         do {
-            PassageAPIClient.shared.appId = appInfoValid.id
-            let _ = try await PassageAPIClient.shared.currentUser(token: "")
-            // fail if we didn't get an error
-            XCTAssertTrue(false)
-        }
-        catch {
-            XCTAssertTrue(error is PassageAPIError)
-            
-            if let thrownError = error as? PassageAPIError {
-                switch thrownError {
-                    case .unauthorized:
-                        XCTAssertTrue(true)
-                default:
-                    XCTAssertFalse(true)
-                }
-            }
+            let _ = try await PassageAuth.getCurrentUser(token: "")
+            XCTFail("passage.getCurrentUser should throw an unauthorized error when no auth token set")
+        } catch let error as UserError {
+            XCTAssertEqual(error, .unauthorized)
+        } catch {
+            XCTFail("passage.getCurrentUser should throw an unauthorized error when no auth token set")
         }
     }
 

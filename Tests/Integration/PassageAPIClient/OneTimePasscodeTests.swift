@@ -3,48 +3,59 @@ import XCTest
 
 final class OneTimePasscodeTests: XCTestCase {
     
+    var passage: PassageAuth!
+    
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = otpAppInfoValid.id
+        passage = PassageAuth(appId: otpAppId)
+        passage.overrideApiUrl(with: apiUrl)
     }
     
-    override func tearDown() {
-        super.tearDown()
-    }
-    
-    @available(iOS 15.0, *)
-    func testSendRegisterOneTimePasscode() async {
+    func testSendRegisterOneTimePasscodeValid() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@passage.id"
-            let _ = try await PassageAPIClient.shared
-                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
-            XCTAssertTrue(true)
+            let _ = try await passage.newRegisterOneTimePasscode(identifier: identifier)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
     
-    func testSendLoginOneTimePasscode() async {
+    func testSendRegisterOneTimePasscodeInvalid() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
-            let _ = try await PassageAPIClient.shared
-                .sendLoginOneTimePasscode(identifier: otpRegisteredUser.email ?? "", language: nil)
-            XCTAssertTrue(true)
+            let _ = try await passage.newRegisterOneTimePasscode(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newRegisterOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewRegisterOneTimePasscodeError {
+            XCTAssertEqual(error, .invalidIdentifier)
         } catch {
-            XCTAssertTrue(false)
+            XCTFail("passage.newRegisterOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        }
+    }
+    
+    func testSendLoginOneTimePasscodeValid() async {
+        do {
+            let _ = try await passage.newLoginOneTimePasscode(identifier: otpRegisteredEmail)
+        } catch {
+            XCTFail("Unexpected error: \(error.localizedDescription)")
+        }
+    }
+    
+    func testSendLoginOneTimePasscodeInvalid() async {
+        do {
+            let _ = try await passage.newLoginOneTimePasscode(identifier: "INVALID_IDENTIFIER")
+            XCTFail("passage.newLoginOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
+        } catch let error as NewLoginOneTimePasscodeError {
+            XCTAssertEqual(error, .invalidIdentifier)
+        } catch {
+            XCTFail("passage.newLoginOneTimePasscode should throw invalidIdentifier error when given an unactived magic link id")
         }
     }
 
     func testActivateOneTimePasscode() async {
         do {
-            PassageAPIClient.shared.appId = otpAppInfoValid.id
             let date = Date().timeIntervalSince1970
             let identifier = "authentigator+\(date)@\(MailosaurAPIClient.serverId).mailosaur.net"
-            let response = try await PassageAPIClient.shared
-                .sendRegisterOneTimePasscode(identifier: identifier, language: nil)
+            let otp = try await passage.newRegisterOneTimePasscode(identifier: identifier)
             
             var oneTimePasscode: String? = nil
             let mailosaurApiClient = MailosaurAPIClient()
@@ -57,11 +68,9 @@ final class OneTimePasscodeTests: XCTestCase {
             }
             XCTAssertNotNil(oneTimePasscode)
             guard let oneTimePasscode else { return }
-            let token = try await PassageAPIClient.shared.activateOneTimePasscode(otp: oneTimePasscode, otpId: response.id)
-            XCTAssertNotNil(token)
+            let _ = try await passage.oneTimePasscodeActivate(otp: oneTimePasscode, otpId: otp.id)
         } catch {
-            print(error)
-            XCTAssertTrue(false)
+            XCTFail("Unexpected error: \(error.localizedDescription)")
         }
     }
 

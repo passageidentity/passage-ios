@@ -11,11 +11,13 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
 
     static var shared: LoginAuthorizationControllerProtocol = LoginAuthorizationController()
     
-    func login(from response: WebauthnLoginStartResponse) async throws -> ASAuthorizationPublicKeyCredentialAssertion? {
+    func login(from response: LoginWebAuthnStartResponse) async throws -> ASAuthorizationPublicKeyCredentialAssertion? {
         PassageAutofillAuthorizationController.shared.cancel()
-        let rpId = response.handshake.challenge.publicKey.rpId
         let challenge = response.handshake.challenge.publicKey.challenge
-        guard let decodedChallenge = challenge.decodeBase64Url() else {
+        guard
+            let rpId = response.handshake.challenge.publicKey.rpId,
+            let decodedChallenge = challenge.decodeBase64Url()
+        else {
             return nil
         }
         // Handle platform request
@@ -80,34 +82,13 @@ class LoginAuthorizationController : NSObject, ASAuthorizationControllerDelegate
             credentialAssertionThrowingContinuation?.resume(returning: credentialAssertion)
             credentialAssertionThrowingContinuation = nil
         default:
-            credentialAssertionThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknownAuthorizationType)
+            credentialAssertionThrowingContinuation?.resume(throwing: ASAuthorizationError.init(.invalidResponse))
         }
     }
-    
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        
-        // TODO: Implement better error handling below
-        guard let authorizationError = error as? ASAuthorizationError else {
-            credentialAssertionThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknown)
-            credentialAssertionThrowingContinuation = nil
-            return
-        }
-
-
-        if authorizationError.code == .canceled {
-            // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
-            // This is a good time to show a traditional login form, or ask the user to create an account.
-            credentialAssertionThrowingContinuation?.resume(throwing: PassageASAuthorizationError.canceled)
-            credentialAssertionThrowingContinuation = nil
-        } else {
-            // Another ASAuthorization error.
-            // Note: The userInfo dictionary contains useful information.
-            credentialAssertionThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknownAuthorizationType)
-            credentialAssertionThrowingContinuation = nil
-        }
+        credentialAssertionThrowingContinuation?.resume(throwing: error)
+        credentialAssertionThrowingContinuation = nil
     }
-    
-
     
 }

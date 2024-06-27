@@ -3,23 +3,18 @@ import XCTest
 
 final class SocialAuthControllerTests: XCTestCase {
     
+    var passage: PassageAuth!
+    
     override func setUp() {
         super.setUp()
-        PassageSettings.shared.apiUrl = apiUrl
-        PassageSettings.shared.appId = appInfoValid.id
-        PassageAPIClient.shared.appId = appInfoValid.id
-    }
-    
-    override func tearDown() {
-        super.tearDown()
+        passage = PassageAuth(appId: appInfoValid.id)
+        passage.overrideApiUrl(with: apiUrl)
     }
     
     func testGetSocialAuthQueryParams() async {
         let window = await UIWindow()
         let socialAuthController = PassageSocialAuthController(window: window)
-        guard let appId = PassageSettings.shared.appId else {
-            return XCTFail("App id not found")
-        }
+        let appId = appInfoValid.id
         
         // Verifier should be an empty string before calling getSocialAuthQueryParams
         XCTAssert(socialAuthController.verifier.isEmpty)
@@ -43,22 +38,30 @@ final class SocialAuthControllerTests: XCTestCase {
     }
     
     func testGetAuthUrl() async {
+        let window = await UIWindow()
+        let socialAuthController = PassageSocialAuthController(window: window)
+        let connection = PassageSocialConnection.github
+        let appId = appInfoValid.id
+        let queryParams = socialAuthController.getSocialAuthQueryParams(
+            appId: appId,
+            connection: connection
+        )
+        let expectedAuthUrl = URL(string: "\(apiUrl)/apps/\(appId)/social/authorize?\(queryParams)")
+        let authUrl = PassageAuth.getSocialAuthUrl(queryParams: queryParams)
+        XCTAssertNotNil(authUrl)
+        XCTAssertEqual(expectedAuthUrl, authUrl)
+    }
+    
+    func testAppleAuthorizationFailure() async {
         do {
+            // SIWA has not been configured for this iOS app, so iOS will throw an authorization error.
             let window = await UIWindow()
-            let socialAuthController = PassageSocialAuthController(window: window)
-            let connection = PassageSocialConnection.github
-            guard let appId = PassageSettings.shared.appId else {
-                return XCTFail("App id not found")
-            }
-            let queryParams = socialAuthController.getSocialAuthQueryParams(
-                appId: appId,
-                connection: connection
-            )
-            let expectedAuthUrl = URL(string: "\(apiUrl)/v1/apps/\(appId)/social/authorize?\(queryParams)")
-            let authUrl = try PassageAPIClient.shared.getAuthUrl(queryParams: queryParams)
-            XCTAssertEqual(expectedAuthUrl, authUrl)
+            let _ = try await passage.authorize(with: .apple, in: window)
+            XCTFail("passage.appInfo should throw an authorizationFailed error.")
+        } catch let error as SocialAuthError {
+            XCTAssertEqual(error, .authorizationFailed)
         } catch {
-            XCTFail("Failed to get auth url.")
+            XCTFail("passage.appInfo should throw an authorizationFailed error.")
         }
     }
     

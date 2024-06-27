@@ -14,14 +14,19 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
     static var shared: RegistrationAuthorizationControllerProtocol = RegistrationAuthorizationController()
     
     func register(
-        from response: WebauthnRegisterStartResponse,
+        from response: RegisterWebAuthnStartResponse,
         identifier: String,
         includeSecurityKeyOption: Bool = false
     ) async throws -> ASAuthorizationPublicKeyCredentialRegistration? {
         PassageAutofillAuthorizationController.shared.cancel()
-        let rpId = response.handshake.challenge.publicKey.rp.id
-        let challenge = response.handshake.challenge.publicKey.challenge
-        let userId = response.user.id
+        guard
+            let publicKey = response.handshake.challenge.publicKey,
+            let challenge = publicKey.challenge,
+            let rpId = publicKey.rp?.id,
+            let userId = response.user?.id
+        else {
+            return nil
+        }
         guard let decodedChallenge = challenge.decodeBase64Url() else {
             return nil
         }
@@ -77,32 +82,13 @@ class RegistrationAuthorizationController : NSObject, ASAuthorizationControllerD
             credentialRegistrationCheckedThrowingContinuation?.resume(returning: credentialRegistration)
             credentialRegistrationCheckedThrowingContinuation = nil
         default:
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.credentialRegistration)
+            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: ASAuthorizationError.init(.invalidResponse))
         }
     }
     
-    
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        
-        // TODO: Implement better error handling below
-        guard let authorizationError = error as? ASAuthorizationError else {
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknown)
-            credentialRegistrationCheckedThrowingContinuation = nil
-            return
-        }
-
-
-        if authorizationError.code == .canceled {
-            // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
-            // This is a good time to show a traditional login form, or ask the user to create an account.
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.canceled)
-            credentialRegistrationCheckedThrowingContinuation = nil
-        } else {
-            // Another ASAuthorization error.
-            // Note: The userInfo dictionary contains useful information.
-            credentialRegistrationCheckedThrowingContinuation?.resume(throwing: PassageASAuthorizationError.unknownAuthorizationType)
-            credentialRegistrationCheckedThrowingContinuation = nil
-        }
+        credentialRegistrationCheckedThrowingContinuation?.resume(throwing: error)
+        credentialRegistrationCheckedThrowingContinuation = nil
     }
     
 
