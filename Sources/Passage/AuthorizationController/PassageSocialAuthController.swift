@@ -74,7 +74,7 @@ final internal class PassageSocialAuthController:
         return "passage-\(appId)"
     }
     
-    private static func getRandomString(length: Int) -> String {
+    internal static func getRandomString(length: Int) -> String {
         let characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         var randomString = ""
         for _ in 0..<length {
@@ -88,7 +88,7 @@ final internal class PassageSocialAuthController:
         return randomString
     }
     
-    private static func sha256Hash(_ str: String) -> String {
+    internal static func sha256Hash(_ str: String) -> String {
         let data = Data(str.utf8)
         var hash = [UInt8](repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
         data.withUnsafeBytes {

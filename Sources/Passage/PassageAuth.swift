@@ -1188,6 +1188,28 @@ public class PassageAuth {
         }
     }
     
+    public func hostedAuth(in window: UIWindow, clientSecret: String) async throws -> AuthResult {
+        do {
+            let appInfo = try await appInfo()
+            let hostedAuthController = try HostedAuthorizationController(
+                appInfo: appInfo,
+                clientSecret: clientSecret
+            )
+            // Need to run on UI Thread?
+            let (authCode, state) = try await hostedAuthController.start(in: window)
+            let authResult = try await hostedAuthController
+                .finish(
+                    authCode: authCode,
+                    state: state
+                )
+            setTokensFromAuthResult(authResult: authResult)
+            return authResult
+        } catch {
+            print(error)
+            throw SocialAuthError.convert(error: error)
+        }
+    }
+    
     /// Private method to instantiate a logger and log the errors we catch
     ///
     /// - Parameters:
