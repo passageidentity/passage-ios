@@ -26,6 +26,8 @@ public protocol PassageTokenStore {
     /// a valid refresh token
     var refreshToken: String? { get set }
     
+    var idToken: String? { get set }
+    
     /// Set the auth token, refresh token or both from an ``AuthResult``
     /// - Parameter authResult: A ``AuthResult`` returned from a successful login or registration
     /// - Returns: Void
@@ -78,6 +80,19 @@ public class PassageStore : PassageTokenStore {
         }
     }
     
+    public var idToken: String? {
+        get {
+            return KeychainWrapper.standard[.idTokenKey]
+        }
+        set {
+            if newValue == nil {
+                KeychainWrapper.standard.removeObject(forKey: "passageIdToken")
+            } else {
+                KeychainWrapper.standard[.idTokenKey] = newValue
+            }
+        }
+    }
+    
     private init() {
         
     }
@@ -95,6 +110,7 @@ public class PassageStore : PassageTokenStore {
     public func clearTokens() {
         self.authToken = nil
         self.refreshToken = nil
+        self.idToken = nil
     }
     
 
@@ -107,4 +123,6 @@ extension KeychainWrapper.Key {
     static let authTokenKey: KeychainWrapper.Key = "passageAuthToken"
     /// Custom refresh token key
     static let refreshTokenKey: KeychainWrapper.Key = "passageRefreshToken"
+    /// Custom id token key
+    static let idTokenKey: KeychainWrapper.Key = "passageIdToken"
 }

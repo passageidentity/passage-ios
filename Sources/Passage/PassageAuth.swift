@@ -1191,19 +1191,32 @@ public class PassageAuth {
     public func hostedAuth(in window: UIWindow, clientSecret: String) async throws -> AuthResult {
         do {
             let appInfo = try await appInfo()
-            let hostedAuthController = try HostedAuthorizationController(
-                appInfo: appInfo,
-                clientSecret: clientSecret
-            )
+            let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
             // Need to run on UI Thread?
             let (authCode, state) = try await hostedAuthController.start(in: window)
-            let authResult = try await hostedAuthController
+            let (authResult, idToken) = try await hostedAuthController
                 .finish(
                     authCode: authCode,
-                    state: state
+                    state: state,
+                    clientSecret: clientSecret
                 )
             setTokensFromAuthResult(authResult: authResult)
+            tokenStore.idToken = idToken
             return authResult
+        } catch {
+            print(error)
+            throw SocialAuthError.convert(error: error)
+        }
+    }
+    
+    public func hostedLogout(in window: UIWindow) async throws {
+        do {
+            let appInfo = try await appInfo()
+            let idToken = tokenStore.idToken ?? ""
+            let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
+            // Need to run on UI Thread?
+            try await hostedAuthController.logout(in: window, idToken: idToken)
+            tokenStore.clearTokens()
         } catch {
             print(error)
             throw SocialAuthError.convert(error: error)

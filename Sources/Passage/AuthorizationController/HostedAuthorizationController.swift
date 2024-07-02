@@ -14,19 +14,21 @@ final internal class HostedAuthorizationController:
     
     // MARK: - INSTANCE PROPERTIES
     private var appInfo: AppInfo
-    private var clientSecret: String
     private var bundleId: String
     private var verifier = ""
     private var safariViewController: SFSafariViewController?
     private var hostedContinuation: CheckedContinuation<(String, String), Error>?
+    private var hostedLogoutContinuation: CheckedContinuation<Void, Error>?
     private lazy var callbackUrlString: String = {
         return "\(appInfo.authOrigin)/ios/\(bundleId)/callback"
     }()
+    private lazy var logoutUrlString: String = {
+        return "\(appInfo.authOrigin)/ios/\(bundleId)/logout"
+    }()
     
     // MARK: - INITIALIZERS
-    internal init(appInfo: AppInfo, clientSecret: String) throws {
+    internal init(appInfo: AppInfo) throws {
         self.appInfo = appInfo
-        self.clientSecret = clientSecret
         guard let bundleId = Bundle.main.bundleIdentifier else {
             throw HostedAuthorizationError.cannotAccessAppBundleId
         }
@@ -52,8 +54,16 @@ final internal class HostedAuthorizationController:
         }
     }
     
-    internal func finish(authCode: String, state: String) async throws -> AuthResult {
-        let url = try getHostedFinishUrl(authCode: authCode, state: state)
+    internal func finish(
+        authCode: String,
+        state: String,
+        clientSecret: String
+    ) async throws -> (AuthResult, String) {
+        let url = try getHostedFinishUrl(
+            authCode: authCode,
+            state: state,
+            clientSecret: clientSecret
+        )
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         do {
@@ -68,7 +78,7 @@ final internal class HostedAuthorizationController:
                 refreshTokenExpiration: nil // TODO: Figure out what to put here?
             )
             verifier = ""
-            return authResult
+            return (authResult, result.id_token)
         } catch {
             // TODO: Handle error cases here.
             throw HostedAuthorizationError.unspecified
@@ -78,15 +88,14 @@ final internal class HostedAuthorizationController:
     private func getHostedStartUrl() throws -> URL {
         let baseUrl = "\(appInfo.authOrigin)/authorize?"
         // TODO: Move these out of PassageSocialAuthController
-        let state = PassageSocialAuthController.getRandomString(length: 32)
         let randomString = PassageSocialAuthController.getRandomString(length: 32)
-        verifier = randomString
+        verifier = PassageSocialAuthController.getRandomString(length: 32)
         let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
         let codeChallengeMethod = "S256"
         var urlComponents = URLComponents(string: baseUrl)
         urlComponents?.queryItems = [
             URLQueryItem(name: "redirect_uri", value: callbackUrlString),
-            URLQueryItem(name: "state", value: state),
+            URLQueryItem(name: "state", value: verifier),
             URLQueryItem(name: "code_challenge", value: codeChallenge),
             URLQueryItem(name: "code_challenge_method", value: codeChallengeMethod),
             URLQueryItem(name: "client_id", value: appInfo.id),
@@ -101,7 +110,8 @@ final internal class HostedAuthorizationController:
     
     private func getHostedFinishUrl(
         authCode: String,
-        state: String
+        state: String,
+        clientSecret: String
     ) throws -> URL {
         let urlString = "\(appInfo.authOrigin)/token"
         guard var urlComponents = URLComponents(string: urlString) else {
@@ -121,6 +131,43 @@ final internal class HostedAuthorizationController:
         return url
     }
     
+    @MainActor
+    internal func logout(in window: UIWindow, idToken: String) async throws {
+        let url = try getLogoutUrl(idToken: idToken)
+        safariViewController = SFSafariViewController(url: url)
+        guard
+            let safariViewController,
+            let appViewController = window.rootViewController
+        else {
+            throw HostedAuthorizationError.cannotAccessAppRootViewController
+        }
+        safariViewController.delegate = self
+        safariViewController.modalPresentationStyle = .pageSheet
+        appViewController.present(safariViewController, animated: true)
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
+            self?.hostedLogoutContinuation = continuation
+            self?.verifier = ""
+        }
+    }
+    
+    private func getLogoutUrl(idToken: String) throws -> URL {
+        let urlString = "\(appInfo.authOrigin)/logout"
+        guard var urlComponents = URLComponents(string: urlString) else {
+            throw HostedAuthorizationError.invalidHostedAuthUrl
+        }
+        verifier = PassageSocialAuthController.getRandomString(length: 32)
+        urlComponents.queryItems = [
+            URLQueryItem(name: "id_token_hint", value: idToken),
+            URLQueryItem(name: "client_id", value: appInfo.id),
+            URLQueryItem(name: "state", value: verifier),
+            URLQueryItem(name: "post_logout_redirect_uri", value: logoutUrlString)
+        ]
+        guard let url = urlComponents.url else {
+            throw HostedAuthorizationError.invalidHostedAuthUrl
+        }
+        return url
+    }
+    
     // MARK: - SFSafariViewControllerDelegate METHODS
     internal func safariViewController(
         _ controller: SFSafariViewController,
@@ -130,9 +177,13 @@ final internal class HostedAuthorizationController:
             URL.absoluteString.contains(callbackUrlString),
             let components = NSURLComponents(url: URL, resolvingAgainstBaseURL: true),
             let code = components.queryItems?.filter({$0.name == "code"}).first?.value,
-            let state = components.queryItems?.filter({$0.name == "state"}).first?.value
+            let state = components.queryItems?.filter({$0.name == "state"}).first?.value,
+            state == verifier // TODO: Throw specific error for bad state.
         {
             hostedContinuation?.resume(returning: (code, state))
+            controller.dismiss(animated: true, completion: nil)
+        } else if URL.absoluteString.contains(logoutUrlString) {
+            hostedLogoutContinuation?.resume(returning: ())
             controller.dismiss(animated: true, completion: nil)
         }
         // TODO: How to handle error case?
