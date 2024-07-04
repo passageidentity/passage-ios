@@ -1188,14 +1188,19 @@ public class PassageAuth {
         }
     }
     
-    public func hostedAuth(in window: UIWindow, clientSecret: String) async throws -> AuthResult {
+    // TODO: Add documentation.
+    public func hostedAuth(clientSecret: String) async throws -> AuthResult {
         do {
             let appInfo = try await appInfo()
             let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
-            // Need to run on UI Thread?
-            let (authCode, state) = try await hostedAuthController.start(in: window)
+            let (authCode, state): (String, String)
+            if #available(iOS 17.4, *) {
+                (authCode, state) = try await hostedAuthController.startWebAuth()
+            } else {
+                (authCode, state) = try await hostedAuthController.startWebAuthSafari()
+            }
             let (authResult, idToken) = try await hostedAuthController
-                .finish(
+                .finishWebAuth(
                     authCode: authCode,
                     state: state,
                     clientSecret: clientSecret
@@ -1209,13 +1214,17 @@ public class PassageAuth {
         }
     }
     
-    public func hostedLogout(in window: UIWindow) async throws {
+    // TODO: Add documentation.
+    public func hostedLogout() async throws {
         do {
             let appInfo = try await appInfo()
             let idToken = tokenStore.idToken ?? ""
             let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
-            // Need to run on UI Thread?
-            try await hostedAuthController.logout(in: window, idToken: idToken)
+            if #available(iOS 17.4, *) {
+                try await hostedAuthController.logout(idToken: idToken)
+            } else {
+                try await hostedAuthController.logoutSafari(idToken: idToken)
+            }
             tokenStore.clearTokens()
         } catch {
             print(error)
