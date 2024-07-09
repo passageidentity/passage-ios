@@ -80,8 +80,9 @@ final internal class HostedAuthorizationController:
                 }
                 guard
                     let self,
+                    let callbackURL,
                     let (code, state): (String, String) = try? self
-                        .handleCallbackUrl(callbackUrl: url)
+                        .handleCallbackUrl(callbackUrl: callbackURL)
                 else {
                     continuation.resume(throwing: HostedAuthorizationError.unspecified) // TODO: Better error
                     return
