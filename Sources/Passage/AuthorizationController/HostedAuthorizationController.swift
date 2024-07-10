@@ -1,15 +1,6 @@
 import AuthenticationServices
 import SafariServices
 
-fileprivate struct HostedAuthResult: Codable {
-    let access_token: String
-    let id_token: String
-    let state: String
-    let token_type: String
-    let expires_in: Int
-    let refresh_token: String?
-}
-
 final internal class HostedAuthorizationController:
     NSObject,
     ASWebAuthenticationPresentationContextProviding,
@@ -132,13 +123,13 @@ final internal class HostedAuthorizationController:
             throw HostedAuthorizationError.invalidHostedTokenUrl
         }
         let authResult = AuthResult(
-            authToken: result.access_token,
-            redirectUrl: "/",
-            refreshToken: result.refresh_token,
+            authToken: result.accessToken,
+            redirectUrl: "",
+            refreshToken: result.refreshToken,
             refreshTokenExpiration: nil
         )
         verifier = ""
-        return (authResult, result.id_token)
+        return (authResult, result.idToken)
     }
     
     @MainActor
@@ -202,10 +193,9 @@ final internal class HostedAuthorizationController:
 
     private func getHostedStartUrl() throws -> URL {
         let baseUrl = "\(appInfo.authOrigin)/authorize?"
-        // TODO: Move these out of PassageSocialAuthController
-        let randomString = PassageSocialAuthController.getRandomString(length: 32)
-        verifier = PassageSocialAuthController.getRandomString(length: 32)
-        let codeChallenge = PassageSocialAuthController.sha256Hash(randomString)
+        let randomString = WebAuthenticationUtils.getRandomString(length: 32)
+        verifier = WebAuthenticationUtils.getRandomString(length: 32)
+        let codeChallenge = WebAuthenticationUtils.sha256Hash(randomString)
         let codeChallengeMethod = "S256"
         var urlComponents = URLComponents(string: baseUrl)
         urlComponents?.queryItems = [
@@ -251,7 +241,7 @@ final internal class HostedAuthorizationController:
         guard var urlComponents = URLComponents(string: urlString) else {
             throw HostedAuthorizationError.invalidHostedLogoutUrl
         }
-        verifier = PassageSocialAuthController.getRandomString(length: 32)
+        verifier = WebAuthenticationUtils.getRandomString(length: 32)
         urlComponents.queryItems = [
             URLQueryItem(name: "id_token_hint", value: idToken),
             URLQueryItem(name: "client_id", value: appInfo.id),
@@ -285,18 +275,18 @@ final internal class HostedAuthorizationController:
     
     internal func safariViewController(
         _ controller: SFSafariViewController,
-        initialLoadDidRedirectTo URL: URL
+        initialLoadDidRedirectTo url: URL
     ) {
-        if URL.absoluteString.contains(callbackUrlString) {
+        if url.absoluteString.contains(callbackUrlString) {
             do {
-                let (code, state) = try handleCallbackUrl(callbackUrl: URL)
+                let (code, state) = try handleCallbackUrl(callbackUrl: url)
                 hostedContinuation?.resume(returning: (code, state))
             } catch {
                 hostedLogoutContinuation?
                     .resume(throwing: HostedAuthorizationError.invalidHostedLogoutUrl)
             }
             controller.dismiss(animated: true, completion: nil)
-        } else if URL.absoluteString.contains(logoutUrlString) {
+        } else if url.absoluteString.contains(logoutUrlString) {
             hostedLogoutContinuation?.resume(returning: ())
             controller.dismiss(animated: true, completion: nil)
         }
@@ -309,4 +299,22 @@ final internal class HostedAuthorizationController:
         return getAnchor()
     }
     
+}
+
+fileprivate struct HostedAuthResult: Codable {
+    let accessToken: String
+    let idToken: String
+    let state: String
+    let tokenType: String
+    let expiresIn: Int
+    let refreshToken: String?
+
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+        case idToken = "id_token"
+        case state
+        case tokenType = "token_type"
+        case expiresIn = "expires_in"
+        case refreshToken = "refresh_token"
+    }
 }

@@ -1207,7 +1207,11 @@ public class PassageAuth {
         clientSecret: String,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> AuthResult {
-        let (authResult, idToken) = try await PassageAuth.hostedAuth(clientSecret: clientSecret)
+        let (authResult, idToken) = try await PassageAuth
+            .hostedAuth(
+                clientSecret: clientSecret,
+                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+            )
         setTokensFromAuthResult(authResult: authResult)
         tokenStore.idToken = idToken
         return authResult
