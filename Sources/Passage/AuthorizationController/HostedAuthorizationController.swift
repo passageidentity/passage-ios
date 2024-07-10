@@ -1,16 +1,7 @@
 import AuthenticationServices
 import SafariServices
 
-// TODO: Move this into separate file
-public enum HostedAuthorizationError: Error {
-    case cannotAccessAppBundleId
-    case cannotAccessAppRootViewController
-    case invalidHostedAuthUrl
-    case unspecified
-}
-
-// TODO: Move this into separate file
-struct HostedAuthResult: Codable {
+fileprivate struct HostedAuthResult: Codable {
     let access_token: String
     let id_token: String
     let state: String
@@ -55,13 +46,13 @@ final internal class HostedAuthorizationController:
     
     @MainActor
     @available(iOS 17.4, *)
-    func startWebAuth() async throws -> (String, String) {
+    func startWebAuth(prefersEphemeralWebBrowserSession: Bool) async throws -> (String, String) {
         let url = try getHostedStartUrl()
         guard
             let callbackUrl = URL(string: callbackUrlString),
             let host = callbackUrl.host()
         else {
-            throw HostedAuthorizationError.unspecified // TODO: Better error
+            throw HostedAuthorizationError.invalidHostedCallbackUrl
         }
         let callback = ASWebAuthenticationSession
             .Callback
@@ -84,13 +75,13 @@ final internal class HostedAuthorizationController:
                     let (code, state): (String, String) = try? self
                         .handleCallbackUrl(callbackUrl: callbackURL)
                 else {
-                    continuation.resume(throwing: HostedAuthorizationError.unspecified) // TODO: Better error
+                    continuation.resume(throwing: HostedAuthorizationError.invalidHostedCallbackUrl)
                     return
                 }
                 continuation.resume(returning: (code, state))
             }
             webAuthSession?.presentationContextProvider = self
-            webAuthSession?.prefersEphemeralWebBrowserSession = false
+            webAuthSession?.prefersEphemeralWebBrowserSession = prefersEphemeralWebBrowserSession
             webAuthSession?.start()
         }
     }
@@ -126,22 +117,28 @@ final internal class HostedAuthorizationController:
         )
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            // TODO: Handle bad response.
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(HostedAuthResult.self, from: data)
-            let authResult = AuthResult(
-                authToken: result.access_token,
-                redirectUrl: "/",
-                refreshToken: result.refresh_token,
-                refreshTokenExpiration: nil // TODO: Figure out what to put here?
-            )
-            verifier = ""
-            return (authResult, result.id_token)
-        } catch {
-            throw HostedAuthorizationError.unspecified // TODO: Handle error cases here.
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw HostedAuthorizationError.serverError
         }
+        switch httpResponse.statusCode {
+        case 400: throw HostedAuthorizationError.invalidHostedTokenUrl
+        case 401: throw HostedAuthorizationError.unauthorized
+        case 500: throw HostedAuthorizationError.serverError
+        default: ()
+        }
+        let decoder = JSONDecoder()
+        guard let result = try? decoder.decode(HostedAuthResult.self, from: data) else {
+            throw HostedAuthorizationError.invalidHostedTokenUrl
+        }
+        let authResult = AuthResult(
+            authToken: result.access_token,
+            redirectUrl: "/",
+            refreshToken: result.refresh_token,
+            refreshTokenExpiration: nil
+        )
+        verifier = ""
+        return (authResult, result.id_token)
     }
     
     @MainActor
@@ -152,7 +149,7 @@ final internal class HostedAuthorizationController:
             let logoutUrl = URL(string: logoutUrlString),
             let host = logoutUrl.host()
         else {
-            throw HostedAuthorizationError.unspecified // TODO: Better error
+            throw HostedAuthorizationError.invalidHostedLogoutUrl
         }
         let callback = ASWebAuthenticationSession
             .Callback
@@ -233,7 +230,7 @@ final internal class HostedAuthorizationController:
     ) throws -> URL {
         let urlString = "\(appInfo.authOrigin)/token"
         guard var urlComponents = URLComponents(string: urlString) else {
-            throw HostedAuthorizationError.invalidHostedAuthUrl
+            throw HostedAuthorizationError.invalidHostedTokenUrl
         }
         urlComponents.queryItems = [
             URLQueryItem(name: "grant_type", value: "authorization_code"),
@@ -244,7 +241,7 @@ final internal class HostedAuthorizationController:
             URLQueryItem(name: "redirect_uri", value: callbackUrlString)
         ]
         guard let url = urlComponents.url else {
-            throw HostedAuthorizationError.invalidHostedAuthUrl
+            throw HostedAuthorizationError.invalidHostedTokenUrl
         }
         return url
     }
@@ -252,7 +249,7 @@ final internal class HostedAuthorizationController:
     private func getLogoutUrl(idToken: String) throws -> URL {
         let urlString = "\(appInfo.authOrigin)/logout"
         guard var urlComponents = URLComponents(string: urlString) else {
-            throw HostedAuthorizationError.invalidHostedAuthUrl
+            throw HostedAuthorizationError.invalidHostedLogoutUrl
         }
         verifier = PassageSocialAuthController.getRandomString(length: 32)
         urlComponents.queryItems = [
@@ -262,7 +259,7 @@ final internal class HostedAuthorizationController:
             URLQueryItem(name: "post_logout_redirect_uri", value: logoutUrlString)
         ]
         guard let url = urlComponents.url else {
-            throw HostedAuthorizationError.invalidHostedAuthUrl
+            throw HostedAuthorizationError.invalidHostedLogoutUrl
         }
         return url
     }
@@ -274,7 +271,7 @@ final internal class HostedAuthorizationController:
             let state = components.queryItems?.filter({$0.name == "state"}).first?.value,
             state == verifier
         else {
-            throw HostedAuthorizationError.unspecified // TODO: Better error
+            throw HostedAuthorizationError.invalidHostedCallbackUrl
         }
         return (code, state)
     }
@@ -290,21 +287,18 @@ final internal class HostedAuthorizationController:
         _ controller: SFSafariViewController,
         initialLoadDidRedirectTo URL: URL
     ) {
-        do {
-            if URL.absoluteString.contains(callbackUrlString) {
+        if URL.absoluteString.contains(callbackUrlString) {
+            do {
                 let (code, state) = try handleCallbackUrl(callbackUrl: URL)
                 hostedContinuation?.resume(returning: (code, state))
-                controller.dismiss(animated: true, completion: nil)
-            } else if URL.absoluteString.contains(logoutUrlString) {
-                hostedLogoutContinuation?.resume(returning: ())
-                controller.dismiss(animated: true, completion: nil)
-            } else {
+            } catch {
                 hostedLogoutContinuation?
-                    .resume(throwing: HostedAuthorizationError.unspecified) // TODO: Better error
+                    .resume(throwing: HostedAuthorizationError.invalidHostedLogoutUrl)
             }
-        } catch {
-            hostedLogoutContinuation?
-                .resume(throwing: HostedAuthorizationError.unspecified) // TODO: Better error
+            controller.dismiss(animated: true, completion: nil)
+        } else if URL.absoluteString.contains(logoutUrlString) {
+            hostedLogoutContinuation?.resume(returning: ())
+            controller.dismiss(animated: true, completion: nil)
         }
     }
     
