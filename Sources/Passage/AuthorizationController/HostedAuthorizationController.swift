@@ -57,7 +57,13 @@ final internal class HostedAuthorizationController:
                 callback: callback
             ) { [weak self] callbackURL, error in
                 guard error == nil else {
-                    continuation.resume(throwing: error!)
+                    if let authError = error as? ASWebAuthenticationSessionError,
+                       authError.code == .canceledLogin
+                    {
+                        continuation.resume(throwing: HostedAuthorizationError.canceled)
+                    } else {
+                        continuation.resume(throwing: error!)
+                    }
                     return
                 }
                 guard
@@ -128,7 +134,6 @@ final internal class HostedAuthorizationController:
             refreshToken: result.refreshToken,
             refreshTokenExpiration: nil
         )
-        verifier = ""
         return (authResult, result.idToken)
     }
     
@@ -154,14 +159,20 @@ final internal class HostedAuthorizationController:
                 callback: callback
             ) { [weak self] callbackURL, error in
                 guard error == nil else {
-                    continuation.resume(throwing: error!)
+                    if let authError = error as? ASWebAuthenticationSessionError,
+                       authError.code == .canceledLogin
+                    {
+                        continuation.resume(throwing: HostedAuthorizationError.canceled)
+                    } else {
+                        continuation.resume(throwing: error!)
+                    }
                     return
                 }
                 guard
                     let callbackURL,
                     callbackURL.absoluteString.contains(self?.logoutUrlString ?? "")
                 else {
-                    continuation.resume(throwing: SocialAuthError.missingAuthCode)
+                    continuation.resume(throwing: HostedAuthorizationError.invalidHostedLogoutUrl)
                     return
                 }
                 continuation.resume(returning: ())
@@ -185,7 +196,6 @@ final internal class HostedAuthorizationController:
         window.rootViewController?.present(safariViewController, animated: true)
         return try await withCheckedThrowingContinuation { [weak self] continuation in
             self?.hostedLogoutContinuation = continuation
-            self?.verifier = ""
         }
     }
     

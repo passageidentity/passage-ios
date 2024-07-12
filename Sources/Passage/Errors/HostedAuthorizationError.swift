@@ -1,6 +1,7 @@
 import Foundation
 
 public enum HostedAuthorizationError: Error {
+    case canceled
     case cannotAccessAppBundleId
     case cannotAccessAppRootViewController
     case invalidHostedAuthUrl
