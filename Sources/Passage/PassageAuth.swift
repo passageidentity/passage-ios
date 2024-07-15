@@ -1188,6 +1188,111 @@ public class PassageAuth {
         }
     }
     
+    /// Authentication Method for Hosted Apps
+    ///
+    /// If your Passage app is Hosted, use this method to register and log in your user. This method will open up a Passage login experience
+    /// in a secure web view (users on iOS 17.4+ will get `ASWebAuthenticationSession` for the web view, while users on older versions
+    /// will get `SFSafariViewController`).
+    ///
+    /// This instance method stores the auth result and id token in the user's keychain on success.
+    ///
+    /// - Parameters:
+    ///   - clientSecret: You hosted app's client secret, found in Passage Console's OIDC Settings.
+    ///   - prefersEphemeralWebBrowserSession: Optional - Set prefersEphemeralWebBrowserSession to true to request that the
+    ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
+    ///   Defaults to false. (Applicable to iOS 17.4+ only)
+    /// - Returns: ``AuthResult``
+    /// - Throws: ``HostedAuthorizationError``
+    public func hostedAuth(
+        clientSecret: String,
+        prefersEphemeralWebBrowserSession: Bool = false
+    ) async throws -> AuthResult {
+        let (authResult, idToken) = try await PassageAuth
+            .hostedAuth(
+                clientSecret: clientSecret,
+                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
+            )
+        setTokensFromAuthResult(authResult: authResult)
+        tokenStore.idToken = idToken
+        return authResult
+    }
+    
+    /// Authentication Method for Hosted Apps
+    ///
+    /// If your Passage app is Hosted, use this method to register and log in your user. This method will open up a Passage login experience
+    /// in a secure web view (users on iOS 17.4+ will get `ASWebAuthenticationSession` for the web view, while users on older versions
+    /// will get `SFSafariViewController`).
+    ///
+    /// This static method does NOT store the auth result and id token in the user's keychain on success.
+    ///
+    /// - Parameters:
+    ///   - clientSecret: You hosted app's client secret, found in Passage Console's OIDC Settings.
+    ///   - prefersEphemeralWebBrowserSession: Optional - Set prefersEphemeralWebBrowserSession to true to request that the
+    ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
+    ///   Defaults to false. (Applicable to iOS 17.4+ only)
+    /// - Returns: (``AuthResult``,  ``String``) Returns the auth result and the id token. The id token is needed for logging out.
+    /// - Throws: ``HostedAuthorizationError``
+    public static func hostedAuth(
+        clientSecret: String,
+        prefersEphemeralWebBrowserSession: Bool = false
+    ) async throws -> (AuthResult, String) {
+        let appInfo = try await appInfo()
+        let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
+        let (authCode, state): (String, String)
+        if #available(iOS 17.4, *) {
+            (authCode, state) = try await hostedAuthController
+                .startWebAuth(prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession)
+        } else {
+            (authCode, state) = try await hostedAuthController.startWebAuthSafari()
+        }
+        let (authResult, idToken) = try await hostedAuthController
+            .finishWebAuth(
+                authCode: authCode,
+                state: state,
+                clientSecret: clientSecret
+            )
+        return (authResult, idToken)
+    }
+    
+    /// Logout Method for Hosted Apps
+    ///
+    /// If your Passage app is Hosted, use this method to log out your user. This method will briefly open up a web view where it will log out the
+    /// user from the web view session also (users on iOS 17.4+ will get `ASWebAuthenticationSession` for the web view, while users on
+    /// older versions will get `SFSafariViewController`).
+    ///
+    /// This instance method also removes all tokens from the user's keychain.
+    ///
+    /// - Returns: ``Void``
+    /// - Throws: ``HostedAuthorizationError``
+    public func hostedLogout() async throws {
+        guard let idToken = tokenStore.idToken else {
+            throw HostedAuthorizationError.missingIdToken
+        }
+        try await PassageAuth.hostedLogout(idToken: idToken)
+        tokenStore.clearTokens()
+    }
+    
+    /// Logout Method for Hosted Apps
+    ///
+    /// If your Passage app is Hosted, use this method to log out your user. This method will briefly open up a web view where it will log out the
+    /// user from the web view session also (users on iOS 17.4+ will get `ASWebAuthenticationSession` for the web view, while users on
+    /// older versions will get `SFSafariViewController`).
+    ///
+    /// This static method also removes all tokens from the user's keychain.
+    ///
+    /// - Parameter idToken: The auth id token, used to log the user our of any remaining web sessions.
+    /// - Returns: ``Void``
+    /// - Throws: ``HostedAuthorizationError``
+    public static func hostedLogout(idToken: String) async throws {
+        let appInfo = try await appInfo()
+        let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
+        if #available(iOS 17.4, *) {
+            try await hostedAuthController.logout(idToken: idToken)
+        } else {
+            try await hostedAuthController.logoutSafari(idToken: idToken)
+        }
+    }
+    
     /// Private method to instantiate a logger and log the errors we catch
     ///
     /// - Parameters:
