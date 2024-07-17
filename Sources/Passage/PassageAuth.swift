@@ -1197,21 +1197,16 @@ public class PassageAuth {
     /// This instance method stores the auth result and id token in the user's keychain on success.
     ///
     /// - Parameters:
-    ///   - clientSecret: You hosted app's client secret, found in Passage Console's OIDC Settings.
     ///   - prefersEphemeralWebBrowserSession: Optional - Set prefersEphemeralWebBrowserSession to true to request that the
     ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
     ///   Defaults to false. (Applicable to iOS 17.4+ only)
     /// - Returns: ``AuthResult``
     /// - Throws: ``HostedAuthorizationError``
     public func hostedAuth(
-        clientSecret: String,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> AuthResult {
         let (authResult, idToken) = try await PassageAuth
-            .hostedAuth(
-                clientSecret: clientSecret,
-                prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession
-            )
+            .hostedAuth(prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession)
         setTokensFromAuthResult(authResult: authResult)
         tokenStore.idToken = idToken
         return authResult
@@ -1226,31 +1221,24 @@ public class PassageAuth {
     /// This static method does NOT store the auth result and id token in the user's keychain on success.
     ///
     /// - Parameters:
-    ///   - clientSecret: You hosted app's client secret, found in Passage Console's OIDC Settings.
     ///   - prefersEphemeralWebBrowserSession: Optional - Set prefersEphemeralWebBrowserSession to true to request that the
     ///   browser doesn’t share cookies or other browsing data between the authentication session and the user’s normal browser session.
     ///   Defaults to false. (Applicable to iOS 17.4+ only)
     /// - Returns: (``AuthResult``,  ``String``) Returns the auth result and the id token. The id token is needed for logging out.
     /// - Throws: ``HostedAuthorizationError``
     public static func hostedAuth(
-        clientSecret: String,
         prefersEphemeralWebBrowserSession: Bool = false
     ) async throws -> (AuthResult, String) {
         let appInfo = try await appInfo()
         let hostedAuthController = try HostedAuthorizationController(appInfo: appInfo)
-        let (authCode, state): (String, String)
+        let authCode: String
         if #available(iOS 17.4, *) {
-            (authCode, state) = try await hostedAuthController
+            authCode = try await hostedAuthController
                 .startWebAuth(prefersEphemeralWebBrowserSession: prefersEphemeralWebBrowserSession)
         } else {
-            (authCode, state) = try await hostedAuthController.startWebAuthSafari()
+            authCode = try await hostedAuthController.startWebAuthSafari()
         }
-        let (authResult, idToken) = try await hostedAuthController
-            .finishWebAuth(
-                authCode: authCode,
-                state: state,
-                clientSecret: clientSecret
-            )
+        let (authResult, idToken) = try await hostedAuthController.finishWebAuth(authCode: authCode)
         return (authResult, idToken)
     }
     
