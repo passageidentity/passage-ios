@@ -1,3 +1,10 @@
+## ⚠️ Deprecated – Use [Passage Swift](https://github.com/passageidentity/passage-swift) Instead
+
+This repository is deprecated and will no longer receive updates or support.
+We strongly recommend switching to [Passage Swift](https://github.com/passageidentity/passage-swift), which offers greater platform support, superior performance, better features, and active maintenance.
+
+---
+
 <img src="https://storage.googleapis.com/passage-docs/passage-logo-gradient.svg" alt="Passage logo" style="width:250px;"/>
 
 - [Overview](#overview)
