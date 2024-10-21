@@ -1,7 +1,7 @@
-## ⚠️ Deprecated – Use [Passage Swift](https://github.com/passageidentity/passage-swift) Instead
+![passage-ios-deprecated](https://storage.googleapis.com/passage-docs/github-md-assets/passage-ios-deprecated.png)
 
-This repository is deprecated and will no longer receive updates or support.
-We strongly recommend switching to [Passage Swift](https://github.com/passageidentity/passage-swift), which offers greater platform support, superior performance, better features, and active maintenance.
+> [!WARNING]
+> passage-ios was deprecated on July 17, 2024 and is no longer receiving updates or support. Please use [passage-swift](https://github.com/passageidentity/passage-swift) instead.
 
 ---
 
@@ -14,40 +14,40 @@ We strongly recommend switching to [Passage Swift](https://github.com/passageide
 - [SDK Methods](#sdk-methods)
 - [Examples](#examples)
 
-
 # Overview
 
 **NOTE: passage-ios is currently in beta.**
 
-The [Passage](https://passage.id) iOS framework provides an easy to use SDK interface to implement a [Passkey](https://developer.apple.com/passkeys/) focused authentication expierence for native apps built in Swift. 
+The [Passage](https://passage.id) iOS framework provides an easy to use SDK interface to implement a [Passkey](https://developer.apple.com/passkeys/) focused authentication expierence for native apps built in Swift.
 
- Want to see the end result before the setup work? 
+Want to see the end result before the setup work?
 
- To see a code level implementation, checkout and run our [Swift Example App](https://github.com/passageidentity/example-ios)  
+To see a code level implementation, checkout and run our [Swift Example App](https://github.com/passageidentity/example-ios)
 
- To see a quick demo reach out to our team on [Discord](https://discord.gg/9CC7vHJEku) and ask for a link to our TestFlight app. 
+To see a quick demo reach out to our team on [Discord](https://discord.gg/9CC7vHJEku) and ask for a link to our TestFlight app.
 
-
-**Note:** This package is currently in Beta - breaking changes may occur. To report a bug please create a Github Issue or get in touch with our team on [Discord](https://discord.gg/9CC7vHJEku). 
+**Note:** This package is currently in Beta - breaking changes may occur. To report a bug please create a Github Issue or get in touch with our team on [Discord](https://discord.gg/9CC7vHJEku).
 
 # Requirements
 
 ### Xcode
+
 Compatile with [Xcode](https://developer.apple.com/xcode/) version 14+.
 
 ### iOS Version
 
 The Passage-iOS SDK is supported for iOS version 14+. However, Passkeys are only supported on iOS v16+.
 
-| iOS Version 	| Passkey Login 	 | Passcode & Magic Link Login 	|
-|-------------	|      :----:      |        :----: 	    |
-| v16.x       	|       ✅       	|           ✅        |
-| v15.x     	|        ❌       	|           ✅      	 |
-| v14.x       	|        ❌       	|           ✅        |
+| iOS Version | Passkey Login | Passcode & Magic Link Login |
+| ----------- | :-----------: | :-------------------------: |
+| v16.x       |      ✅       |             ✅              |
+| v15.x       |      ❌       |             ✅              |
+| v14.x       |      ❌       |             ✅              |
 
 # Installation
 
 Add the passage-ios package to your app via SwiftPackage Manager or Cocoapods
+
 ## Swift Package Manager
 
 [Swift Package Manager](https://swift.org/package-manager/)
@@ -72,18 +72,16 @@ Add the following line to your Podfile:
 ```
 pod 'Passage', '~> 1.1'
 ```
+
 Then, run pod install.
 
 For further reference on Cocoapods, check their [official documentation](https://guides.cocoapods.org/using/getting-started.html).
 
-
 - Run `pod install`
-
 
 # Setup Guide
 
 View the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer. Follow the `Getting Started` guide which consists the following steps:
-
 
 1. Setup your Passage application
 2. Associate your domain with your application
@@ -92,6 +90,7 @@ View the [Documentation Catalog](https://passageidentity.github.io/passage-ios/d
 5. Send auth token on API requests
 
 # Initialization & Usage
+
 Import the Passage package into any source file that will use the iOS SDK.
 
 ```
@@ -100,8 +99,8 @@ import Passage
 
 View the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer, and navigate to the `Getting Started` guide for a detailed step by step guide.
 
+# SDK Methods
 
-# SDK Methods 
 The package provides both Type Methods and Instance Methods. These methods provide everything you will need to register, login, and manage users on your application. The SDK methods below provide a high level overview of available actions. For the full a full list of available methos and their signatures view the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer and navigate to `Classes`.
 
 ## PassageAuth
@@ -114,8 +113,9 @@ PassageAuth is the primary class you will work with. It provides the following:
 - User Management
 - App Details
 - And More
- 
+
 # Examples
+
 ## Registration
 
 See the `User Registration` guide in the [Documentation Catalog](https://passageidentity.github.io/passage-ios/documentation/passage/) or dowload the [Documentation Catalog](docs/Passage.doccarchive.zip) to view in the Xcode Document Viewer.
