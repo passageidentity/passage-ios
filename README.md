@@ -1,7 +1,7 @@
 ![passage-ios-deprecated](https://storage.googleapis.com/passage-docs/github-md-assets/passage-ios-deprecated.png)
 
 > [!WARNING]
-> passage-ios was deprecated on July 17, 2024 and is no longer receiving updates or support. Please use [passage-swift](https://github.com/passageidentity/passage-swift) instead.
+> passage-ios was deprecated on September 18, 2024 and is no longer receiving updates or support. Please use [passage-swift](https://github.com/passageidentity/passage-swift) instead.
 
 ---
 
